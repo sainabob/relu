@@ -37,7 +37,7 @@ You are currently in fast-start mode with all core tools preloaded and ready NOW
 ⏳ Advanced tools available via initialize_tools():
    • Content: sb_presentation_tool, sb_designer_tool
    • Research: people_search_tool, company_search_tool, paper_search_tool
-   • Data: data_providers_tool, sb_kb_tool
+   • Data: apify_tool, sb_kb_tool
 
 If you need specialized tools, use initialize_tools() to load them.
 If relevant context seems missing, ask a clarifying question.
@@ -50,11 +50,28 @@ If relevant context seems missing, ask a clarifying question.
         
         content = await PromptManager._append_jit_mcp_info(content, mcp_loader)
         
+        # Fetch user context (locale, username), memory, and file context in parallel
+        user_context_task = PromptManager._fetch_user_context_data(user_id, client)
+        memory_task = PromptManager._fetch_user_memories(user_id, thread_id, client)
+        file_task = PromptManager._fetch_file_context(thread_id)
+        
+        user_context_data, memory_data, file_data = await asyncio.gather(
+            user_context_task, memory_task, file_task
+        )
+        
+        if user_context_data:
+            content += user_context_data
+        
         system_message = {"role": "system", "content": content}
         
-        memory_data = await PromptManager._fetch_user_memories(user_id, thread_id, client)
+        context_parts = []
         if memory_data:
-            return system_message, {"role": "user", "content": f"[CONTEXT - User Memory]\n{memory_data}\n[END CONTEXT]"}
+            context_parts.append(f"[CONTEXT - User Memory]\n{memory_data}\n[END CONTEXT]")
+        if file_data:
+            context_parts.append(f"[CONTEXT - Attached Files]\n{file_data}\n[END CONTEXT]")
+        
+        if context_parts:
+            return system_message, {"role": "user", "content": "\n\n".join(context_parts)}
         
         return system_message, None
     
@@ -81,13 +98,14 @@ If relevant context seems missing, ask a clarifying question.
         kb_task = PromptManager._fetch_knowledge_base(agent_config, client)
         user_context_task = PromptManager._fetch_user_context_data(user_id, client)
         memory_task = PromptManager._fetch_user_memories(user_id, thread_id, client)
+        file_task = PromptManager._fetch_file_context(thread_id)
         
         system_content = PromptManager._append_mcp_tools_info(system_content, agent_config, mcp_wrapper_instance)
         system_content = await PromptManager._append_jit_mcp_info(system_content, mcp_loader)
         system_content = PromptManager._append_xml_tool_calling_instructions(system_content, xml_tool_calling, tool_registry)
         system_content = PromptManager._append_datetime_info(system_content)
         
-        kb_data, user_context_data, memory_data = await asyncio.gather(kb_task, user_context_task, memory_task)
+        kb_data, user_context_data, memory_data, file_data = await asyncio.gather(kb_task, user_context_task, memory_task, file_task)
         
         if kb_data:
             system_content += kb_data
@@ -99,8 +117,14 @@ If relevant context seems missing, ask a clarifying question.
         
         system_message = {"role": "system", "content": system_content}
         
+        context_parts = []
         if memory_data:
-            return system_message, {"role": "user", "content": f"[CONTEXT - User Memory]\n{memory_data}\n[END CONTEXT]"}
+            context_parts.append(f"[CONTEXT - User Memory]\n{memory_data}\n[END CONTEXT]")
+        if file_data:
+            context_parts.append(f"[CONTEXT - Attached Files]\n{file_data}\n[END CONTEXT]")
+        
+        if context_parts:
+            return system_message, {"role": "user", "content": "\n\n".join(context_parts)}
         
         return system_message, None
     
@@ -208,13 +232,6 @@ If relevant context seems missing, ask a clarifying question.
         except Exception as e:
             logger.error(f"Error retrieving knowledge base context for agent {agent_config.get('agent_id', 'unknown')}: {e}")
             return None
-    
-    @staticmethod
-    async def _append_knowledge_base(system_content: str, agent_config: Optional[dict], client) -> str:
-        kb_data = await PromptManager._fetch_knowledge_base(agent_config, client)
-        if kb_data:
-            system_content += kb_data
-        return system_content
     
     @staticmethod
     def _append_mcp_tools_info(system_content: str, agent_config: Optional[dict], mcp_wrapper_instance: Optional[MCPToolWrapper]) -> str:
@@ -446,10 +463,35 @@ Example of correct tool call format (multiple invokes in one block):
         if not (user_id and client):
             return None
         
-        locale_task = PromptManager._fetch_user_locale(user_id, client)
-        username_task = PromptManager._fetch_username(user_id, client)
+        # Fetch locale and username in parallel
+        async def fetch_locale():
+            try:
+                from core.utils.user_locale import get_user_locale
+                return await get_user_locale(user_id, client)
+            except Exception as e:
+                logger.warning(f"Failed to fetch locale for user {user_id}: {e}")
+                return None
         
-        locale, username = await asyncio.gather(locale_task, username_task)
+        async def fetch_username():
+            try:
+                user = await client.auth.admin.get_user_by_id(user_id)
+                if user and user.user:
+                    user_metadata = user.user.user_metadata or {}
+                    email = user.user.email
+                    
+                    username = (
+                        user_metadata.get('full_name') or
+                        user_metadata.get('name') or
+                        user_metadata.get('display_name') or
+                        (email.split('@')[0] if email else None)
+                    )
+                    return username
+                return None
+            except Exception as e:
+                logger.warning(f"Failed to fetch username for user {user_id}: {e}")
+                return None
+        
+        locale, username = await asyncio.gather(fetch_locale(), fetch_username())
         
         context_parts = []
         
@@ -467,42 +509,6 @@ Example of correct tool call format (multiple invokes in one block):
             logger.debug(f"Added username ({username}) to system prompt for user {user_id}")
         
         return ''.join(context_parts) if context_parts else None
-    
-    @staticmethod
-    async def _append_user_context(system_content: str, user_id: Optional[str], client) -> str:
-        user_context_data = await PromptManager._fetch_user_context_data(user_id, client)
-        if user_context_data:
-            system_content += user_context_data
-        return system_content
-    
-    @staticmethod
-    async def _fetch_user_locale(user_id: str, client):
-        try:
-            from core.utils.user_locale import get_user_locale
-            return await get_user_locale(user_id, client)
-        except Exception as e:
-            logger.warning(f"Failed to fetch locale for user {user_id}: {e}")
-            return None
-    
-    @staticmethod
-    async def _fetch_username(user_id: str, client):
-        try:
-            user = await client.auth.admin.get_user_by_id(user_id)
-            if user and user.user:
-                user_metadata = user.user.user_metadata or {}
-                email = user.user.email
-                
-                username = (
-                    user_metadata.get('full_name') or
-                    user_metadata.get('name') or
-                    user_metadata.get('display_name') or
-                    (email.split('@')[0] if email else None)
-                )
-                return username
-            return None
-        except Exception as e:
-            logger.warning(f"Failed to fetch username for user {user_id}: {e}")
-            return None
     
     @staticmethod
     async def _fetch_user_memories(user_id: Optional[str], thread_id: str, client) -> Optional[str]:
@@ -577,6 +583,24 @@ Example of correct tool call format (multiple invokes in one block):
         except Exception as e:
             logger.warning(f"Failed to fetch user memories for {user_id}: {e}")
             return None
+    
+    @staticmethod
+    async def _fetch_file_context(thread_id: Optional[str]) -> Optional[str]:
+        if not thread_id:
+            return None
+        
+        try:
+            from core.agent_runs import get_cached_file_context, format_file_context_for_agent
+            
+            files = await get_cached_file_context(thread_id)
+            if files:
+                formatted = format_file_context_for_agent(files)
+                logger.info(f"Retrieved {len(files)} cached file(s) for thread {thread_id}")
+                return formatted
+        except Exception as e:
+            logger.warning(f"Failed to fetch file context for {thread_id}: {e}")
+        
+        return None
     
     @staticmethod
     def _log_prompt_stats(system_content: str, use_dynamic_tools: bool):

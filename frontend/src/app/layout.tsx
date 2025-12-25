@@ -20,6 +20,7 @@ const GoogleAnalytics = lazy(() => import('@next/third-parties/google').then(mod
 const PostHogIdentify = lazy(() => import('@/components/posthog-identify').then(mod => ({ default: mod.PostHogIdentify })));
 const PlanSelectionModal = lazy(() => import('@/components/billing/pricing/plan-selection-modal').then(mod => ({ default: mod.PlanSelectionModal })));
 const AnnouncementDialog = lazy(() => import('@/components/announcements/announcement-dialog').then(mod => ({ default: mod.AnnouncementDialog })));
+const ReactScan = lazy(() => import('@/components/react-scan').then(mod => ({ default: mod.ReactScan })));
 
 
 export const viewport: Viewport = {
@@ -99,6 +100,15 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${roobert.variable} ${roobertMono.variable}`}>
       <head>
+        {/* Google Tag Manager */}
+        <Script id="google-tag-manager" strategy="afterInteractive">
+          {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+          'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+          })(window,document,'script','dataLayer','GTM-PKFG3JCX');`}
+        </Script>
+        {/* End Google Tag Manager */}
         {/* Preload critical fonts for faster FCP - local fonts need crossOrigin for CORS */}
         <link
           rel="preload"
@@ -113,8 +123,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://connect.facebook.net" />
         <link rel="dns-prefetch" href="https://eu.i.posthog.com" />
         
-        {/* React Scan removed - causing initialization errors */}
-        {/* rest of your scripts go under */}
+        {/* React Scan - development only */}
         
         {/* Static SEO meta tags - rendered in initial HTML */}
         <title>Kortix: Your Autonomous AI Worker</title>
@@ -208,20 +217,13 @@ export default function RootLayout({
             }),
           }}
         />
-
-        <Script id="google-tag-manager" strategy="lazyOnload">
-          {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-          'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-          })(window,document,'script','dataLayer','GTM-PCHSN4M2');`}
-        </Script>
       </head>
 
       <body className="antialiased font-sans bg-background">
+        {/* Google Tag Manager (noscript) */}
         <noscript>
           <iframe
-            src="https://www.googletagmanager.com/ns.html?id=GTM-PCHSN4M2"
+            src="https://www.googletagmanager.com/ns.html?id=GTM-PKFG3JCX"
             height="0"
             width="0"
             style={{ display: 'none', visibility: 'hidden' }}
@@ -261,6 +263,10 @@ export default function RootLayout({
           </Suspense>
           <Suspense fallback={null}>
             <PostHogIdentify />
+          </Suspense>
+          {/* React Scan - only loads in development */}
+          <Suspense fallback={null}>
+            <ReactScan />
           </Suspense>
         </ThemeProvider>
       </body>

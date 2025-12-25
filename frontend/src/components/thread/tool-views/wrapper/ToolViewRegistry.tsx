@@ -16,8 +16,6 @@ import { CompanySearchToolView } from '../company-search-tool/CompanySearchToolV
 import { DocumentParserToolView } from '../document-parser-tool/DocumentParserToolView';
 import { SeeImageToolView } from '../see-image-tool/SeeImageToolView';
 import { WaitToolView } from '../wait-tool/WaitToolView';
-import { ExecuteDataProviderCallToolView } from '../data-provider-tool/ExecuteDataProviderCallToolView';
-import { DataProviderEndpointsToolView } from '../data-provider-tool/DataProviderEndpointsToolView';
 import { SearchMcpServersToolView } from '../search-mcp-servers/search-mcp-servers';
 import { GetAppDetailsToolView } from '../get-app-details/get-app-details';
 import { CreateCredentialProfileToolView } from '../create-credential-profile/create-credential-profile';
@@ -59,6 +57,8 @@ import { createPresentationViewerToolContent, parsePresentationSlidePath } from 
 import { KbToolView } from '../KbToolView';
 import { ExpandMessageToolView } from '../expand-message-tool/ExpandMessageToolView';
 import { RealityDefenderToolView } from '../reality-defender-tool/RealityDefenderToolView';
+import { ApifyToolView } from '../apify-tool/ToolView';
+import { FileReaderToolView } from '../file-reader-tool/FileReaderToolView';
 
 
 export type ToolViewComponent = React.ComponentType<ToolViewProps>;
@@ -79,10 +79,14 @@ const defaultRegistry: ToolViewRegistryType = {
   'create-file': FileOperationToolView,
   'delete-file': FileOperationToolView,
   'full-file-rewrite': FileOperationToolView,
-  'read-file': FileOperationToolView,
   'edit-file': FileOperationToolView,
 
   'parse-document': DocumentParserToolView,
+
+  'read-file': FileReaderToolView,
+  'read_file': FileReaderToolView,
+  'search-file': FileReaderToolView,
+  'search_file': FileReaderToolView,
 
   'str-replace': FileOperationToolView,
 
@@ -93,8 +97,21 @@ const defaultRegistry: ToolViewRegistryType = {
   'scrape-webpage': WebScrapeToolView,
   'image-search': WebSearchToolView,
 
-  'execute-data-provider-call': ExecuteDataProviderCallToolView,
-  'get-data-provider-endpoints': DataProviderEndpointsToolView,
+
+  'search-apify-actors': ApifyToolView,
+  'search_apify_actors': ApifyToolView,
+  'get-actor-details': ApifyToolView,
+  'get_actor_details': ApifyToolView,
+  'request-apify-approval': ApifyToolView,
+  'request_apify_approval': ApifyToolView,
+  'approve-apify-request': ApifyToolView,
+  'approve_apify_request': ApifyToolView,
+  'get-apify-approval-status': ApifyToolView,
+  'get_apify_approval_status': ApifyToolView,
+  'run-apify-actor': ApifyToolView,
+  'run_apify_actor': ApifyToolView,
+  'get-actor-run-results': ApifyToolView,
+  'get_actor_run_results': ApifyToolView,
 
   'search-mcp-servers': SearchMcpServersToolView,
   'get-app-details': GetAppDetailsToolView,
@@ -294,6 +311,13 @@ export function ToolView({ toolCall, toolResult, ...props }: ToolViewProps) {
   let modifiedToolResult = toolResult;
   if (isPresentationSlide && filePath && presentationName && slideNumber && !isAlreadyPresentationTool && toolResult) {
     const viewerContent = createPresentationViewerToolContent(presentationName, filePath, slideNumber);
+    console.log('[ToolViewRegistry] Detected presentation slide in file operation:', {
+      toolName: name,
+      filePath,
+      presentationName,
+      slideNumber,
+      viewerContent: JSON.parse(viewerContent),
+    });
     modifiedToolResult = {
       ...toolResult,
       output: viewerContent,

@@ -5,8 +5,18 @@ import {
     Loader2, Download, ChevronDown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+    isPreviewableExtension,
+    isImageExtension,
+    isJsonExtension,
+    isMarkdownExtension,
+    isHtmlExtension,
+    isCsvExtension,
+    isSpreadsheetExtension,
+    isPdfExtension,
+} from '@/lib/utils/file-types';
 import { AttachmentGroup } from './attachment-group';
-import { HtmlRenderer, CsvRenderer, XlsxRenderer, PdfRenderer } from '@/components/file-renderers';
+import { HtmlRenderer, CsvRenderer, XlsxRenderer, PdfRenderer, JsonRenderer } from '@/components/file-renderers';
 import { UnifiedMarkdown } from '@/components/markdown';
 import {
     DropdownMenu,
@@ -187,22 +197,13 @@ interface FileAttachmentProps {
     showPreview?: boolean;
     localPreviewUrl?: string;
     customStyle?: React.CSSProperties;
-    /**
-     * Controls whether HTML, Markdown, and CSV files show their content preview.
-     * - true: files are shown as regular file attachments (default)
-     * - false: HTML, MD, and CSV files show rendered content in grid layout
-     */
     collapsed?: boolean;
     project?: Project;
-    isSingleItemGrid?: boolean; // New prop to detect single item in grid
-    standalone?: boolean; // New prop for minimal standalone styling
-    alignRight?: boolean; // New prop to control right alignment
+    isSingleItemGrid?: boolean;
+    standalone?: boolean;
+    alignRight?: boolean;
+    uploadStatus?: 'pending' | 'uploading' | 'ready' | 'error';
 }
-
-// Cache fetched content between mounts to avoid duplicate fetches
-// Content caches for file attachment optimization
-// const contentCache = new Map<string, string>();
-// const errorCache = new Set<string>();
 
 export function FileAttachment({
     filepath,
@@ -216,7 +217,8 @@ export function FileAttachment({
     project,
     isSingleItemGrid = false,
     standalone = false,
-    alignRight = false
+    alignRight = false,
+    uploadStatus
 }: FileAttachmentProps) {
     // Authentication 
     const { session } = useAuth();
@@ -245,27 +247,29 @@ export function FileAttachment({
     const fileSize = getFileSize(filepath, fileType);
     const IconComponent = getFileIcon(fileType);
 
-    // Display flags
+    // Display flags - using centralized file type utilities
     const isImage = fileType === 'image';
-    const isHtmlOrMd = extension === 'html' || extension === 'htm' || extension === 'md' || extension === 'markdown';
-    const isHtml = extension === 'html' || extension === 'htm';
+    const isHtml = isHtmlExtension(extension);
+    const isMarkdown = isMarkdownExtension(extension);
+    const isHtmlOrMd = isHtml || isMarkdown;
+    const isJson = isJsonExtension(extension);
+    const isCsv = isCsvExtension(extension);
+    const isXlsx = isSpreadsheetExtension(extension);
+    const isPdf = isPdfExtension(extension);
     
     // For HTML files, construct the proper preview URL using sandbox URL instead of API endpoint
     const htmlPreviewUrl = isHtml && project?.sandbox?.sandbox_url
         ? constructHtmlPreviewUrl(project.sandbox.sandbox_url, filepath)
         : undefined;
-    const isCsv = extension === 'csv' || extension === 'tsv';
-    const isXlsx = extension === 'xlsx' || extension === 'xls';
-    const isPdf = extension === 'pdf';
+    
     const isGridLayout = customStyle?.gridColumn === '1 / -1' || Boolean(customStyle && ('--attachment-height' in customStyle));
-    // Define isInlineMode early, before any hooks
     const isInlineMode = !isGridLayout;
-    const shouldShowPreview = (isHtmlOrMd || isCsv || isXlsx || isPdf) && showPreview && collapsed === false;
+    const shouldShowPreview = isPreviewableExtension(extension) && showPreview && collapsed === false;
 
     // Use the React Query hook to fetch file content
     // For CSV files, always try to load content for better preview experience
     // For XLSX files, we need binary data which is handled by useImageContent
-    const shouldLoadContent = (isHtmlOrMd || isCsv) && (shouldShowPreview || isCsv);
+    const shouldLoadContent = (isHtmlOrMd || isJson || isCsv) && (shouldShowPreview || isCsv);
     const {
         data: fileContent,
         isLoading: fileContentLoading,
@@ -464,16 +468,11 @@ export function FileAttachment({
         }
     }
 
-    // Images are displayed with their natural aspect ratio
     if (isImage && showPreview) {
-        // Use custom height for images if provided through CSS variable
         const imageHeight = isGridLayout
             ? (customStyle as any)['--attachment-height'] as string
             : '54px';
 
-        // No separate loading state needed - we handle it inline in the main render
-
-        // Check for sandbox deleted state
         if (isSandboxDeleted) {
             return (
                 <div
@@ -558,31 +557,41 @@ export function FileAttachment({
 
         return (
             <button
-                onClick={handleClick}
+                onClick={uploadStatus === 'uploading' ? undefined : handleClick}
                 className={cn(
-                    "group relative rounded-2xl cursor-pointer",
+                    "group relative rounded-2xl",
+                    uploadStatus === 'uploading' ? "cursor-default" : "cursor-pointer",
                     "border border-black/10 dark:border-white/10",
                     "bg-black/5 dark:bg-black/20",
-                    "p-0 overflow-hidden", // No padding, content touches borders
-                    "flex items-center justify-center", // Center the image
-                    // For grid, full width with auto height; for inline, fixed height
+                    "p-0 overflow-hidden",
+                    "flex items-center justify-center",
                     isGridLayout ? "w-full" : "h-[54px] inline-block",
                     className
                 )}
                 style={{
                     ...customStyle,
-                    // Only apply minHeight if image hasn't loaded yet (prevents thin line)
                     minHeight: isGridLayout && !imageLoaded ? '200px' : undefined,
-                    // Use aspect ratio placeholder until image loads
                     aspectRatio: isGridLayout && !imageLoaded ? '4/3' : undefined,
                     height: isGridLayout ? 'auto' : customStyle?.height
                 }}
-                title={filename}
+                title={uploadStatus === 'uploading' ? 'Uploading...' : filename}
             >
+                {/* Upload progress overlay */}
+                {uploadStatus === 'uploading' && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 z-20">
+                        <Loader2 className="h-5 w-5 text-white animate-spin" />
+                    </div>
+                )}
+                {/* Upload error overlay */}
+                {uploadStatus === 'error' && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-red-500/20 z-20">
+                        <div className="text-xs text-red-500 font-medium bg-background/90 px-2 py-1 rounded">Failed</div>
+                    </div>
+                )}
                 {/* Show loading spinner overlay while image is loading */}
-                {!imageLoaded && isGridLayout && (
+                {!imageLoaded && isGridLayout && !uploadStatus && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-black/5 to-black/10 dark:from-white/5 dark:to-white/10 z-10">
-                        <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                        <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
                         {imageRetryAttempt > 0 && (
                             <div className="text-xs text-muted-foreground bg-background/80 px-2 py-1 rounded">
                                 Retrying... (attempt {imageRetryAttempt + 1})
@@ -671,7 +680,7 @@ export function FileAttachment({
                     "group relative w-full",
                     "rounded-xl border bg-card overflow-hidden pt-10", // Consistent card styling with header space
                     isPdf ? "!min-h-[200px] sm:min-h-0 sm:h-[400px] max-h-[500px] sm:!min-w-[300px]" :
-                        isHtmlOrMd ? "!min-h-[200px] sm:min-h-0 sm:h-[400px] max-h-[600px] sm:!min-w-[300px]" :
+                        isHtmlOrMd || isJson ? "!min-h-[200px] sm:min-h-0 sm:h-[400px] max-h-[600px] sm:!min-w-[300px]" :
                             (isCsv || isXlsx) ? "min-h-[300px] h-full" : // Let CSV and XLSX take full height
                                 standalone ? "min-h-[300px] h-auto" : "h-[300px]", // Better height handling for standalone
                     className
@@ -690,8 +699,8 @@ export function FileAttachment({
                     style={{
                         minWidth: 0,
                         width: '100%',
-                        containIntrinsicSize: (isPdf || isHtmlOrMd) ? '100% 500px' : undefined,
-                        contain: (isPdf || isHtmlOrMd) ? 'layout size' : undefined
+                        containIntrinsicSize: (isPdf || isHtmlOrMd || isJson) ? '100% 500px' : undefined,
+                        contain: (isPdf || isHtmlOrMd || isJson) ? 'layout size' : undefined
                     }}
                 >
                     {/* Render PDF, XLSX, or text-based previews */}
@@ -737,6 +746,11 @@ export function FileAttachment({
                                 <div className="h-full w-full overflow-auto p-4">
                                     <UnifiedMarkdown content={fileContent} />
                                     </div>
+                            )}
+                            
+                            {/* JSON Preview */}
+                            {isJson && fileContent && (
+                                <JsonRenderer content={fileContent} />
                             )}
                             
                             {/* HTML Preview */}
@@ -924,32 +938,57 @@ export function FileAttachment({
         </div>
     ) : (
         <button
-            onClick={handleClick}
+            onClick={uploadStatus === 'uploading' ? undefined : handleClick}
             className={cn(
-                "group flex items-center rounded-xl transition-all duration-200 overflow-hidden cursor-pointer",
+                "group flex items-center rounded-xl transition-all duration-200 overflow-hidden",
+                uploadStatus === 'uploading' ? "cursor-default" : "cursor-pointer",
                 "border border-black/10 dark:border-white/10",
-                "bg-sidebar hover:bg-accent/5",
+                uploadStatus === 'error' 
+                    ? "bg-red-500/5 border-red-500/20" 
+                    : "bg-sidebar hover:bg-accent/5",
                 "text-left",
                 "h-[54px] w-fit min-w-[200px] max-w-[300px]",
                 className
             )}
             style={safeStyle}
-            title={filename}
+            title={uploadStatus === 'uploading' ? 'Uploading...' : uploadStatus === 'error' ? 'Upload failed' : filename}
         >
-            {/* Icon container */}
-            <div className="w-[54px] h-full flex items-center justify-center flex-shrink-0 bg-black/5 dark:bg-white/5">
-                <IconComponent className="h-5 w-5 text-black/60 dark:text-white/60" />
+            {/* Icon container with upload progress overlay */}
+            <div className="w-[54px] h-full flex items-center justify-center flex-shrink-0 bg-black/5 dark:bg-white/5 relative">
+                <IconComponent className={cn(
+                    "h-5 w-5",
+                    uploadStatus === 'error' ? "text-red-500" : "text-black/60 dark:text-white/60"
+                )} />
+                {uploadStatus === 'uploading' && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                        <Loader2 className="h-4 w-4 text-white animate-spin" />
+                    </div>
+                )}
             </div>
 
             {/* Text content */}
             <div className="flex-1 min-w-0 flex flex-col justify-center px-3 py-2 overflow-hidden">
-                <div className="text-sm font-medium text-foreground truncate">
+                <div className={cn(
+                    "text-sm font-medium truncate",
+                    uploadStatus === 'error' ? "text-red-500" : "text-foreground"
+                )}>
                     {filename}
                 </div>
-                <div className="text-xs text-muted-foreground flex items-center gap-1 truncate">
-                    <span className="truncate">{typeLabel}</span>
-                    <span className="flex-shrink-0">·</span>
-                    <span className="flex-shrink-0">{fileSize}</span>
+                <div className={cn(
+                    "text-xs flex items-center gap-1 truncate",
+                    uploadStatus === 'error' ? "text-red-500/70" : "text-muted-foreground"
+                )}>
+                    {uploadStatus === 'uploading' ? (
+                        <span className="truncate">Uploading...</span>
+                    ) : uploadStatus === 'error' ? (
+                        <span className="truncate">Upload failed</span>
+                    ) : (
+                        <>
+                            <span className="truncate">{typeLabel}</span>
+                            <span className="flex-shrink-0">·</span>
+                            <span className="flex-shrink-0">{fileSize}</span>
+                        </>
+                    )}
                 </div>
             </div>
         </button>

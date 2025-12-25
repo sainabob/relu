@@ -11,6 +11,7 @@ CORE_TOOLS = [
 SANDBOX_TOOLS = [
     ('sb_shell_tool', 'core.tools.sb_shell_tool', 'SandboxShellTool'),
     ('sb_files_tool', 'core.tools.sb_files_tool', 'SandboxFilesTool'),
+    ('sb_file_reader_tool', 'core.tools.sb_file_reader_tool', 'SandboxFileReaderTool'),
     ('sb_expose_tool', 'core.tools.sb_expose_tool', 'SandboxExposeTool'),
     ('sb_vision_tool', 'core.tools.sb_vision_tool', 'SandboxVisionTool'),
     ('sb_image_edit_tool', 'core.tools.sb_image_edit_tool', 'SandboxImageEditTool'),
@@ -29,10 +30,10 @@ SEARCH_TOOLS = [
 ]
 
 UTILITY_TOOLS = [
-    ('data_providers_tool', 'core.tools.data_providers_tool', 'DataProvidersTool'),
     ('browser_tool', 'core.tools.browser_tool', 'BrowserTool'),
     ('vapi_voice_tool', 'core.tools.vapi_voice_tool', 'VapiVoiceTool'),
     ('reality_defender_tool', 'core.tools.reality_defender_tool', 'RealityDefenderTool'),
+    ('apify_tool', 'core.tools.apify_tool', 'ApifyTool'),
 ]
 
 AGENT_BUILDER_TOOLS = [

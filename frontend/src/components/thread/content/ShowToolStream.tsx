@@ -1,8 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { CircleDashed } from 'lucide-react';
 import { getToolIcon, getUserFriendlyToolName, extractPrimaryParam } from '@/components/thread/utils';
-import { CodeBlockCode } from '@/components/ui/code-block';
-import { getLanguageFromFileName } from '../tool-views/file-operation/_utils';
 import { AppIcon } from '../tool-views/shared/AppIcon';
 
 // Define tool categories for different streaming behaviors
@@ -68,7 +66,7 @@ const isStreamableTool = (toolName: string) => {
 interface ShowToolStreamProps {
     content: string;
     messageId?: string | null;
-    onToolClick?: (messageId: string | null, toolName: string) => void;
+    onToolClick?: (messageId: string | null, toolName: string, toolCallId?: string) => void;
     showExpanded?: boolean;
     startTime?: number;
     toolCall?: any;
@@ -93,25 +91,30 @@ export const ShowToolStream: React.FC<ShowToolStreamProps> = ({
         stableStartTimeRef.current = Date.now();
     }
 
-    let rawToolName: string | null = null;
-    let parsedToolCall: any = null;
+    // Parse tool info from content
+    const { rawToolName, parsedToolCall } = useMemo(() => {
+        let rawName: string | null = null;
+        let parsed: any = null;
+        
+        try {
+          parsed = JSON.parse(content);
+          if (parsed.function?.name) {
+            rawName = parsed.function.name;
+          } else if (parsed.tool_name) {
+            rawName = parsed.tool_name;
+          } else if (parsed.function_name) {
+            rawName = parsed.function_name;
+          }
+        } catch (e) {
+          const match = content.match(/(?:function|tool)[_\-]?name["']?\s*[:=]\s*["']?([^"'\s]+)/i);
+          if (match) {
+            rawName = match[1];
+          }
+        }
+        
+        return { rawToolName: rawName, parsedToolCall: parsed };
+    }, [content]);
     
-    try {
-      const parsed = JSON.parse(content);
-      parsedToolCall = parsed;
-      if (parsed.function?.name) {
-        rawToolName = parsed.function.name;
-      } else if (parsed.tool_name) {
-        rawToolName = parsed.tool_name;
-      } else if (parsed.function_name) {
-        rawToolName = parsed.function_name;
-      }
-    } catch (e) {
-      const match = content.match(/(?:function|tool)[_\-]?name["']?\s*[:=]\s*["']?([^"'\s]+)/i);
-      if (match) {
-        rawToolName = match[1];
-      }
-    }
     const toolName = getUserFriendlyToolName(rawToolName || '');
     const isEditFile = toolName === 'AI File Edit';
     const isCreateFile = toolName === 'Creating File';
@@ -143,7 +146,7 @@ export const ShowToolStream: React.FC<ShowToolStreamProps> = ({
     };
 
     // Extract streaming content from JSON or plain text
-    const streamingContent = React.useMemo(() => {
+    const streamingContent = useMemo(() => {
         if (!content) return { html: '', plainText: '' };
 
         try {
@@ -251,6 +254,9 @@ export const ShowToolStream: React.FC<ShowToolStreamProps> = ({
         return () => container.removeEventListener('scroll', handleScroll);
     }, [shouldShowContent]);
 
+    // Calculate paramDisplay before early return to satisfy Rules of Hooks
+    const paramDisplay = useMemo(() => extractPrimaryParam(rawToolName || '', content), [rawToolName, content]);
+
     if (!toolName) {
         return null;
     }
@@ -260,7 +266,6 @@ export const ShowToolStream: React.FC<ShowToolStreamProps> = ({
 
     const IconComponent = getToolIcon(rawToolName || '');
     const displayName = toolName;
-    const paramDisplay = extractPrimaryParam(rawToolName || '', content);
 
     // Always show tool button, conditionally show content below for streamable tools
     if (showExpanded && isToolStreamable) {
@@ -271,7 +276,7 @@ export const ShowToolStream: React.FC<ShowToolStreamProps> = ({
                     }`}>
                     {/* Tool name header */}
                     <button
-                        onClick={() => onToolClick?.(messageId, toolName)}
+                        onClick={() => onToolClick?.(messageId ?? null, toolName, effectiveToolCall?.tool_call_id)}
                         className={`w-full flex items-center gap-1.5 py-1 px-2 text-xs text-muted-foreground hover:bg-muted/80 transition-all duration-400 ease-in-out cursor-pointer ${shouldShowContent ? 'bg-muted' : 'bg-muted rounded-lg'
                             }`}
                     >
@@ -366,11 +371,11 @@ export const ShowToolStream: React.FC<ShowToolStreamProps> = ({
     return (
         <div className="my-1.5">
             <button
-                onClick={() => onToolClick?.(messageId, toolName)}
+                onClick={() => onToolClick?.(messageId ?? null, toolName, effectiveToolCall?.tool_call_id)}
                 className="inline-flex items-center gap-1.5 h-8 px-2 py-1.5 text-xs text-muted-foreground bg-card hover:bg-card/80 rounded-lg transition-colors cursor-pointer border border-neutral-200 dark:border-neutral-700/50 whitespace-nowrap"
             >
-                <div className='border-2 bg-gradient-to-br from-neutral-200 to-neutral-300 dark:from-neutral-700 dark:to-neutral-800 flex items-center justify-center p-0.5 rounded-sm border-neutral-400/20 dark:border-neutral-600'>
-                    <AppIcon toolCall={effectiveToolCall} size={14} className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                <div className='flex items-center justify-center'>
+                    <AppIcon toolCall={effectiveToolCall} size={14} className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" fallbackIcon={IconComponent} />
                 </div>
                 <span className="font-mono text-xs text-foreground">{displayName}</span>
                 {paramDisplay && <span className="ml-1 text-xs text-muted-foreground truncate max-w-[200px]" title={paramDisplay}>{paramDisplay}</span>}
