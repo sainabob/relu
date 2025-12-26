@@ -42,7 +42,7 @@ const PresenceDebug = lazy(() =>
 );
 
 const ReluAppBanners = lazy(() => 
-  import('@/components/announcements/kortix-app-banners').then(mod => ({ default: mod.ReluAppBanners }))
+  import('@/components/announcements/relu-app-banners').then(mod => ({ default: mod.ReluAppBanners }))
 );
 
 // Skeleton shell that renders immediately for FCP
