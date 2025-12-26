@@ -25,7 +25,7 @@ function normalizeWorkspacePath(path: string): string {
   return `/workspace/${path.replace(/^\//, '')}`;
 }
 
-interface KortixComputerState {
+interface ReluComputerState {
   // Main view state
   activeView: ViewType;
   
@@ -73,7 +73,7 @@ interface KortixComputerState {
   // Navigate to a specific tool call (clicking tool in ThreadContent)
   navigateToToolCall: (toolIndex: number) => void;
   
-  // Clear pending tool nav after KortixComputer processes it
+  // Clear pending tool nav after ReluComputer processes it
   clearPendingToolNav: () => void;
   
   // Panel control
@@ -108,7 +108,7 @@ const initialState = {
   unsavedFileState: {} as Record<string, boolean>,
 };
 
-export const useKortixComputerStore = create<KortixComputerState>((set, get) => ({
+export const useComputerStore = create<ReluComputerState>((set, get) => ({
   ...initialState,
   
   setActiveView: (view: ViewType) => {
@@ -302,44 +302,44 @@ export const useKortixComputerStore = create<KortixComputerState>((set, get) => 
 }));
 
 // Selector hooks for common use cases
-export const useKortixComputerActiveView = () => 
-  useKortixComputerStore((state) => state.activeView);
+export const useReluComputerActiveView = () => 
+  useComputerStore((state) => state.activeView);
 
-export const useKortixComputerIsOpen = () =>
-  useKortixComputerStore((state) => state.isOpen);
+export const useReluComputerIsOpen = () =>
+  useComputerStore((state) => state.isOpen);
 
 // Individual selectors for files state (stable, primitive values)
-export const useKortixComputerFilesSubView = () =>
-  useKortixComputerStore((state) => state.filesSubView);
+export const useReluComputerFilesSubView = () =>
+  useComputerStore((state) => state.filesSubView);
 
-export const useKortixComputerCurrentPath = () =>
-  useKortixComputerStore((state) => state.currentPath);
+export const useReluComputerCurrentPath = () =>
+  useComputerStore((state) => state.currentPath);
 
-export const useKortixComputerSelectedFilePath = () =>
-  useKortixComputerStore((state) => state.selectedFilePath);
+export const useReluComputerSelectedFilePath = () =>
+  useComputerStore((state) => state.selectedFilePath);
 
-export const useKortixComputerFilePathList = () =>
-  useKortixComputerStore((state) => state.filePathList);
+export const useReluComputerFilePathList = () =>
+  useComputerStore((state) => state.filePathList);
 
-export const useKortixComputerCurrentFileIndex = () =>
-  useKortixComputerStore((state) => state.currentFileIndex);
+export const useReluComputerCurrentFileIndex = () =>
+  useComputerStore((state) => state.currentFileIndex);
 
 // Individual selectors for pending tool navigation (stable primitives)
-export const useKortixComputerPendingToolNavIndex = () =>
-  useKortixComputerStore((state) => state.pendingToolNavIndex);
+export const useReluComputerPendingToolNavIndex = () =>
+  useComputerStore((state) => state.pendingToolNavIndex);
 
-export const useKortixComputerClearPendingToolNav = () =>
-  useKortixComputerStore((state) => state.clearPendingToolNav);
+export const useReluComputerClearPendingToolNav = () =>
+  useComputerStore((state) => state.clearPendingToolNav);
 
 // Version history selectors
-export const useKortixComputerSelectedVersion = () =>
-  useKortixComputerStore((state) => state.selectedVersion);
+export const useReluComputerSelectedVersion = () =>
+  useComputerStore((state) => state.selectedVersion);
 
-export const useKortixComputerSelectedVersionDate = () =>
-  useKortixComputerStore((state) => state.selectedVersionDate);
+export const useReluComputerSelectedVersionDate = () =>
+  useComputerStore((state) => state.selectedVersionDate);
 
-export const useKortixComputerVersionActions = () =>
-  useKortixComputerStore((state) => ({
+export const useReluComputerVersionActions = () =>
+  useComputerStore((state) => ({
     setSelectedVersion: state.setSelectedVersion,
     clearSelectedVersion: state.clearSelectedVersion,
   }));

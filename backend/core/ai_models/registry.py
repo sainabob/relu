@@ -29,15 +29,15 @@ class ModelRegistry:
         self._initialize_models()
     
     def _initialize_models(self):
-        # Kortix Basic - uses Haiku 4.5 under the hood
+        # Relu Basic - uses Haiku 4.5 under the hood
         basic_litellm_id = build_bedrock_profile_arn(HAIKU_4_5_PROFILE_ID) if SHOULD_USE_BEDROCK else "anthropic/claude-haiku-4-5-20251001"
         
         self.register(Model(
             id="kortix/basic",
-            name="Kortix Basic",
+            name="Relu Basic",
             litellm_model_id=basic_litellm_id,
             provider=ModelProvider.ANTHROPIC,
-            aliases=["kortix-basic", "Kortix Basic"],
+            aliases=["kortix-basic", "Relu Basic"],
             context_window=200_000,
             capabilities=[
                 ModelCapability.CHAT,
@@ -68,10 +68,10 @@ class ModelRegistry:
         
         self.register(Model(
             id="kortix/power",
-            name="Kortix Advanced Mode",
+            name="Relu Advanced Mode",
             litellm_model_id=power_litellm_id,
             provider=ModelProvider.ANTHROPIC,
-            aliases=["kortix-power", "Kortix POWER Mode", "Kortix Power", "Kortix Advanced Mode"],
+            aliases=["kortix-power", "Relu POWER Mode", "Relu Power", "Relu Advanced Mode"],
             context_window=200_000,
             capabilities=[
                 ModelCapability.CHAT,
@@ -98,7 +98,7 @@ class ModelRegistry:
             )
         ))
         
-        # Kortix Test - uses MiniMax M2 via Bedrock (only in LOCAL and STAGING, not PRODUCTION)
+        # Relu Test - uses MiniMax M2 via Bedrock (only in LOCAL and STAGING, not PRODUCTION)
         if config.ENV_MODE != EnvMode.PRODUCTION:
             # test_litellm_id = build_bedrock_profile_arn(MINIMAX_M2_PROFILE_ID)
             test_litellm_id ="openrouter/minimax/minimax-m2" #  205K context $0.255/M input tokens $1.02/M output tokens
@@ -111,10 +111,10 @@ class ModelRegistry:
 
             self.register(Model(
                 id="kortix/test",
-                name="Kortix Test",
+                name="Relu Test",
                 litellm_model_id=test_litellm_id,
                 provider=ModelProvider.BEDROCK,
-                aliases=["kortix-test", "Kortix Test"],
+                aliases=["kortix-test", "Relu Test"],
                 context_window=200_000,
                 capabilities=[
                     ModelCapability.CHAT,

@@ -1,1 +1,1 @@
-# Kortix Mobile App
+# Relu Mobile App

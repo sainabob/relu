@@ -1,9 +1,9 @@
-# Kortix Robots.txt
+# Relu Robots.txt
 User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://kortix.com/sitemap.xml
+Sitemap: https://relu.work/sitemap.xml
 
 # Disallow sensitive routes
 Disallow: /api/

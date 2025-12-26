@@ -4,13 +4,13 @@ import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
-interface KortixLogoProps {
+interface LogoProps {
   size?: number;
   variant?: 'symbol' | 'logomark';
   className?: string;
 }
 
-export function KortixLogo({ size = 24, variant = 'symbol', className }: KortixLogoProps) {
+export function Logo({ size = 24, variant = 'symbol', className }: LogoProps) {
   const { theme, systemTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -29,7 +29,7 @@ export function KortixLogo({ size = 24, variant = 'symbol', className }: KortixL
     return (
       <img
         src="/logomark-white.svg"
-        alt="Kortix"
+        alt="Relu"
         className={cn(`${shouldInvert ? '' : 'invert'} flex-shrink-0`, className)}
         style={{ height: `${size}px`, width: 'auto' }}
       />
@@ -39,8 +39,8 @@ export function KortixLogo({ size = 24, variant = 'symbol', className }: KortixL
   // Default symbol variant behavior
   return (
     <img
-      src="/kortix-symbol.svg"
-      alt="Kortix"
+      src="/relu-symbol.svg"
+      alt="Relu"
       className={cn(`${shouldInvert ? 'invert' : ''} flex-shrink-0`, className)}
       style={{ width: `${size}px`, height: `${size}px` }}
     />

@@ -9,7 +9,7 @@ export function isElectron(): boolean {
     return false;
   }
 
-  // Check user agent for Electron (we append "Electron/Kortix-Desktop" in main.js)
+  // Check user agent for Electron (we append "Electron/Relu-Desktop" in main.js)
   if (typeof navigator !== 'undefined' && navigator.userAgent) {
     return navigator.userAgent.toLowerCase().includes('electron');
   }
@@ -25,7 +25,7 @@ export function isElectron(): boolean {
 
 /**
  * Gets the auth callback URL for the current environment
- * - Web: returns the web URL (https://kortix.com/auth/callback)
+ * - Web: returns the web URL (https://relu.work/auth/callback)
  * - Electron: returns the custom protocol URL (kortix://auth/callback)
  */
 export function getAuthCallbackUrl(returnUrl?: string, termsAccepted?: boolean): string {

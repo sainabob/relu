@@ -62,7 +62,7 @@ import { useProjectRealtime } from '@/hooks/threads';
 import { handleGoogleSlidesUpload } from './tool-views/utils/presentation-utils';
 import { useTranslations } from 'next-intl';
 import { backendApi } from '@/lib/api-client';
-import { useKortixComputerStore, useSetIsSidePanelOpen } from '@/stores/kortix-computer-store';
+import { useComputerStore, useSetIsSidePanelOpen } from '@/stores/relu-computer-store';
 import { useToolStreamStore } from '@/stores/tool-stream-store';
 import { useOptimisticFilesStore } from '@/stores/optimistic-files-store';
 import { uploadPendingFilesToProject } from '@/components/thread/chat-input/file-upload-handler';
@@ -256,7 +256,7 @@ export function ThreadComponent({ projectId, threadId, compact = false, configur
     setAutoOpenedPanel(true);
   }, [setIsSidePanelOpen, setAutoOpenedPanel]);
 
-  const { openFileInComputer, openFileBrowser, reset: resetKortixComputerStore } = useKortixComputerStore();
+  const { openFileInComputer, openFileBrowser, reset: resetReluComputerStore } = useComputerStore();
 
   const billingModal = useBillingModal();
   const threadBilling = useThreadBilling(
@@ -308,9 +308,9 @@ export function ThreadComponent({ projectId, threadId, compact = false, configur
     if (!isShared) {
       queryClient.invalidateQueries({ queryKey: threadKeys.agentRuns(threadId) });
       queryClient.invalidateQueries({ queryKey: threadKeys.messages(threadId) });
-      resetKortixComputerStore();
+      resetReluComputerStore();
     }
-  }, [threadId, queryClient, isShared, resetKortixComputerStore]);
+  }, [threadId, queryClient, isShared, resetReluComputerStore]);
 
   // Fallback timeout for new thread polling
   // If we haven't detected an agent after 30 seconds, stop polling and hide optimistic UI
@@ -1004,7 +1004,7 @@ export function ThreadComponent({ projectId, threadId, compact = false, configur
   // SEO title update
   useEffect(() => {
     if (projectName) {
-      document.title = `${projectName} | Kortix`;
+      document.title = `${projectName} | Relu`;
 
       const metaDescription = document.querySelector(
         'meta[name="description"]',
@@ -1012,13 +1012,13 @@ export function ThreadComponent({ projectId, threadId, compact = false, configur
       if (metaDescription) {
         metaDescription.setAttribute(
           'content',
-          `${projectName} - Interactive Worker conversation powered by Kortix`,
+          `${projectName} - Interactive Worker conversation powered by Relu`,
         );
       }
 
       const ogTitle = document.querySelector('meta[property="og:title"]');
       if (ogTitle) {
-        ogTitle.setAttribute('content', `${projectName} | Kortix`);
+        ogTitle.setAttribute('content', `${projectName} | Relu`);
       }
 
       const ogDescription = document.querySelector(

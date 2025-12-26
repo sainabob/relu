@@ -23,10 +23,10 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { Dimensions, Animated as RNAnimated } from 'react-native';
-import { KortixLogo } from '@/components/ui/KortixLogo';
+import { Logo } from '@/components/ui/Logo';
 import { EmailAuthDrawer, type EmailAuthDrawerRef } from '@/components/auth';
-import KortixSymbolBlack from '@/assets/brand/kortix-symbol-scale-effect-black.svg';
-import KortixSymbolWhite from '@/assets/brand/kortix-symbol-scale-effect-white.svg';
+import ReluSymbolBlack from '@/assets/brand/kortix-symbol-scale-effect-black.svg';
+import ReluSymbolWhite from '@/assets/brand/kortix-symbol-scale-effect-white.svg';
 
 const AnimatedView = Animated.createAnimatedComponent(View);
 const AnimatedText = Animated.createAnimatedComponent(Text);
@@ -156,7 +156,7 @@ function AuthBackgroundLogo() {
   }, []);
 
   const leftOffset = (SCREEN_WIDTH - 393) / 2;
-  const SymbolComponent = colorScheme === 'dark' ? KortixSymbolWhite : KortixSymbolBlack;
+  const SymbolComponent = colorScheme === 'dark' ? ReluSymbolWhite : ReluSymbolBlack;
 
   return (
     <RNAnimated.View
@@ -284,7 +284,7 @@ function WelcomeContent({ onOAuth, onEmail }: WelcomeContentProps) {
     >
         {/* Logo */}
         <View style={{ marginBottom: SPACING.logoToTitle }}>
-          <KortixLogo variant="logomark" size={100} color={isDark ? 'dark' : 'light'} />
+          <Logo variant="logomark" size={100} color={isDark ? 'dark' : 'light'} />
         </View>
         
         {/* Title */}

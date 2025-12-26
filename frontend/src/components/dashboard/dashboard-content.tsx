@@ -140,11 +140,11 @@ export function DashboardContent() {
     ? agents.find(agent => agent.agent_id === selectedAgentId)
     : null;
   const sunaAgent = agents.find(agent => agent.metadata?.is_suna_default === true);
-  const displayName = selectedAgent?.name || 'Kortix';
+  const displayName = selectedAgent?.name || 'Relu';
   const agentAvatar = undefined;
-  // Show Kortix modes while loading (assume Kortix is default) or when Kortix agent is selected
+  // Show Relu modes while loading (assume Relu is default) or when Relu agent is selected
   const isSunaAgent = isLoadingAgents 
-    ? true // Show Kortix modes while loading
+    ? true // Show Relu modes while loading
     : (selectedAgent?.metadata?.is_suna_default || (!selectedAgentId && sunaAgent !== undefined) || false);
 
   const threadQuery = useThreadQuery(initiatedThreadId || '');
@@ -588,7 +588,7 @@ export function DashboardContent() {
                         : "text-muted-foreground hover:text-foreground"
                     )}
                   >
-                    Kortix
+                    Relu
                   </button>
                   <button
                     onClick={() => {

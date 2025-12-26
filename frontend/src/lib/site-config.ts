@@ -16,16 +16,16 @@ export const siteConfig = {
   },
   hero: {
     description:
-      'Kortix – open-source platform to build, manage and train your AI Workforce.',
+      'Relu – open-source platform to build, manage and train your AI Workforce.',
   },
   cloudPricingItems: pricingTiers,
   footerLinks: [
     {
-      title: 'Kortix',
+      title: 'Relu',
       links: [
-        { id: 1, title: 'About', url: 'https://www.kortix.com' },
-        { id: 3, title: 'Contact', url: 'mailto:hey@kortix.com' },
-        { id: 4, title: 'Careers', url: 'https://www.kortix.com/careers' },
+        { id: 1, title: 'About', url: 'https://www.relu.work' },
+        { id: 3, title: 'Contact', url: 'mailto:hey@relu.work' },
+        { id: 4, title: 'Careers', url: 'https://www.relu.work/careers' },
       ],
     },
     {
@@ -34,10 +34,10 @@ export const siteConfig = {
         {
           id: 5,
           title: 'Documentation',
-          url: 'https://github.com/kortix-ai/suna',
+          url: 'https://github.com/sainabob/suna',
         },
         { id: 7, title: 'Discord', url: 'https://discord.gg/Py6pCBUUPw' },
-        { id: 8, title: 'GitHub', url: 'https://github.com/kortix-ai/suna' },
+        { id: 8, title: 'GitHub', url: 'https://github.com/sainabob/suna' },
       ],
     },
     {
@@ -46,17 +46,17 @@ export const siteConfig = {
         {
           id: 9,
           title: 'Privacy Policy',
-          url: 'https://www.kortix.com/legal?tab=privacy',
+          url: 'https://www.relu.work/legal?tab=privacy',
         },
         {
           id: 10,
           title: 'Terms of Service',
-          url: 'https://www.kortix.com/legal?tab=terms',
+          url: 'https://www.relu.work/legal?tab=terms',
         },
         {
           id: 11,
           title: 'License',
-          url: 'https://github.com/kortix-ai/suna/blob/main/LICENSE',
+          url: 'https://github.com/sainabob/suna/blob/main/LICENSE',
         },
       ],
     },

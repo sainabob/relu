@@ -41,8 +41,8 @@ const PresenceDebug = lazy(() =>
   import('@/components/debug/presence-debug').then(mod => ({ default: mod.PresenceDebug }))
 );
 
-const KortixAppBanners = lazy(() => 
-  import('@/components/announcements/kortix-app-banners').then(mod => ({ default: mod.KortixAppBanners }))
+const ReluAppBanners = lazy(() => 
+  import('@/components/announcements/kortix-app-banners').then(mod => ({ default: mod.ReluAppBanners }))
 );
 
 // Skeleton shell that renders immediately for FCP
@@ -184,9 +184,9 @@ export default function DashboardLayoutContent({
         <Suspense fallback={null}>
           <PresentationViewerWrapper />
         </Suspense>
-        {/* Kortix App announcement banners */}
+        {/* Relu App announcement banners */}
         <Suspense fallback={null}>
-          <KortixAppBanners />
+          <ReluAppBanners />
         </Suspense>
       </div>
     </AppProviders>

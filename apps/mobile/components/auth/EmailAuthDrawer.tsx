@@ -305,7 +305,7 @@ export const EmailAuthDrawer = React.forwardRef<EmailAuthDrawerRef, {
                     <BottomSheetTouchable onPress={async () => {
                       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       const WebBrowser = await import('expo-web-browser');
-                      await WebBrowser.openBrowserAsync('https://www.kortix.com/legal?tab=terms', {
+                      await WebBrowser.openBrowserAsync('https://www.relu.work/legal?tab=terms', {
                         presentationStyle: WebBrowser.WebBrowserPresentationStyle.PAGE_SHEET,
                         controlsColor: isDark ? '#FFFFFF' : '#000000',
                       });
@@ -320,7 +320,7 @@ export const EmailAuthDrawer = React.forwardRef<EmailAuthDrawerRef, {
                     <BottomSheetTouchable onPress={async () => {
                       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       const WebBrowser = await import('expo-web-browser');
-                      await WebBrowser.openBrowserAsync('https://www.kortix.com/legal?tab=privacy', {
+                      await WebBrowser.openBrowserAsync('https://www.relu.work/legal?tab=privacy', {
                         presentationStyle: WebBrowser.WebBrowserPresentationStyle.PAGE_SHEET,
                         controlsColor: isDark ? '#FFFFFF' : '#000000',
                       });

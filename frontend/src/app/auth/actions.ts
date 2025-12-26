@@ -20,7 +20,7 @@ export async function signIn(prevState: any, formData: FormData) {
 
   // Use magic link (passwordless) authentication
   // For desktop app, use custom protocol (kortix://auth/callback) - same as mobile
-  // For web, use standard origin (https://kortix.com/auth/callback)
+  // For web, use standard origin (https://relu.work/auth/callback)
   let emailRedirectTo: string;
   if (isDesktopApp && origin.startsWith('kortix://')) {
     // Match mobile implementation - simple protocol URL with optional terms_accepted
@@ -73,7 +73,7 @@ export async function signUp(prevState: any, formData: FormData) {
 
   // Use magic link (passwordless) authentication - auto-creates account
   // For desktop app, use custom protocol (kortix://auth/callback) - same as mobile
-  // For web, use standard origin (https://kortix.com/auth/callback)
+  // For web, use standard origin (https://relu.work/auth/callback)
   let emailRedirectTo: string;
   if (isDesktopApp && origin.startsWith('kortix://')) {
     // Match mobile implementation - simple protocol URL with optional terms_accepted
@@ -176,7 +176,7 @@ export async function resendMagicLink(prevState: any, formData: FormData) {
 
   // Use magic link (passwordless) authentication
   // For desktop app, use custom protocol (kortix://auth/callback) - same as mobile
-  // For web, use standard origin (https://kortix.com/auth/callback)
+  // For web, use standard origin (https://relu.work/auth/callback)
   let emailRedirectTo: string;
   if (isDesktopApp && origin.startsWith('kortix://')) {
     // Match mobile implementation - simple protocol URL with optional terms_accepted

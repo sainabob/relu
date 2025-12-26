@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useTheme } from 'next-themes';
 import { cn } from '@/lib/utils';
 
-interface KortixLoaderProps {
+interface ReluLoaderProps {
   /**
    * Size preset for the loader
    * @default 'medium'
@@ -58,7 +58,7 @@ const SIZE_MAP = {
 } as const;
 
 /**
- * KortixLoader - A unified loading animation component
+ * ReluLoader - A unified loading animation component
  * 
  * Uses separate Lottie animations (white and black) that dynamically load
  * based on the current theme or can be explicitly set.
@@ -78,19 +78,19 @@ const SIZE_MAP = {
  * @example
  * ```tsx
  * // Auto-themed (default)
- * <KortixLoader />
+ * <ReluLoader />
  * 
  * // Always white (for dark backgrounds in any theme)
- * <KortixLoader variant="white" />
+ * <ReluLoader variant="white" />
  * 
  * // Always black (for light backgrounds in any theme)
- * <KortixLoader variant="black" />
+ * <ReluLoader variant="black" />
  * 
  * // Custom size
- * <KortixLoader size="large" />
+ * <ReluLoader size="large" />
  * ```
  */
-export function KortixLoader({
+export function ReluLoader({
   size = 'medium',
   speed = 1.2,
   customSize,
@@ -100,7 +100,7 @@ export function KortixLoader({
   loop = true,
   variant = 'auto',
   forceTheme, // deprecated, but kept for backwards compatibility
-}: KortixLoaderProps) {
+}: ReluLoaderProps) {
   const { resolvedTheme } = useTheme();
   const loaderSize = customSize || SIZE_MAP[size];
   

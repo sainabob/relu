@@ -26,12 +26,12 @@ async def main():
     # Create the MCP tools client with the URL of the MCP server that's accessible by the Suna instance
     mcp_tools = kortix.MCPTools(
         "http://localhost:4000/mcp/",  # Since we are running Suna locally, we can use the local URL
-        "Kortix",
+        "Relu",
         allowed_tools=["get_wind_direction"],
     )
     await mcp_tools.initialize()
 
-    kortix_client = kortix.Kortix(
+    kortix_client = kortix.Relu(
         os.getenv("KORTIX_API_KEY", "pk_xxx:sk_xxx"),
         "http://localhost:8000/v1",
     )

@@ -1,6 +1,6 @@
 <div align="center">
 
-# Kortix
+# Relu
 
 **The complete platform for creating autonomous AI agents that work for you**
 
@@ -8,32 +8,32 @@ Build, manage, and train sophisticated AI agents for any use case. Create powerf
 
 [![Discord Follow](https://dcbadge.limes.pink/api/server/Py6pCBUUPw?style=flat)](https://discord.gg/RvFhXUdZ9H)
 [![Twitter Follow](https://img.shields.io/twitter/follow/kortix)](https://x.com/korti)
-[![GitHub Repo stars](https://img.shields.io/github/stars/kortix-ai/suna)](https://github.com/kortix-ai/suna)
-[![Issues](https://img.shields.io/github/issues/kortix-ai/suna)](https://github.com/kortix-ai/suna/labels/bug)
+[![GitHub Repo stars](https://img.shields.io/github/stars/sainabob/suna)](https://github.com/sainabob/suna)
+[![Issues](https://img.shields.io/github/issues/sainabob/suna)](https://github.com/sainabob/suna/labels/bug)
 
 <!-- Keep these links. Translations will automatically update with the README. -->
-[Deutsch](https://www.readme-i18n.com/kortix-ai/suna?lang=de) | 
-[Español](https://www.readme-i18n.com/kortix-ai/suna?lang=es) | 
-[français](https://www.readme-i18n.com/kortix-ai/suna?lang=fr) | 
-[日本語](https://www.readme-i18n.com/kortix-ai/suna?lang=ja) | 
-[한국어](https://www.readme-i18n.com/kortix-ai/suna?lang=ko) | 
-[Português](https://www.readme-i18n.com/kortix-ai/suna?lang=pt) | 
-[Русский](https://www.readme-i18n.com/kortix-ai/suna?lang=ru) | 
-[中文](https://www.readme-i18n.com/kortix-ai/suna?lang=zh)
+[Deutsch](https://www.readme-i18n.com/sainabob/suna?lang=de) | 
+[Español](https://www.readme-i18n.com/sainabob/suna?lang=es) | 
+[français](https://www.readme-i18n.com/sainabob/suna?lang=fr) | 
+[日本語](https://www.readme-i18n.com/sainabob/suna?lang=ja) | 
+[한국어](https://www.readme-i18n.com/sainabob/suna?lang=ko) | 
+[Português](https://www.readme-i18n.com/sainabob/suna?lang=pt) | 
+[Русский](https://www.readme-i18n.com/sainabob/suna?lang=ru) | 
+[中文](https://www.readme-i18n.com/sainabob/suna?lang=zh)
 
-![Kortix Screenshot](frontend/public/banner.png)
+![Relu Screenshot](frontend/public/banner.png)
 </div>
 
 
 
 
-## 🌟 What Makes Kortix Special
+## 🌟 What Makes Relu Special
 
-### 🤖 Includes Kortix Super Worker – Flagship Generalist AI Worker
-Meet Kortix Super Worker, our showcase agent that demonstrates the full power of the Kortix platform. Through natural conversation, Kortix Super Worker handles research, data analysis, browser automation, file management, and complex workflows – showing you what's possible when you build with Kortix.
+### 🤖 Includes Relu Super Worker – Flagship Generalist AI Worker
+Meet Relu Super Worker, our showcase agent that demonstrates the full power of the Relu platform. Through natural conversation, Relu Super Worker handles research, data analysis, browser automation, file management, and complex workflows – showing you what's possible when you build with Relu.
 
-### 🔧 Build Custom Kortix Super Worker-Type Agents
-Create your own specialized agents tailored to specific domains, workflows, or business needs. Whether you need agents for customer service, data processing, content creation, or industry-specific tasks, Kortix provides the infrastructure and tools to build, deploy, and scale them.
+### 🔧 Build Custom Relu Super Worker-Type Agents
+Create your own specialized agents tailored to specific domains, workflows, or business needs. Whether you need agents for customer service, data processing, content creation, or industry-specific tasks, Relu provides the infrastructure and tools to build, deploy, and scale them.
 
 ### 🚀 Complete Platform Capabilities
 - **Browser Automation**: Navigate websites, extract data, fill forms, automate web workflows
@@ -45,7 +45,7 @@ Create your own specialized agents tailored to specific domains, workflows, or b
 
 ## 📋 Table of Contents
 
-- [🌟 What Makes Kortix Special](#-what-makes-kortix-special)
+- [🌟 What Makes Relu Special](#-what-makes-kortix-special)
 - [🎯 Agent Examples & Use Cases](#-agent-examples--use-cases)
 - [🏗️ Platform Architecture](#️-platform-architecture)
 - [🚀 Quick Start](#-quick-start)
@@ -55,9 +55,9 @@ Create your own specialized agents tailored to specific domains, workflows, or b
 
 ## 🎯 Agent Examples & Use Cases
 
-### Kortix Super Worker - Your Generalist AI Worker
+### Relu Super Worker - Your Generalist AI Worker
 
-Kortix Super Worker demonstrates the full capabilities of the Kortix platform as a versatile AI worker that can:
+Relu Super Worker demonstrates the full capabilities of the Relu platform as a versatile AI worker that can:
 
 **🔍 Research & Analysis**
 - Conduct comprehensive web research across multiple sources
@@ -91,7 +91,7 @@ Kortix Super Worker demonstrates the full capabilities of the Kortix platform as
 
 ### Build Your Own Specialized Agents
 
-The Kortix platform enables you to create agents tailored to specific needs:
+The Relu platform enables you to create agents tailored to specific needs:
 
 **🎧 Customer Service Agents**
 - Handle support tickets and FAQ responses
@@ -129,7 +129,7 @@ Each agent can be configured with custom tools, workflows, knowledge bases, and 
 
 ![Architecture Diagram](docs/images/diagram.png)
 
-Kortix consists of four main components that work together to provide a complete AI agent development platform:
+Relu consists of four main components that work together to provide a complete AI agent development platform:
 
 ### 🔧 Backend API
 Python/FastAPI service that powers the agent platform with REST endpoints, thread management, agent orchestration, and LLM integration with Anthropic, OpenAI, and others via LiteLLM. Includes agent builder tools, workflow management, and extensible tool system.
@@ -145,11 +145,11 @@ Supabase-powered data layer handling authentication, user management, agent conf
 
 ## 🚀 Quick Start
 
-Get your Kortix platform running in minutes with our automated setup wizard:
+Get your Relu platform running in minutes with our automated setup wizard:
 
 ### 1️⃣ Clone the Repository
 ```bash
-git clone https://github.com/kortix-ai/suna.git
+git clone https://github.com/sainabob/suna.git
 cd suna
 ```
 
@@ -164,7 +164,7 @@ The wizard will guide you through 14 steps with progress saving, so you can resu
 python start.py
 ```
 
-That's it! Your Kortix platform will be running with Kortix Super Worker ready to assist you.
+That's it! Your Relu platform will be running with Relu Super Worker ready to assist you.
 
 ## 🏠 Self-Hosting
 
@@ -180,3 +180,14 @@ Just use "setup.py". Ty mate.
 [Get Started](./docs/SELF-HOSTING.md) • [Join Discord](https://discord.gg/RvFhXUdZ9H) • [Follow on Twitter](https://x.com/kortix)
 
 </div>
+
+
+## Docker
+ ```bash
+ cd backend && docker build -t relu-backend:latest .
+
+ cd frontend && docker build -t relu-frontend:latest .
+
+ cd .. && docker compose up -d
+
+ ```

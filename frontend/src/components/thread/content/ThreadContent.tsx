@@ -13,7 +13,7 @@ import {
     safeJsonParse,
     HIDE_STREAMING_XML_TAGS,
 } from '@/components/thread/utils';
-import { KortixLogo } from '@/components/sidebar/kortix-logo';
+import { Logo } from '@/components/sidebar/logo';
 import { AgentLoader } from './loader';
 import { ShowToolStream } from './ShowToolStream';
 import { ComposioUrlDetector } from './composio-url-detector';
@@ -99,8 +99,8 @@ export const ThreadContent: React.FC<ThreadContentProps> = memo(function ThreadC
     sandboxId,
     project,
     isPreviewMode = false,
-    agentName = 'Kortix',
-    agentAvatar = <KortixLogo size={14} />,
+    agentName = 'Relu',
+    agentAvatar = <Logo size={14} />,
     emptyStateComponent,
     threadMetadata,
     scrollContainerRef,
@@ -159,13 +159,13 @@ export const ThreadContent: React.FC<ThreadContentProps> = memo(function ThreadC
                 name: recentAssistantWithAgent.agents.name,
                 avatar: (
                     <div className="h-5 w-5 flex items-center justify-center rounded text-xs">
-                        <KortixLogo size={14} />
+                        <Logo size={14} />
                     </div>
                 )
             };
         }
         return {
-            name: agentName || 'Kortix',
+            name: agentName || 'Relu',
             avatar: agentAvatar
         };
     }, [threadMetadata, displayMessages, agentName, agentAvatar]);

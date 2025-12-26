@@ -16,10 +16,10 @@ import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useDocumentModalStore } from '@/stores/use-document-modal-store';
 import { 
-  useKortixComputerStore,
-  useKortixComputerPendingToolNavIndex,
-  useKortixComputerClearPendingToolNav,
-} from '@/stores/kortix-computer-store';
+  useComputerStore,
+  useReluComputerPendingToolNavIndex,
+  useReluComputerClearPendingToolNav,
+} from '@/stores/relu-computer-store';
 import { FileBrowserView } from './FileBrowserView';
 import { FileViewerView } from './FileViewerView';
 import { ToolCallData, ToolResultData } from '../tool-views/types';
@@ -41,7 +41,7 @@ export interface ToolCallInput {
   messages?: ApiMessageType[];
 }
 
-interface KortixComputerProps {
+interface ReluComputerProps {
   isOpen: boolean;
   onClose: () => void;
   toolCalls: ToolCallInput[];
@@ -78,9 +78,9 @@ interface ToolCallSnapshot {
 
 type NavigationMode = 'live' | 'manual';
 
-const FLOATING_LAYOUT_ID = 'kortix-computer-float';
+const FLOATING_LAYOUT_ID = 'relu-computer-float';
 
-export const KortixComputer = memo(function KortixComputer({
+export const ReluComputer = memo(function ReluComputer({
   isOpen,
   onClose,
   toolCalls,
@@ -98,7 +98,7 @@ export const KortixComputer = memo(function KortixComputer({
   streamingText,
   sandboxId,
   projectId,
-}: KortixComputerProps) {
+}: ReluComputerProps) {
   const t = useTranslations('thread');
   const [dots, setDots] = useState('');
   const [internalIndex, setInternalIndex] = useState(0);
@@ -120,10 +120,10 @@ export const KortixComputer = memo(function KortixComputer({
     currentPath,
     navigateToPath,
     openFile,
-  } = useKortixComputerStore();
+  } = useComputerStore();
   
-  const pendingToolNavIndex = useKortixComputerPendingToolNavIndex();
-  const clearPendingToolNav = useKortixComputerClearPendingToolNav();
+  const pendingToolNavIndex = useReluComputerPendingToolNavIndex();
+  const clearPendingToolNav = useReluComputerClearPendingToolNav();
 
   const effectiveSandboxIdForQuery = sandboxId || project?.sandbox?.id || '';
   const { data: enhancedBrowserFiles = [] } = useDirectoryQuery(
@@ -903,7 +903,7 @@ export const KortixComputer = memo(function KortixComputer({
   return (
     <motion.div
       key="sidepanel-resizable"
-      layoutId="kortix-computer-window"
+      layoutId="relu-computer-window"
       initial={{ opacity: 1 }}
       animate={{ opacity: 1 }}
       transition={{

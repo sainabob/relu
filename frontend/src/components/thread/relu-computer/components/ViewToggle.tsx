@@ -9,7 +9,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { ViewType } from '@/stores/kortix-computer-store';
+import { ViewType } from '@/stores/relu-computer-store';
 
 interface ViewToggleProps {
   currentView: ViewType;

@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { X, Download, Smartphone, Monitor } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { KortixLogo } from '@/components/sidebar/kortix-logo';
+import { Logo } from '@/components/sidebar/logo';
 import { isElectron } from '@/lib/utils/is-electron';
 
 const MOBILE_STORAGE_KEY = 'kortix-mobile-banner-dismissed';
@@ -17,9 +17,9 @@ const STORE_LINKS = {
 };
 
 const DOWNLOAD_LINKS = {
-  windows: 'https://download.kortix.com/desktop/latest/windows/Kortix%20Setup%201.0.0.exe',
-  macArm: 'https://download.kortix.com/desktop/latest/macos/Kortix-1.0.0-arm64.dmg',
-  macIntel: 'https://download.kortix.com/desktop/latest/macos/Kortix-1.0.0-x64.dmg',
+  windows: 'https://download.relu.work/desktop/latest/windows/Relu%20Setup%201.0.0.exe',
+  macArm: 'https://download.relu.work/desktop/latest/macos/Relu-1.0.0-arm64.dmg',
+  macIntel: 'https://download.relu.work/desktop/latest/macos/Relu-1.0.0-x64.dmg',
 };
 
 type MobilePlatform = 'ios' | 'android';
@@ -57,7 +57,7 @@ function detectDesktopPlatform(): DesktopPlatform {
 }
 
 
-export function KortixAppBanners() {
+export function ReluAppBanners() {
   const [isVisible, setIsVisible] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -158,14 +158,14 @@ export function KortixAppBanners() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-foreground dark:text-white text-sm font-semibold truncate">
-                    Get Kortix Apps
+                    Get Relu Apps
                   </p>
                   <p className="text-muted-foreground dark:text-white/60 text-xs">
                     Mobile & Desktop
                   </p>
                 </div>
                 <div className="w-10 h-10 rounded-xl bg-foreground dark:bg-white flex items-center justify-center shadow-sm">
-                  <KortixLogo size={20} className="invert dark:invert-0" />
+                  <Logo size={20} className="invert dark:invert-0" />
                 </div>
               </div>
             </motion.div>
@@ -199,15 +199,15 @@ export function KortixAppBanners() {
                       <div className="relative bg-white rounded-lg p-2 shadow-sm">
                 <img 
                   src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(currentStoreUrl)}&format=svg&ecc=H`}
-                  alt={`QR Code to download Kortix on ${selectedMobilePlatform === 'ios' ? 'App Store' : 'Play Store'}`}
+                  alt={`QR Code to download Relu on ${selectedMobilePlatform === 'ios' ? 'App Store' : 'Play Store'}`}
                   width={100}
                   height={100}
                   className={`block ${selectedMobilePlatform === 'android' ? 'grayscale opacity-40' : ''}`}
                 />
-                {/* Kortix logo in center */}
+                {/* Relu logo in center */}
                 <div className={`absolute inset-0 flex items-center justify-center ${selectedMobilePlatform === 'android' ? 'opacity-40' : ''}`}>
                   <div className="bg-white p-1.5 rounded-lg">
-                    <KortixLogo size={24} />
+                    <Logo size={24} />
                   </div>
                 </div>
                         {selectedMobilePlatform === 'android' && (
@@ -223,7 +223,7 @@ export function KortixAppBanners() {
                     {/* Content area */}
                     <div className="p-4 bg-muted/50 dark:bg-[#161618]">
                       <h3 className="text-foreground dark:text-white text-sm font-semibold mb-1">
-                        Kortix for Mobile coming soon
+                        Relu for Mobile coming soon
                       </h3>
                       <p className="text-muted-foreground dark:text-white/60 text-xs leading-relaxed mb-3">
                         {selectedMobilePlatform === 'ios' 
@@ -287,7 +287,7 @@ export function KortixAppBanners() {
                         </div>
                         
                         <div className="w-8 h-8 bg-foreground dark:bg-[#1a1a1a] rounded-lg flex items-center justify-center">
-                          <KortixLogo size={16} className="invert dark:invert" />
+                          <Logo size={16} className="invert dark:invert" />
                         </div>
                         
                         <div className="flex gap-1 absolute bottom-1.5 right-2">
@@ -301,10 +301,10 @@ export function KortixAppBanners() {
                     {/* Content area */}
                     <div className="p-4 bg-muted/50 dark:bg-[#161618]">
                       <h3 className="text-foreground dark:text-white text-sm font-semibold mb-1">
-                        Kortix for Desktop is here
+                        Relu for Desktop is here
                       </h3>
                       <p className="text-muted-foreground dark:text-white/60 text-xs leading-relaxed mb-3">
-                        Hand it off to Kortix. From anywhere on your {desktopPlatform === 'mac' ? 'Mac' : 'Desktop'}. Download now.
+                        Hand it off to Relu. From anywhere on your {desktopPlatform === 'mac' ? 'Mac' : 'Desktop'}. Download now.
                       </p>
 
                       <Button

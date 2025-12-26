@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import { toast } from 'sonner';
-import { ToolCallInput } from '@/components/thread/kortix-computer';
+import { ToolCallInput } from '@/components/thread/relu-computer';
 import { UnifiedMessage, ParsedMetadata, AgentStatus } from '@/components/thread/types';
 import { safeJsonParse } from '@/components/thread/utils';
 import { useIsMobile } from '@/hooks/utils';
 import { isAskOrCompleteTool } from './utils';
-import { useKortixComputerStore, useIsSidePanelOpen, useSetIsSidePanelOpen } from '@/stores/kortix-computer-store';
+import { useComputerStore, useIsSidePanelOpen, useSetIsSidePanelOpen } from '@/stores/relu-computer-store';
 
 interface UseThreadToolCallsReturn {
   toolCalls: ToolCallInput[];
@@ -48,7 +48,7 @@ export function useThreadToolCalls(
   const userNavigatedRef = useRef(false);
   const isMobile = useIsMobile();
   
-  const navigateToToolCall = useKortixComputerStore((state) => state.navigateToToolCall);
+  const navigateToToolCall = useComputerStore((state) => state.navigateToToolCall);
 
   const toggleSidePanel = useCallback(() => {
     const newState = !isSidePanelOpen;
@@ -214,7 +214,7 @@ export function useThreadToolCalls(
       setExternalNavIndex(index);
       setCurrentToolIndex(index);
       setIsSidePanelOpen(true);
-      // Use store action to ensure KortixComputer switches to tools view
+      // Use store action to ensure ReluComputer switches to tools view
       navigateToToolCall(index);
       setTimeout(() => setExternalNavIndex(undefined), 100);
     };

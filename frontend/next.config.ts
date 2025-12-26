@@ -14,7 +14,7 @@ const getBackendUrl = (): string => {
   
   // Production environment
   if (vercelEnv === 'production') {
-    return 'https://api.kortix.com/v1';
+    return 'https://api.relu.work/v1';
   }
   
   // Preview deployments (non-main branches)

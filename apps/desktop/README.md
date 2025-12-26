@@ -1,6 +1,6 @@
-# Kortix Desktop
+# Relu Desktop
 
-Minimal Electron wrapper for the Kortix web application with deep linking support.
+Minimal Electron wrapper for the Relu web application with deep linking support.
 
 ## Features
 
@@ -43,7 +43,7 @@ Set `APP_URL` environment variable to load a different URL:
 APP_URL=http://localhost:3000 npm start
 ```
 
-By default, it loads `https://kortix.com/`.
+By default, it loads `https://relu.work/`.
 
 ## Installation
 
@@ -56,7 +56,7 @@ The app registers the `kortix://` protocol for magic link authentication:
 1. User enters email in desktop app
 2. Magic link email contains `kortix://auth/callback?code=xxx`
 3. User clicks link in email
-4. Operating system opens Kortix Desktop app
+4. Operating system opens Relu Desktop app
 5. App handles auth callback and logs user in
 
 The protocol is automatically registered when the app is installed.

@@ -98,8 +98,8 @@ dependencies = [
 ]
 
 [project.urls]
-homepage = "https://www.kortix.com"
-repository = "https://github.com/kortix-ai/suna"
+homepage = "https://www.relu.work"
+repository = "https://github.com/sainabob/suna"
 
 [tool.uv]
 package = false

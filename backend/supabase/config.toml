@@ -121,10 +121,10 @@ additional_redirect_urls = [
   "http://localhost:3000/auth/callback",
   "https://staging.suna.so/**",
   "https://staging.suna.so/auth/callback",
-  "https://kortix.com/**",
-  "https://kortix.com/auth/callback",
-  "https://www.kortix.com/**",
-  "https://www.kortix.com/auth/callback",
+  "https://relu.work/**",
+  "https://relu.work/auth/callback",
+  "https://www.relu.work/**",
+  "https://www.relu.work/auth/callback",
 ]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600

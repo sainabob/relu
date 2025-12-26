@@ -1,12 +1,12 @@
--- Migration: Mark Kortix team templates
--- This migration marks templates created by the Kortix team as official
+-- Migration: Mark Relu team templates
+-- This migration marks templates created by the Relu team as official
 
 BEGIN;
 
--- Update templates to mark as Kortix team based on specific criteria
--- You can adjust the WHERE clause based on your actual Kortix team account IDs or template names
+-- Update templates to mark as Relu team based on specific criteria
+-- You can adjust the WHERE clause based on your actual Relu team account IDs or template names
 
--- Option 1: Mark templates by specific names that are known Kortix team templates
+-- Option 1: Mark templates by specific names that are known Relu team templates
 UPDATE agent_templates
 SET is_kortix_team = true
 WHERE name IN (
@@ -20,8 +20,8 @@ WHERE name IN (
     'API Testing Agent'
 ) AND is_public = true;
 
--- Option 2: Mark templates by creator_id if you know the Kortix team account IDs
--- Uncomment and modify with actual Kortix team account IDs
+-- Option 2: Mark templates by creator_id if you know the Relu team account IDs
+-- Uncomment and modify with actual Relu team account IDs
 -- UPDATE agent_templates
 -- SET is_kortix_team = true
 -- WHERE creator_id IN (
@@ -41,6 +41,6 @@ DECLARE
     updated_count INTEGER;
 BEGIN
     GET DIAGNOSTICS updated_count = ROW_COUNT;
-    RAISE NOTICE 'Marked % templates as Kortix team templates', updated_count;
+    RAISE NOTICE 'Marked % templates as Relu team templates', updated_count;
 END $$;
 
