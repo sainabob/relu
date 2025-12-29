@@ -108,7 +108,7 @@ const initialState = {
   unsavedFileState: {} as Record<string, boolean>,
 };
 
-export const useComputerStore = create<ReluComputerState>((set, get) => ({
+export const useReluComputerStore = create<ReluComputerState>((set, get) => ({
   ...initialState,
   
   setActiveView: (view: ViewType) => {
@@ -303,43 +303,43 @@ export const useComputerStore = create<ReluComputerState>((set, get) => ({
 
 // Selector hooks for common use cases
 export const useReluComputerActiveView = () => 
-  useComputerStore((state) => state.activeView);
+  useReluComputerStore((state) => state.activeView);
 
 export const useReluComputerIsOpen = () =>
-  useComputerStore((state) => state.isOpen);
+  useReluComputerStore((state) => state.isOpen);
 
 // Individual selectors for files state (stable, primitive values)
 export const useReluComputerFilesSubView = () =>
-  useComputerStore((state) => state.filesSubView);
+  useReluComputerStore((state) => state.filesSubView);
 
 export const useReluComputerCurrentPath = () =>
-  useComputerStore((state) => state.currentPath);
+  useReluComputerStore((state) => state.currentPath);
 
 export const useReluComputerSelectedFilePath = () =>
-  useComputerStore((state) => state.selectedFilePath);
+  useReluComputerStore((state) => state.selectedFilePath);
 
 export const useReluComputerFilePathList = () =>
-  useComputerStore((state) => state.filePathList);
+  useReluComputerStore((state) => state.filePathList);
 
 export const useReluComputerCurrentFileIndex = () =>
-  useComputerStore((state) => state.currentFileIndex);
+  useReluComputerStore((state) => state.currentFileIndex);
 
 // Individual selectors for pending tool navigation (stable primitives)
 export const useReluComputerPendingToolNavIndex = () =>
-  useComputerStore((state) => state.pendingToolNavIndex);
+  useReluComputerStore((state) => state.pendingToolNavIndex);
 
 export const useReluComputerClearPendingToolNav = () =>
-  useComputerStore((state) => state.clearPendingToolNav);
+  useReluComputerStore((state) => state.clearPendingToolNav);
 
 // Version history selectors
 export const useReluComputerSelectedVersion = () =>
-  useComputerStore((state) => state.selectedVersion);
+  useReluComputerStore((state) => state.selectedVersion);
 
 export const useReluComputerSelectedVersionDate = () =>
-  useComputerStore((state) => state.selectedVersionDate);
+  useReluComputerStore((state) => state.selectedVersionDate);
 
 export const useReluComputerVersionActions = () =>
-  useComputerStore((state) => ({
+  useReluComputerStore((state) => ({
     setSelectedVersion: state.setSelectedVersion,
     clearSelectedVersion: state.clearSelectedVersion,
   }));

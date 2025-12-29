@@ -16,7 +16,7 @@ import { useTranslations } from 'next-intl';
 import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { useDocumentModalStore } from '@/stores/use-document-modal-store';
 import { 
-  useComputerStore,
+  useReluComputerStore,
   useReluComputerPendingToolNavIndex,
   useReluComputerClearPendingToolNav,
 } from '@/stores/relu-computer-store';
@@ -124,7 +124,7 @@ export const ReluComputer = memo(function ReluComputer({
     currentPath,
     navigateToPath,
     openFile,
-  } = useComputerStore();
+  } = useReluComputerStore();
   
   const pendingToolNavIndex = useReluComputerPendingToolNavIndex();
   const clearPendingToolNav = useReluComputerClearPendingToolNav();

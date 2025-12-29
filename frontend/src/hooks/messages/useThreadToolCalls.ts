@@ -5,7 +5,7 @@ import { UnifiedMessage, ParsedMetadata, AgentStatus } from '@/components/thread
 import { safeJsonParse } from '@/components/thread/utils';
 import { useIsMobile } from '@/hooks/utils';
 import { isAskOrCompleteTool } from './utils';
-import { useComputerStore, useIsSidePanelOpen, useSetIsSidePanelOpen } from '@/stores/relu-computer-store';
+import { useReluComputerStore, useIsSidePanelOpen, useSetIsSidePanelOpen } from '@/stores/relu-computer-store';
 
 interface UseThreadToolCallsReturn {
   toolCalls: ToolCallInput[];
@@ -48,7 +48,7 @@ export function useThreadToolCalls(
   const userNavigatedRef = useRef(false);
   const isMobile = useIsMobile();
   
-  const navigateToToolCall = useComputerStore((state) => state.navigateToToolCall);
+  const navigateToToolCall = useReluComputerStore((state) => state.navigateToToolCall);
 
   const toggleSidePanel = useCallback(() => {
     const newState = !isSidePanelOpen;

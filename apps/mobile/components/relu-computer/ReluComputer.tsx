@@ -5,7 +5,7 @@ import { Icon } from '@/components/ui/icon';
 import { X } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
-import { useComputerStore } from '@/stores/relu-computer-store';
+import { useReluComputerStore } from '@/stores/relu-computer-store';
 import { ViewToggle } from './ViewToggle';
 import { NavigationControls } from './NavigationControls';
 import { ToolsView } from './ToolsView';
@@ -65,7 +65,7 @@ export function ReluComputer({
     closePanel,
     setActiveView,
     clearPendingToolNav,
-  } = useComputerStore();
+  } = useReluComputerStore();
 
   const [internalIndex, setInternalIndex] = useState(currentIndex);
   const [navigationMode, setNavigationMode] = useState<'live' | 'manual'>('live');

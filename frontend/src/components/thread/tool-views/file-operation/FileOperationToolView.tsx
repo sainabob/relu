@@ -65,7 +65,7 @@ import { LoadingState } from '../shared/LoadingState';
 import { toast } from 'sonner';
 import { PresentationSlidePreview } from '../presentation-tools/PresentationSlidePreview';
 import { usePresentationViewerStore } from '@/stores/presentation-viewer-store';
-import { useComputerStore } from '@/stores/relu-computer-store';
+import { useReluComputerStore } from '@/stores/relu-computer-store';
 
 // Improved diff view components for str-replace operations
 const UnifiedDiffView: React.FC<{ lineDiff: LineDiff[]; fileName?: string }> = ({ lineDiff, fileName }) => (
@@ -221,7 +221,7 @@ export function FileOperationToolView({
   const { openPresentation } = usePresentationViewerStore();
   
   // Relu Computer store for opening files in Files Manager
-  const { openFileInComputer } = useComputerStore();
+  const { openFileInComputer } = useReluComputerStore();
 
   // Extract from structured metadata
   const name = toolCall.function_name.replace(/_/g, '-').toLowerCase();

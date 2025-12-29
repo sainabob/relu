@@ -19,7 +19,7 @@ import {
 } from '@/components/chat';
 import { ThreadHeader } from '@/components/threads';
 import { ReluComputer } from '@/components/relu-computer';
-import { useComputerStore } from '@/stores/relu-computer-store';
+import { useReluComputerStore } from '@/stores/relu-computer-store';
 import { useChatCommons, type UseChatReturn, useDeleteThread, useShareThread } from '@/hooks';
 import { useThread } from '@/lib/chat';
 import { Text } from '@/components/ui/text';
@@ -245,7 +245,7 @@ export function ThreadPage({
     openPanel,
     openFileInComputer,
     openFileBrowser,
-  } = useComputerStore();
+  } = useReluComputerStore();
 
   const deleteThreadMutation = useDeleteThread();
   const shareThreadMutation = useShareThread();

@@ -33,7 +33,7 @@ import {
 } from '@/hooks/files';
 import { useDownloadRestriction } from '@/hooks/billing';
 import { cn } from '@/lib/utils';
-import { useComputerStore } from '@/stores/relu-computer-store';
+import { useReluComputerStore } from '@/stores/relu-computer-store';
 import { PresentationViewer } from '../tool-views/presentation-tools/PresentationViewer';
 import { FullScreenPresentationViewer } from '../tool-views/presentation-tools/FullScreenPresentationViewer';
 import { usePresentationViewerStore } from '@/stores/presentation-viewer-store';
@@ -162,7 +162,7 @@ export function FileViewerView({
     selectedVersionDate: globalSelectedVersionDate,
     setSelectedVersion: setGlobalSelectedVersion,
     clearSelectedVersion: clearGlobalSelectedVersion,
-  } = useComputerStore();
+  } = useReluComputerStore();
 
   // React Query client for cache invalidation
   const queryClient = useQueryClient();

@@ -42,7 +42,7 @@ import {
   type FileVersion,
   type CommitInfo,
 } from '@/lib/files/hooks';
-import { useComputerStore } from '@/stores/relu-computer-store';
+import { useReluComputerStore } from '@/stores/relu-computer-store';
 import { API_URL, getAuthToken } from '@/api/config';
 import { ReluComputerHeader } from './ReluComputerHeader';
 import { VersionBanner } from './VersionBanner';
@@ -84,7 +84,7 @@ export function FileViewerView({
     selectedVersionDate,
     setSelectedVersion,
     clearSelectedVersion,
-  } = useComputerStore();
+  } = useReluComputerStore();
 
   const [blobUrl, setBlobUrl] = useState<string | undefined>();
   const [versionBlobUrl, setVersionBlobUrl] = useState<string | undefined>();

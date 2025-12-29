@@ -47,7 +47,7 @@ import { useDownloadRestriction } from '@/hooks/billing';
 import JSZip from 'jszip';
 import { normalizeFilenameToNFC } from '@/lib/utils/unicode';
 import { cn } from '@/lib/utils';
-import { useComputerStore } from '@/stores/relu-computer-store';
+import { useReluComputerStore } from '@/stores/relu-computer-store';
 import { Badge } from '@/components/ui/badge';
 import { VersionBanner } from './VersionBanner';
 import { ReluComputerHeader } from './ReluComputerHeader';
@@ -76,7 +76,7 @@ export function FileBrowserView({
     selectedVersionDate,
     setSelectedVersion,
     clearSelectedVersion,
-  } = useComputerStore();
+  } = useReluComputerStore();
   
   // Download restriction for free tier users
   const { isRestricted: isDownloadRestricted, openUpgradeModal } = useDownloadRestriction({

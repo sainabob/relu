@@ -37,7 +37,7 @@ import { JsonRenderer } from './JsonRenderer';
 import { CsvRenderer } from './CsvRenderer';
 import { XlsxRenderer } from './XlsxRenderer';
 import { ToolViewCard, TabSwitcher, StatusBadge, LoadingState, CodeRenderer, FileDownloadButton } from '../shared';
-import { useComputerStore } from '@/stores/relu-computer-store';
+import { useReluComputerStore } from '@/stores/relu-computer-store';
 import { constructHtmlPreviewUrl } from '@/lib/utils/url';
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
@@ -94,7 +94,7 @@ export function FileOperationToolView({
   project,
   streamingText,
 }: ToolViewProps) {
-  const { openFileInComputer } = useComputerStore();
+  const { openFileInComputer } = useReluComputerStore();
   const [isCopyingContent, setIsCopyingContent] = useState(false);
   const [activeTab, setActiveTab] = useState<'code' | 'preview' | 'changes'>('preview');
   const sourceScrollRef = useRef<ScrollView>(null);

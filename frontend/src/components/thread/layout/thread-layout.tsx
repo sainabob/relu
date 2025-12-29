@@ -11,7 +11,7 @@ import {
   ResizablePanel,
   ResizableHandle,
 } from '@/components/ui/resizable';
-import { useComputerStore } from '@/stores/relu-computer-store';
+import { useReluComputerStore } from '@/stores/relu-computer-store';
 
 interface ThreadLayoutProps {
   children: React.ReactNode;
@@ -81,7 +81,7 @@ export const ThreadLayout = memo(function ThreadLayout({
   const isActuallyMobile = useIsMobile();
 
   // Relu Computer Store - for handling file open requests
-  const { shouldOpenPanel, clearShouldOpenPanel, openFileInComputer, openFileBrowser } = useComputerStore();
+  const { shouldOpenPanel, clearShouldOpenPanel, openFileInComputer, openFileBrowser } = useReluComputerStore();
 
   // Track when panel should be visible
   const shouldShowPanel = isSidePanelOpen && initialLoadCompleted;

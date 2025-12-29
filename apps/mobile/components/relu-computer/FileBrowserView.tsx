@@ -21,7 +21,7 @@ import * as Haptics from 'expo-haptics';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useComputerStore } from '@/stores/relu-computer-store';
+import { useReluComputerStore } from '@/stores/relu-computer-store';
 import {
   useSandboxFiles,
   useUploadFileToSandbox,
@@ -91,7 +91,7 @@ export function FileBrowserView({
     selectedVersionDate,
     setSelectedVersion,
     clearSelectedVersion,
-  } = useComputerStore();
+  } = useReluComputerStore();
 
   const [isUploading, setIsUploading] = useState(false);
   const [showVersionModal, setShowVersionModal] = useState(false);

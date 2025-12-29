@@ -41,7 +41,7 @@ import { StreamingToolCard } from './StreamingToolCard';
 import { TaskCompletedFeedback } from './tool-views/complete-tool/TaskCompletedFeedback';
 import { renderAssistantMessage } from './assistant-message-renderer';
 import { PromptExamples } from '@/components/shared';
-import { useComputerStore } from '@/stores/relu-computer-store';
+import { useReluComputerStore } from '@/stores/relu-computer-store';
 
 export interface ToolMessagePair {
   assistantMessage: UnifiedMessage | null;
@@ -938,7 +938,7 @@ export const ThreadContent: React.FC<ThreadContentProps> = React.memo(
       return maps;
     }, [groupedMessages]);
 
-    const { navigateToToolCall } = useComputerStore();
+    const { navigateToToolCall } = useReluComputerStore();
 
     const handleToolPressInternal = useCallback(
       (clickedToolMsg: UnifiedMessage) => {
