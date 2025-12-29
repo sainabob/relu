@@ -535,7 +535,7 @@
     "credits": "クレジット",
     "popular": "人気",
     "creditsExplained": "クレジットの説明",
-    "creditsExhausted": "+200クレジットが{time}後に追加されます。今すぐアップグレードして使用してください。",
+    "creditsExhausted": "+100クレジットが{time}後に追加されます。今すぐアップグレードして使用してください。",
     "creditsExhaustedRefreshIn": "クレジットを使い果たしました。{time}後に更新されます",
     "trialActive": "トライアル有効",
     "trialBadge": "7日間トライアル",
@@ -552,6 +552,18 @@
     "cannotDowngradeDuringCommitment": "コミットメント期間中はダウングレードできません",
     "alreadyOnThisPlan": "既にこのプランにいます。",
     "localModeMessage": "ローカル開発モードで実行中 - 請求機能は無効です",
+    "holidayPromo": {
+      "badge": "ホリデー特典",
+      "countdown": "{time}で終了",
+      "discount": "最初の3か月が50%オフ",
+      "window": "12月24日〜25日まで有効",
+      "headerLine": "コード{code}で{discount}",
+      "description": "チェックアウト時にコード{code}を入力すると{discount}になります。{window}",
+      "copyCode": "コードをコピー",
+      "copied": "コピー完了",
+      "codeCopied": "{code}をコピーしました",
+      "copyFailed": "プロモコードをコピーできませんでした"
+    },
     "creditsExplainedPage": {
       "title": "クレジットの説明",
       "subtitle": "Reluでのクレジットの仕組みについて知っておくべきすべて",

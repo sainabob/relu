@@ -65,6 +65,7 @@ import { backendApi } from '@/lib/api-client';
 import { useComputerStore, useSetIsSidePanelOpen } from '@/stores/relu-computer-store';
 import { useToolStreamStore } from '@/stores/tool-stream-store';
 import { useOptimisticFilesStore } from '@/stores/optimistic-files-store';
+import { useProcessStreamOperation } from '@/stores/spreadsheet-store';
 import { uploadPendingFilesToProject } from '@/components/thread/chat-input/file-upload-handler';
 
 interface ThreadComponentProps {
@@ -225,18 +226,20 @@ export function ThreadComponent({ projectId, threadId, compact = false, configur
   
   // Stop polling only when we have confirmed the agent is running (agentRunId exists)
   // This prevents the race condition where polling stops before the agent is detected
-  if (isNewThread && !hasDataLoaded.current && agentRunId) {
-    hasDataLoaded.current = true;
-    console.log('[ThreadComponent] Agent detected, stopping polling:', agentRunId);
-    // Clean up the ?new=true URL param to prevent future polling issues
-    if (typeof window !== 'undefined') {
-      const url = new URL(window.location.href);
-      if (url.searchParams.get('new') === 'true') {
-        url.searchParams.delete('new');
-        window.history.replaceState({}, '', url.pathname + url.search);
+  useEffect(() => {
+    if (isNewThread && !hasDataLoaded.current && agentRunId) {
+      hasDataLoaded.current = true;
+      console.log('[ThreadComponent] Agent detected, stopping polling:', agentRunId);
+      // Clean up the ?new=true URL param to prevent future polling issues
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href);
+        if (url.searchParams.get('new') === 'true') {
+          url.searchParams.delete('new');
+          window.history.replaceState({}, '', url.pathname + url.search);
+        }
       }
     }
-  }
+  }, [isNewThread, agentRunId]);
   
   // Hide optimistic UI only when we have both agentRunId AND initialLoadCompleted
   // This ensures the stream is ready before transitioning
@@ -244,9 +247,11 @@ export function ThreadComponent({ projectId, threadId, compact = false, configur
     ? (agentRunId && initialLoadCompleted)
     : ((agentRunId || messages.length > 0 || threadStatus === 'ready') && initialLoadCompleted);
   
-  if (shouldHideOptimisticUI && showOptimisticUI) {
-    setShowOptimisticUI(false);
-  }
+  useEffect(() => {
+    if (shouldHideOptimisticUI && showOptimisticUI) {
+      setShowOptimisticUI(false);
+    }
+  }, [shouldHideOptimisticUI, showOptimisticUI]);
   
   const effectivePanelOpen = isSidePanelOpen || (isNewThread && showOptimisticUI);
 
@@ -647,6 +652,7 @@ export function ThreadComponent({ projectId, threadId, compact = false, configur
   const handleStreamClose = useCallback(() => { }, []);
 
   const { appendOutput, markComplete } = useToolStreamStore();
+  const processSpreadsheetOperation = useProcessStreamOperation();
   
   const handleToolOutputStream = useCallback((data: { 
     tool_call_id: string; 
@@ -654,13 +660,23 @@ export function ThreadComponent({ projectId, threadId, compact = false, configur
     output: string; 
     is_final: boolean; 
   }) => {
+    if (data.tool_name === 'spreadsheet' && data.output) {
+      try {
+        const operation = JSON.parse(data.output);
+        if (operation.type === 'spreadsheet_operation') {
+          processSpreadsheetOperation(operation);
+        }
+      } catch (e) {
+      }
+    }
+    
     if (data.output) {
       appendOutput(data.tool_call_id, data.output);
     }
     if (data.is_final) {
       markComplete(data.tool_call_id);
     }
-  }, [appendOutput, markComplete]);
+  }, [appendOutput, markComplete, processSpreadsheetOperation]);
 
   const streamCallbacks = useMemo(() => ({
     onMessage: handleNewMessageFromStream,

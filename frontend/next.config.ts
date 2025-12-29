@@ -40,6 +40,19 @@ const nextConfig = (): NextConfig => ({
     NEXT_PUBLIC_BACKEND_URL: getBackendUrl(),
   },
   
+  // Webpack configuration to make Konva work with Next.js
+  webpack: (config) => {
+    config.externals = [...config.externals, { canvas: 'canvas' }]; // required to make Konva & react-konva work
+    return config;
+  },
+  
+  // Turbopack configuration
+  turbopack: {
+    // Note: Turbopack handles externals differently than webpack.
+    // The canvas external is handled automatically for browser builds.
+    // If you need to configure loaders or aliases, add them here.
+  },
+  
   // Performance optimizations
   experimental: {
     // Optimize package imports for faster builds and smaller bundles

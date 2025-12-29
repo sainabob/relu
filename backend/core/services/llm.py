@@ -37,23 +37,21 @@ def setup_api_keys() -> None:
     if getattr(config, 'OPENROUTER_API_KEY', None) and getattr(config, 'OPENROUTER_API_BASE', None):
         os.environ["OPENROUTER_API_BASE"] = config.OPENROUTER_API_BASE
     
+    # OpenRouter app name and site URL (per LiteLLM docs: https://docs.litellm.ai/docs/providers/openrouter)
+    if getattr(config, 'OR_APP_NAME', None):
+        os.environ["OR_APP_NAME"] = config.OR_APP_NAME
+    if getattr(config, 'OR_SITE_URL', None):
+        os.environ["OR_SITE_URL"] = config.OR_SITE_URL
+    
     # AWS Bedrock bearer token
     if getattr(config, 'AWS_BEARER_TOKEN_BEDROCK', None):
         os.environ["AWS_BEARER_TOKEN_BEDROCK"] = config.AWS_BEARER_TOKEN_BEDROCK
 
 def setup_provider_router(openai_compatible_api_key: str = None, openai_compatible_api_base: str = None):
-    """Configure LiteLLM Router with fallback chains for Bedrock models."""
+    """Configure LiteLLM Router with fallback chains from model registry."""
     global provider_router
     
-    from core.ai_models.registry import (
-        HAIKU_4_5_PROFILE_ID, SONNET_4_5_PROFILE_ID, build_bedrock_profile_arn
-    )
-    
-    # Build ARNs once
-    arns = {
-        "haiku": build_bedrock_profile_arn(HAIKU_4_5_PROFILE_ID),
-        "sonnet45": build_bedrock_profile_arn(SONNET_4_5_PROFILE_ID),
-    }
+    from core.ai_models.registry import registry
     
     # Model list for router
     model_list = [
@@ -68,22 +66,13 @@ def setup_provider_router(openai_compatible_api_key: str = None, openai_compatib
         {"model_name": "*", "litellm_params": {"model": "*"}},
     ]
     
-    # Fallback chains: primary -> [fallbacks]
-    fallbacks = [
-        # {arns["haiku"]: [arns["sonnet45"]]},
-        {arns["sonnet45"]: [arns["haiku"]]},
-    ]
-    
-    # Context window fallbacks: smaller context -> larger context
-    # context_window_fallbacks = [
-    #     {arns["haiku"]: [arns["sonnet45"]]},  # 200k -> 1M
-    # ]
+    # Get fallback chains from registry (single source of truth)
+    fallbacks = registry.get_fallback_chains()
     
     provider_router = Router(
         model_list=model_list,
         num_retries=3,
         fallbacks=fallbacks,
-        # context_window_fallbacks=context_window_fallbacks,
     )
     
     logger.info(f"LiteLLM Router configured with {len(fallbacks)} fallback rules")
@@ -201,6 +190,16 @@ async def make_llm_api_call(
     if extra_headers is not None: override_params["extra_headers"] = extra_headers
     
     params = model_manager.get_litellm_params(resolved_model_name, **override_params)
+    
+    # Add OpenRouter app parameter if using OpenRouter
+    # Check if the actual LiteLLM model ID is an OpenRouter model
+    actual_litellm_model_id = params.get("model", resolved_model_name)
+    if isinstance(actual_litellm_model_id, str) and actual_litellm_model_id.startswith("openrouter/"):
+        # OpenRouter requires the "app" parameter in extra_body
+        if "extra_body" not in params:
+            params["extra_body"] = {}
+        params["extra_body"]["app"] = "Kortix.com"
+        logger.debug(f"Added OpenRouter app parameter: Kortix.com for model {actual_litellm_model_id}")
     
     # Add tools if provided
     if tools:

@@ -15,8 +15,9 @@ import {
   ChatInputSection,
   ChatDrawers,
   type ToolMessagePair,
+  CHAT_INPUT_SECTION_HEIGHT,
 } from '@/components/chat';
-import { ThreadHeader, ThreadActionsMenu } from '@/components/threads';
+import { ThreadHeader } from '@/components/threads';
 import { ReluComputer } from '@/components/relu-computer';
 import { useComputerStore } from '@/stores/relu-computer-store';
 import { useChatCommons, type UseChatReturn, useDeleteThread, useShareThread } from '@/hooks';
@@ -187,42 +188,6 @@ const DynamicIslandRefresh = React.memo(function DynamicIslandRefresh({
           </Animated.View>
         </View>
       )}
-
-      {Platform.OS === 'android' && (
-        <View
-          className="absolute w-full items-center"
-          style={{
-            top: insets.top + 10,
-            zIndex: 9999,
-            elevation: 999,
-          }}
-          pointerEvents="none">
-          <Animated.View
-            style={[
-              animatedContainerStyle,
-              {
-                width: 150,
-                backgroundColor: '#000000',
-                justifyContent: 'center',
-                alignItems: 'center',
-              },
-            ]}>
-            <Animated.View style={contentStyle} className="flex-row items-center gap-2">
-              <LottieView
-                ref={lottieRef}
-                source={require('@/components/animations/loading.json')}
-                style={{ width: 20, height: 20 }}
-                autoPlay={false}
-                loop
-                speed={1.5}
-              />
-              <Text style={{ color: 'white', fontSize: 13, fontFamily: 'Roobert-Medium' }}>
-                Refreshing
-              </Text>
-            </Animated.View>
-          </Animated.View>
-        </View>
-      )}
     </>
   );
 });
@@ -244,7 +209,6 @@ export function ThreadPage({
   const isDark = colorScheme === 'dark';
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const [isThreadActionsVisible, setIsThreadActionsVisible] = React.useState(false);
   const [selectedToolData, setSelectedToolData] = React.useState<{
     toolMessages: ToolMessagePair[];
     initialIndex: number;
@@ -303,6 +267,9 @@ export function ThreadPage({
   const isLoading = chat.isLoading;
   const hasMessages = messages.length > 0 || streamingContent.length > 0;
   const scrollViewRef = React.useRef<ScrollView>(null);
+  
+  // Calculate bottom padding for content to account for input section + safe area
+  const contentBottomPadding = CHAT_INPUT_SECTION_HEIGHT.THREAD_PAGE + insets.bottom;
   const [isUserScrolling, setIsUserScrolling] = React.useState(false);
   const [showScrollToBottom, setShowScrollToBottom] = React.useState(false);
   const [isRefreshing, setIsRefreshing] = React.useState(false);
@@ -452,9 +419,12 @@ export function ThreadPage({
               alignItems: 'center',
               paddingHorizontal: 32,
               paddingTop: Math.max(insets.top, 16) + 80,
-              paddingBottom: 200,
+              paddingBottom: contentBottomPadding,
             }}
             keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
+            bounces={Platform.OS === 'ios'}
+            overScrollMode="never"
             refreshControl={
               <RefreshControl
                 refreshing={isRefreshing}
@@ -485,18 +455,20 @@ export function ThreadPage({
             contentContainerStyle={{
               flexGrow: 1,
               paddingTop: Math.max(insets.top, 16) + 80,
-              paddingBottom: 200,
+              paddingBottom: contentBottomPadding,
               paddingHorizontal: 16,
             }}
             keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
             scrollEventThrottle={16}
-            bounces={true}
-            alwaysBounceVertical={true}
+            bounces={Platform.OS === 'ios'}
+            alwaysBounceVertical={Platform.OS === 'ios'}
+            overScrollMode="never"
             onScroll={handleScroll}
-            maintainVisibleContentPosition={{
+            maintainVisibleContentPosition={Platform.OS === 'ios' ? {
               minIndexForVisible: 0,
               autoscrollToTopThreshold: 100,
-            }}
+            } : undefined}
             removeClippedSubviews={false}
             scrollsToTop={true}
             refreshControl={
@@ -534,7 +506,8 @@ export function ThreadPage({
           onPress={scrollToBottom}
           className="absolute right-6 h-12 w-12 items-center justify-center rounded-full border border-border bg-card active:opacity-80"
           style={{
-            bottom: 200,
+            bottom: contentBottomPadding - 44,
+            zIndex: 150,
           }}>
           <Icon as={ArrowDown} size={20} className="text-foreground" strokeWidth={2} />
         </Pressable>
@@ -551,9 +524,30 @@ export function ThreadPage({
             console.error('Failed to update thread title:', error);
           }
         }}
-        onMenuPress={onMenuPress}
         onBackPress={chat.showModeThreadList}
-        onActionsPress={() => setIsThreadActionsVisible(true)}
+        onShare={async () => {
+          if (!chat.activeThread?.id) return;
+          try {
+            await shareThreadMutation.mutateAsync(chat.activeThread.id);
+          } catch (error) {
+            console.error('Failed to share thread:', error);
+          }
+        }}
+        onFiles={() => {
+          openFileBrowser();
+        }}
+        onDelete={async () => {
+          if (!chat.activeThread?.id) return;
+          try {
+            await deleteThreadMutation.mutateAsync(chat.activeThread.id);
+            chat.startNewChat();
+            if (router.canGoBack()) {
+              router.back();
+            }
+          } catch (error) {
+            console.error('Failed to delete thread:', error);
+          }
+        }}
       />
 
       <ChatInputSection
@@ -677,60 +671,6 @@ export function ThreadPage({
         onChooseFiles={chat.handleChooseFiles}
       />
 
-      <ThreadActionsMenu
-        visible={isThreadActionsVisible}
-        onClose={() => setIsThreadActionsVisible(false)}
-        onShare={async () => {
-          if (!chat.activeThread?.id) return;
-
-          try {
-            await shareThreadMutation.mutateAsync(chat.activeThread.id);
-            setIsThreadActionsVisible(false);
-          } catch (error) {
-            console.error('Failed to share thread:', error);
-          }
-        }}
-        onFiles={() => {
-          setIsThreadActionsVisible(false);
-          openFileBrowser();
-        }}
-        onDelete={() => {
-          if (!chat.activeThread?.id) return;
-
-          const threadTitle = chat.activeThread?.title || 'this thread';
-
-          Alert.alert(
-            'Delete Thread',
-            `Are you sure you want to delete "${threadTitle}"? This action cannot be undone.`,
-            [
-              {
-                text: 'Cancel',
-                style: 'cancel',
-              },
-              {
-                text: 'Delete',
-                style: 'destructive',
-                onPress: async () => {
-                  setIsThreadActionsVisible(false);
-
-                  if (!chat.activeThread?.id) return;
-
-                  try {
-                    await deleteThreadMutation.mutateAsync(chat.activeThread.id);
-                    chat.startNewChat();
-                    if (router.canGoBack()) {
-                      router.back();
-                    }
-                  } catch (error) {
-                    console.error('Failed to delete thread:', error);
-                    Alert.alert('Error', 'Failed to delete thread. Please try again.');
-                  }
-                },
-              },
-            ]
-          );
-        }}
-      />
 
       {isReluComputerOpen && (
         <ReluComputer

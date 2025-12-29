@@ -1,7 +1,9 @@
 'use client';
 import { siteConfig } from '@/lib/site-config';
-import { AnimatedBg } from '@/components/ui/animated-bg';
+import { Badge } from '@/components/ui/badge';
 import { useIsMobile } from '@/hooks/utils';
+import dynamic from 'next/dynamic';
+import { useHolidayPromoCountdown } from '@/hooks/utils/use-holiday-promo';
 import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -18,7 +20,24 @@ import {
 } from '@/components/ui/dialog';
 import { isLocalMode } from '@/lib/config';
 import { toast } from 'sonner';
-import { ChatInput, ChatInputHandles } from '@/components/thread/chat-input/chat-input';
+import type { ChatInputHandles } from '@/components/thread/chat-input/chat-input';
+
+// Use next/dynamic with ssr:false to prevent prefetching heavy chunks
+const AnimatedBg = dynamic(
+    () => import('@/components/ui/animated-bg').then(mod => mod.AnimatedBg),
+    { ssr: false }
+);
+
+// Use next/dynamic with ssr:false to PREVENT prefetching the 1.4MB chunk
+const ChatInput = dynamic(
+    () => import('@/components/thread/chat-input/chat-input').then(mod => mod.ChatInput),
+    { 
+        ssr: false,
+        loading: () => (
+            <div className="w-full h-[140px] rounded-2xl bg-card/50 border border-border/50 animate-pulse" />
+        )
+    }
+);
 import { normalizeFilenameToNFC } from '@/lib/utils/unicode';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { agentKeys } from '@/hooks/agents/keys';
@@ -53,6 +72,7 @@ export function HeroSection() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [inputValue, setInputValue] = useState('');
     const [memoryEnabled, setMemoryEnabled] = useState(true);
+    const holidayPromo = useHolidayPromoCountdown();
 
     const {
         selectedAgentId,
@@ -367,8 +387,27 @@ export function HeroSection() {
 
                 <div className="relative z-10 pt-20 sm:pt-24 md:pt-32 mx-auto h-full w-full max-w-6xl flex flex-col items-center justify-center min-h-[60vh] sm:min-h-0">
 
-                    <div className="flex flex-col items-center justify-center gap-3 sm:gap-4 pt-12 sm:pt-20 max-w-4xl mx-auto pb-6 sm:pb-7 animate-in fade-in-0 slide-in-from-bottom-4 duration-500 fill-mode-both">
-                        <DynamicGreeting className="text-2xl sm:text-3xl md:text-3xl lg:text-4xl font-medium text-balance text-center px-4 sm:px-2" />
+                    {holidayPromo.isActive && (
+                        <div className="w-full max-w-4xl mx-auto px-4 sm:px-0 mb-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500 fill-mode-both">
+                            <div className="flex flex-col items-center gap-2 text-center">
+                                <div className="flex flex-wrap items-center justify-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                                    <Badge className="rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em]">
+                                        {tBilling('holidayPromo.badge')}
+                                    </Badge>
+                                    <span>{tBilling('holidayPromo.countdown', { time: holidayPromo.timeLabel })}</span>
+                                </div>
+                                <p className="text-sm font-medium text-muted-foreground tracking-tight">
+                                    {tBilling('holidayPromo.headerLine', {
+                                        code: holidayPromo.promoCode,
+                                        discount: tBilling('holidayPromo.discount'),
+                                    })}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="flex flex-col items-center justify-center gap-3 sm:gap-4 pt-12 sm:pt-20 max-w-4xl mx-auto pb-6 sm:pb-7">
+                        <DynamicGreeting className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-medium text-balance text-center px-4 sm:px-2" />
                     </div>
 
                     <div className="flex flex-col items-center w-full max-w-3xl mx-auto gap-2 flex-wrap justify-center px-4 sm:px-0 animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-100 fill-mode-both">

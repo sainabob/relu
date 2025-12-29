@@ -16,7 +16,7 @@ import {
     isPdfExtension,
 } from '@/lib/utils/file-types';
 import { AttachmentGroup } from './attachment-group';
-import { HtmlRenderer, CsvRenderer, XlsxRenderer, PdfRenderer, JsonRenderer } from '@/components/file-renderers';
+import { HtmlRenderer, SpreadsheetViewer, PdfRenderer, JsonRenderer } from '@/components/file-renderers';
 import { UnifiedMarkdown } from '@/components/markdown';
 import {
     DropdownMenu,
@@ -33,6 +33,7 @@ import { PresentationSlidePreview } from '@/components/thread/tool-views/present
 import { usePresentationViewerStore } from '@/stores/presentation-viewer-store';
 import { constructHtmlPreviewUrl } from '@/lib/utils/url';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { IframePreview } from './iframe-preview';
 
 // Define basic file types
 export type FileType =
@@ -576,8 +577,8 @@ export function FileAttachment({
                 }}
                 title={uploadStatus === 'uploading' ? 'Uploading...' : filename}
             >
-                {/* Upload progress overlay */}
-                {uploadStatus === 'uploading' && (
+                {/* Upload progress overlay - show while uploading, or pending when upload will happen (sandboxId exists) */}
+                {(uploadStatus === 'uploading' || (uploadStatus === 'pending' && sandboxId)) && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/40 z-20">
                         <Loader2 className="h-5 w-5 text-white animate-spin" />
                     </div>
@@ -601,7 +602,7 @@ export function FileAttachment({
                 )}
                 
                 <img
-                    src={sandboxId && session?.access_token ? imageUrl : (fileUrl || '')}
+                    src={localPreviewUrl || (sandboxId && session?.access_token ? imageUrl : (fileUrl || ''))}
                     alt={filename}
                     className={cn(
                         // Preserve natural aspect ratio - let image dictate dimensions
@@ -718,30 +719,18 @@ export function FileAttachment({
                                 ) : null;
                             })()}
                             
-                            {/* XLSX Preview */}
-                            {isXlsx && (() => {
-                                const xlsxUrlForRender = localPreviewUrl || (sandboxId ? (xlsxBlobUrl ?? null) : fileUrl);
-                                return xlsxUrlForRender ? (
-                                    <XlsxRenderer
-                                        filePath={xlsxUrlForRender}
-                                        fileName={filename}
-                                        className="h-full w-full"
-                                        project={project}
-                                    />
-                                ) : null;
-                            })()}
-                            
-                            {/* CSV Preview - compact mode */}
-                            {isCsv && fileContent && (
-                                <CsvRenderer
-                                    content={fileContent}
+                            {(isCsv || isXlsx) && (
+                                <SpreadsheetViewer
+                                    filePath={filepath}
+                                    fileName={filename}
+                                    sandboxId={sandboxId}
+                                    project={project}
                                     className="h-full w-full"
                                     compact={true}
-                                    containerHeight={300}
+                                    showToolbar={false}
+                                    allowEditing={false}
                                 />
                             )}
-                            
-                            {/* Markdown Preview */}
                             {(extension === 'md' || extension === 'markdown') && fileContent && (
                                 <div className="h-full w-full overflow-auto p-4">
                                     <UnifiedMarkdown content={fileContent} />
@@ -959,7 +948,7 @@ export function FileAttachment({
                     "h-5 w-5",
                     uploadStatus === 'error' ? "text-red-500" : "text-black/60 dark:text-white/60"
                 )} />
-                {uploadStatus === 'uploading' && (
+                {(uploadStatus === 'uploading' || (uploadStatus === 'pending' && sandboxId)) && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/40">
                         <Loader2 className="h-4 w-4 text-white animate-spin" />
                     </div>
@@ -1020,6 +1009,11 @@ interface FileAttachmentGridProps {
     alignRight?: boolean;
 }
 
+// Helper function to check if a string is a URL
+function isUrl(str: string): boolean {
+    return str.startsWith('http://') || str.startsWith('https://');
+}
+
 export function FileAttachmentGrid({
     attachments,
     onFileClick,
@@ -1033,6 +1027,10 @@ export function FileAttachmentGrid({
 }: FileAttachmentGridProps) {
     if (!attachments || attachments.length === 0) return null;
 
+    // Separate URLs from file paths
+    const urls = attachments.filter(isUrl);
+    const filePaths = attachments.filter(att => !isUrl(att));
+
     // For standalone rendering, always expand previews to show content
     // Always show previews for HTML files
     const shouldCollapse = false; // Always show previews like in CompleteToolView
@@ -1042,7 +1040,7 @@ export function FileAttachmentGrid({
     const getGridImageHeight = () => {
         if (!standalone) return 200; // Default for non-standalone
         
-        const fileCount = attachments.length;
+        const fileCount = filePaths.length;
         if (fileCount === 1) return 600; // Large for single file - preserves aspect ratio better
         if (fileCount === 2) return 400; // Medium for 2 files
         if (fileCount <= 4) return 300; // Smaller for 3-4 files
@@ -1050,19 +1048,90 @@ export function FileAttachmentGrid({
     };
 
     const content = (
-        <AttachmentGroup
-            files={attachments}
-            onFileClick={onFileClick}
-            className={className}
-            sandboxId={sandboxId}
-            showPreviews={showPreviews}
-            layout="grid"
-            gridImageHeight={getGridImageHeight()}
-            collapsed={shouldCollapse}
-            project={project}
-            standalone={standalone}
-            alignRight={alignRight}
-        />
+        <div className="space-y-4">
+            {/* Render URL previews first - using same styling as HTML files */}
+            {urls.length > 0 && (
+                <div className="space-y-3">
+                    {urls.map((url, index) => {
+                        // Extract domain for header
+                        let domain = url;
+                        try {
+                            const urlObj = new URL(url);
+                            domain = urlObj.hostname;
+                        } catch {
+                            // Keep original URL if parsing fails
+                        }
+
+                        return (
+                            <div
+                                key={`url-${index}`}
+                                className={cn(
+                                    "group relative w-full",
+                                    "rounded-xl border bg-card overflow-hidden pt-10",
+                                    standalone ? "min-h-[300px] h-[400px]" : "!min-h-[200px] sm:min-h-0 sm:h-[400px] max-h-[600px] sm:!min-w-[300px]"
+                                )}
+                                style={{
+                                    gridColumn: "1 / -1",
+                                    width: "100%",
+                                    minWidth: 0
+                                }}
+                            >
+                                {/* Content area */}
+                                <div
+                                    className="h-full w-full relative"
+                                    style={{
+                                        minWidth: 0,
+                                        width: '100%',
+                                        containIntrinsicSize: '100% 500px',
+                                        contain: 'layout size'
+                                    }}
+                                >
+                                    <IframePreview
+                                        url={url}
+                                        title={`Preview: ${domain}`}
+                                    />
+                                </div>
+
+                                {/* Header with domain - identical to HTML file header */}
+                                <div className="absolute top-0 left-0 right-0 bg-accent p-2 h-[40px] z-10 flex items-center justify-between">
+                                    <div className="flex items-center gap-2 min-w-0">
+                                        <div className="text-sm font-medium truncate" title={url}>
+                                            {domain}
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <button
+                                            onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}
+                                            className="cursor-pointer p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10"
+                                            title="Open in new tab"
+                                        >
+                                            <ExternalLink size={14} />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+            
+            {/* Render file attachments */}
+            {filePaths.length > 0 && (
+                <AttachmentGroup
+                    files={filePaths}
+                    onFileClick={onFileClick}
+                    className={className}
+                    sandboxId={sandboxId}
+                    showPreviews={showPreviews}
+                    layout="grid"
+                    gridImageHeight={getGridImageHeight()}
+                    collapsed={shouldCollapse}
+                    project={project}
+                    standalone={standalone}
+                    alignRight={alignRight}
+                />
+            )}
+        </div>
     );
 
     // Wrap with alignment container if alignRight is true
