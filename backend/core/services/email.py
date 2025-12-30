@@ -191,7 +191,7 @@ class EmailService:
 
     <p>Hi {user_name},</p>
 
-    <p><em><strong>Welcome to <a href="https://www.relu.work/">Relu.com</a> — we're excited to have you on board!</strong></em></p>
+    <p><em><strong>Welcome to <a href="https://www.relu.work/">Relu.work</a> — we're excited to have you on board!</strong></em></p>
 
     <p>To get started, we'd like to get to know you better: fill out this short <a href="https://docs.google.com/forms/d/e/1FAIpQLSef1EHuqmIh_iQz-kwhjnzSC3Ml-V_5wIySDpMoMU9W_j24JQ/viewform">form</a>!</p>
 

@@ -564,12 +564,12 @@
   "beta": {
     "title": "测试功能",
     "webSupportTitle": "网页版完全支持",
-    "webSupportDescription": "可在 Relu.com 使用。即将登陆移动端—移动端仍在开发中。",
-    "visitRelu": "访问 Relu.com",
+    "webSupportDescription": "可在 Relu.work 使用。即将登陆移动端—移动端仍在开发中。",
+    "visitRelu": "访问 Relu.work",
     "advancedFeatures": "高级功能",
     "mobileBeta": "移动端测试版",
     "pleaseNote": "注意事项",
-    "mobileWarning": "移动端仍在开发中，可能存在问题。为了获得最佳体验，请使用 Relu.com。"
+    "mobileWarning": "移动端仍在开发中，可能存在问题。为了获得最佳体验，请使用 Relu.work。"
   },
   "accountDeletion": {
     "title": "删除账户",

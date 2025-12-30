@@ -31,7 +31,7 @@ if (process.platform === 'darwin') {
   app.setName('Relu');
 }
 
-// Register as default protocol handler for kortix://
+// Register as default protocol handler for relu://
 // This allows magic links to open in the desktop app
 if (process.defaultApp) {
   // Development mode - register with path to electron executable
@@ -54,7 +54,7 @@ function handleDeepLink(url) {
     return;
   }
   
-  // Convert kortix://auth/callback?code=xxx to https://relu.work/auth/callback?code=xxx
+  // Convert relu://auth/callback?code=xxx to https://relu.work/auth/callback?code=xxx
   const deepLinkPath = url.replace(`${PROTOCOL_SCHEME}://`, '');
   const webUrl = normalizedUrl.endsWith('/') 
     ? normalizedUrl + deepLinkPath 

@@ -5,7 +5,7 @@ Minimal Electron wrapper for the Relu web application with deep linking support.
 ## Features
 
 - Native macOS/Windows/Linux desktop app
-- Deep linking for magic link authentication (`kortix://` protocol)
+- Deep linking for magic link authentication (`relu://` protocol)
 - Integrated navigation controls (back, forward, reload, copy URL)
 - Keyboard shortcuts (Cmd+Left/Right, Cmd+R, Cmd+Shift+C)
 
@@ -51,10 +51,10 @@ For end users, see [INSTALLATION.md](./INSTALLATION.md) for detailed installatio
 
 ## Deep Linking
 
-The app registers the `kortix://` protocol for magic link authentication:
+The app registers the `relu://` protocol for magic link authentication:
 
 1. User enters email in desktop app
-2. Magic link email contains `kortix://auth/callback?code=xxx`
+2. Magic link email contains `relu://auth/callback?code=xxx`
 3. User clicks link in email
 4. Operating system opens Relu Desktop app
 5. App handles auth callback and logs user in

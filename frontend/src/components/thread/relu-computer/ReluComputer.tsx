@@ -244,7 +244,7 @@ export const ReluComputer = memo(function ReluComputer({
 
   const newSnapshots = useMemo(() => {
     // #region agent log - track toolCalls prop
-    fetch('http://127.0.0.1:7242/ingest/8574b837-03d2-4ece-8422-988bb17343e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'KortixComputer.tsx:245',message:'toolCalls prop changed',data:{toolCallsLength:toolCalls.length,isOpen,toolCalls:toolCalls.map(tc=>({functionName:tc.toolCall?.function_name,hasResult:!!tc.toolResult}))},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'TOOL_CALLS_PROP'})}).catch(()=>{});
+    fetch('http://127.0.0.1:7242/ingest/8574b837-03d2-4ece-8422-988bb17343e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ReluComputer.tsx:245',message:'toolCalls prop changed',data:{toolCallsLength:toolCalls.length,isOpen,toolCalls:toolCalls.map(tc=>({functionName:tc.toolCall?.function_name,hasResult:!!tc.toolResult}))},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'TOOL_CALLS_PROP'})}).catch(()=>{});
     // #endregion
     
     return toolCalls.map((toolCall, index) => ({
@@ -325,7 +325,7 @@ export const ReluComputer = memo(function ReluComputer({
 
     // #region agent log - track current tool call state
     if (isOpen) {
-      fetch('http://127.0.0.1:7242/ingest/8574b837-03d2-4ece-8422-988bb17343e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'KortixComputer.tsx:310',message:'currentToolCall computed',data:{safeIndex,internalIndex,totalCalls:total,toolCallSnapshotsLength:toolCallSnapshots.length,hasCurrentToolCall:!!toolCall,currentToolCallFunctionName:toolCall?.toolCall?.function_name,currentIndex},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'CURRENT_TOOL_CALL'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7242/ingest/8574b837-03d2-4ece-8422-988bb17343e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ReluComputer.tsx:310',message:'currentToolCall computed',data:{safeIndex,internalIndex,totalCalls:total,toolCallSnapshotsLength:toolCallSnapshots.length,hasCurrentToolCall:!!toolCall,currentToolCallFunctionName:toolCall?.toolCall?.function_name,currentIndex},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'CURRENT_TOOL_CALL'})}).catch(()=>{});
     }
     // #endregion
 

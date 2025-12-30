@@ -2,7 +2,7 @@ import { Stack, useRouter, Redirect } from 'expo-router';
 import { useColorScheme } from 'nativewind';
 import { useAuthContext } from '@/contexts';
 import { View } from 'react-native';
-import { KortixLoader } from '@/components/ui';
+import { ReluLoader } from '@/components/ui';
 
 /**
  * Auth Layout
@@ -26,7 +26,7 @@ export default function AuthLayout() {
           justifyContent: 'center',
         }}
       >
-        <KortixLoader size="xlarge" />
+        <ReluLoader size="xlarge" />
       </View>
     );
   }

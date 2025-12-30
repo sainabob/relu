@@ -140,7 +140,7 @@ export const ThreadLayout = memo(function ThreadLayout({
   }, [shouldOpenPanel, isSidePanelOpen, onToggleSidePanel, clearShouldOpenPanel]);
 
   // Get selected file path from store
-  const selectedFilePath = useKortixComputerStore((state) => state.selectedFilePath);
+  const selectedFilePath = useReluComputerStore((state) => state.selectedFilePath);
   
   const SUITE_MODE_FILE_EXTENSIONS = [
     'kanvax', 

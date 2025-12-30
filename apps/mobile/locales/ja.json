@@ -557,12 +557,12 @@
   "beta": {
     "title": "ベータ機能",
     "webSupportTitle": "Web版で完全サポート",
-    "webSupportDescription": "Relu.comで利用可能。モバイル版は近日公開予定—こちらではまだ開発中です。",
-    "visitRelu": "Relu.comを訪問",
+    "webSupportDescription": "Relu.workで利用可能。モバイル版は近日公開予定—こちらではまだ開発中です。",
+    "visitRelu": "Relu.workを訪問",
     "advancedFeatures": "高度な機能",
     "mobileBeta": "モバイルベータ",
     "pleaseNote": "注意事項",
-    "mobileWarning": "モバイル版は開発中で問題が発生する可能性があります。最良の体験のため、Relu.comをご利用ください。"
+    "mobileWarning": "モバイル版は開発中で問題が発生する可能性があります。最良の体験のため、Relu.workをご利用ください。"
   },
   "accountDeletion": {
     "title": "アカウント削除",

@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text } from '@/components/ui/text';
 import { Icon } from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
-import { KortixLoader } from '@/components/ui';
+import { ReluLoader } from '@/components/ui';
 import { Mail } from 'lucide-react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import Svg, { Path } from 'react-native-svg';
@@ -244,7 +244,7 @@ export default function AuthScreen() {
       <>
         <Stack.Screen options={{ headerShown: false, gestureEnabled: false }} />
         <View className="flex-1 bg-background items-center justify-center">
-          <KortixLoader size="xlarge" />
+          <ReluLoader size="xlarge" />
         </View>
       </>
     );

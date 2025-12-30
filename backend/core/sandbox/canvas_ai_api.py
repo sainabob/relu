@@ -189,7 +189,7 @@ async def process_with_gemini(
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
         "HTTP-Referer": "https://kortix.ai",
-        "X-Title": "Kortix Canvas AI"
+        "X-Title": "Relu Canvas AI"
     }
     
     payload = {
@@ -212,7 +212,7 @@ async def process_with_gemini(
             }
         ],
         "modalities": ["image", "text"],
-        "app": "Kortix.com"
+        "app": "Relu.work"
     }
     
     async with httpx.AsyncClient(timeout=120.0) as client:
@@ -519,7 +519,7 @@ The result should be a high-quality merged image."""
             "Authorization": f"Bearer {OPENROUTER_API_KEY}",
             "Content-Type": "application/json",
             "HTTP-Referer": "https://kortix.ai",
-            "X-Title": "Kortix Canvas AI"
+            "X-Title": "Relu Canvas AI"
         }
         
         # Build content with text first, then all images
@@ -534,7 +534,7 @@ The result should be a high-quality merged image."""
                 }
             ],
             "modalities": ["image", "text"],
-            "app": "Kortix.com"
+            "app": "Relu.work"
         }
         
         async with httpx.AsyncClient(timeout=180.0) as client:  # Longer timeout for merge

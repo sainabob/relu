@@ -732,12 +732,12 @@
   "beta": {
     "title": "Beta Features",
     "webSupportTitle": "Fully Supported on Web",
-    "webSupportDescription": "Available on Relu.com. Coming to mobile soon—still work-in-progress here.",
-    "visitRelu": "Visit Relu.com",
+    "webSupportDescription": "Available on Relu.work. Coming to mobile soon—still work-in-progress here.",
+    "visitRelu": "Visit Relu.work",
     "advancedFeatures": "Advanced Features",
     "mobileBeta": "Mobile Beta",
     "pleaseNote": "Please Note",
-    "mobileWarning": "Work-in-progress on mobile and may have issues. For the best experience, use Relu.com."
+    "mobileWarning": "Work-in-progress on mobile and may have issues. For the best experience, use Relu.work."
   },
   "accountDeletion": {
     "title": "Delete Account",

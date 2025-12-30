@@ -425,7 +425,7 @@ class SandboxFilesTool(SandboxToolsBase):
                     api_base="https://openrouter.ai/api/v1",
                     temperature=0.0,
                     timeout=30.0,
-                    extra_body={"app": "Kortix.com"}
+                    extra_body={"app": "Relu.work"}
                 )
             else:
                 error_msg = "No Morph or OpenRouter API key found, cannot perform AI edit."
