@@ -114,7 +114,7 @@ const initialState = {
   unsavedFileState: {} as Record<string, boolean>,
 };
 
-export const useComputerStore = create<ReluComputerState>()(
+export const useReluComputerStore = create<ReluComputerState>()(
   devtools(
     (set, get) => ({
       ...initialState,
@@ -337,36 +337,36 @@ export const useComputerStore = create<ReluComputerState>()(
 
 // Selector hooks for common use cases
 export const useReluComputerActiveView = () => 
-  useComputerStore((state) => state.activeView);
+  useReluComputerStore((state) => state.activeView);
 
 // Individual selectors for files state (stable, primitive values)
 export const useReluComputerFilesSubView = () =>
-  useComputerStore((state) => state.filesSubView);
+  useReluComputerStore((state) => state.filesSubView);
 
 export const useReluComputerCurrentPath = () =>
-  useComputerStore((state) => state.currentPath);
+  useReluComputerStore((state) => state.currentPath);
 
 export const useReluComputerSelectedFilePath = () =>
-  useComputerStore((state) => state.selectedFilePath);
+  useReluComputerStore((state) => state.selectedFilePath);
 
 export const useReluComputerFilePathList = () =>
-  useComputerStore((state) => state.filePathList);
+  useReluComputerStore((state) => state.filePathList);
 
 export const useReluComputerCurrentFileIndex = () =>
-  useComputerStore((state) => state.currentFileIndex);
+  useReluComputerStore((state) => state.currentFileIndex);
 
 // Legacy combined selector (for backward compatibility) - use individual selectors in components
 export const useReluComputerFilesState = () => ({
-  filesSubView: useComputerStore((state) => state.filesSubView),
-  currentPath: useComputerStore((state) => state.currentPath),
-  selectedFilePath: useComputerStore((state) => state.selectedFilePath),
-  filePathList: useComputerStore((state) => state.filePathList),
-  currentFileIndex: useComputerStore((state) => state.currentFileIndex),
+  filesSubView: useReluComputerStore((state) => state.filesSubView),
+  currentPath: useReluComputerStore((state) => state.currentPath),
+  selectedFilePath: useReluComputerStore((state) => state.selectedFilePath),
+  filePathList: useReluComputerStore((state) => state.filePathList),
+  currentFileIndex: useReluComputerStore((state) => state.currentFileIndex),
 });
 
 // Actions are stable references (functions don't change)
 export const useReluComputerActions = () =>
-  useComputerStore((state) => ({
+  useReluComputerStore((state) => ({
     setActiveView: state.setActiveView,
     openFile: state.openFile,
     goBackToBrowser: state.goBackToBrowser,
@@ -382,15 +382,15 @@ export const useReluComputerActions = () =>
 
 // Individual selectors for pending tool navigation (stable primitives)
 export const useReluComputerPendingToolNavIndex = () =>
-  useComputerStore((state) => state.pendingToolNavIndex);
+  useReluComputerStore((state) => state.pendingToolNavIndex);
 
 export const useReluComputerClearPendingToolNav = () =>
-  useComputerStore((state) => state.clearPendingToolNav);
+  useReluComputerStore((state) => state.clearPendingToolNav);
 
 // Side panel state selectors
 export const useIsSidePanelOpen = () =>
-  useComputerStore((state) => state.isSidePanelOpen);
+  useReluComputerStore((state) => state.isSidePanelOpen);
 
 export const useSetIsSidePanelOpen = () =>
-  useComputerStore((state) => state.setIsSidePanelOpen);
+  useReluComputerStore((state) => state.setIsSidePanelOpen);
 
