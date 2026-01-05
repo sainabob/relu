@@ -244,13 +244,6 @@ export const ReluComputer = memo(function ReluComputer({
   }, [isMaximized]);
 
   const newSnapshots = useMemo(() => {
-<<<<<<<< HEAD:frontend/src/components/thread/relu-computer/ReluComputer.tsx
-    // #region agent log - track toolCalls prop
-    fetch('http://127.0.0.1:7242/ingest/8574b837-03d2-4ece-8422-988bb17343e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ReluComputer.tsx:245',message:'toolCalls prop changed',data:{toolCallsLength:toolCalls.length,isOpen,toolCalls:toolCalls.map(tc=>({functionName:tc.toolCall?.function_name,hasResult:!!tc.toolResult}))},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'TOOL_CALLS_PROP'})}).catch(()=>{});
-    // #endregion
-    
-========
->>>>>>>> e7b931586d13db02008d89b285ef110842d2dfa2:apps/frontend/src/components/thread/kortix-computer/KortixComputer.tsx
     return toolCalls.map((toolCall, index) => ({
       id: `${index}-${toolCall.assistantTimestamp || Date.now()}`,
       toolCall,
@@ -327,15 +320,6 @@ export const ReluComputer = memo(function ReluComputer({
     );
     const completedCount = completed.length;
 
-<<<<<<<< HEAD:frontend/src/components/thread/relu-computer/ReluComputer.tsx
-    // #region agent log - track current tool call state
-    if (isOpen) {
-      fetch('http://127.0.0.1:7242/ingest/8574b837-03d2-4ece-8422-988bb17343e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ReluComputer.tsx:310',message:'currentToolCall computed',data:{safeIndex,internalIndex,totalCalls:total,toolCallSnapshotsLength:toolCallSnapshots.length,hasCurrentToolCall:!!toolCall,currentToolCallFunctionName:toolCall?.toolCall?.function_name,currentIndex},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'CURRENT_TOOL_CALL'})}).catch(()=>{});
-    }
-    // #endregion
-
-========
->>>>>>>> e7b931586d13db02008d89b285ef110842d2dfa2:apps/frontend/src/components/thread/kortix-computer/KortixComputer.tsx
     return {
       safeInternalIndex: safeIndex,
       currentSnapshot: snapshot,
