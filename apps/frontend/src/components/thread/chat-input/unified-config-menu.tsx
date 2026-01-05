@@ -18,7 +18,8 @@ import {
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Search, Check, ChevronDown, Plus, Loader2, Plug, Brain, LibraryBig, Zap, Lock, Sparkles, ChevronLeft } from 'lucide-react';
+import { Search, Check, ChevronDown, Plus, Plug, Brain, LibraryBig, Zap, Lock, Sparkles, ChevronLeft } from 'lucide-react';
+import { KortixLoader } from '@/components/ui/kortix-loader';
 import { useAgents } from '@/hooks/agents/use-agents';
 import { Logo } from '@/components/sidebar/logo';
 import type { ModelOption } from '@/hooks/agents';
@@ -274,7 +275,7 @@ const LoggedInMenu: React.FC<UnifiedConfigMenuProps> = memo(function LoggedInMen
                             >
                                 {isFetching ? (
                                     <>
-                                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                        <KortixLoader size="small" className="mr-2" />
                                         Loading...
                                     </>
                                 ) : (
@@ -545,6 +546,9 @@ const LoggedInMenu: React.FC<UnifiedConfigMenuProps> = memo(function LoggedInMen
         ) : null
     ), [onAgentSelect, selectedAgentId, displayAgent?.agent_id, handleQuickAction]);
 
+    // Check if current agent is Kortix (used in multiple places)
+    const isKortixAgent = !displayAgent?.name || displayAgent?.name === 'Kortix';
+
     // Mobile Sheet Content
     const MobileSheetContent = useCallback(() => {
         if (mobileSection === 'agents') {
@@ -635,7 +639,7 @@ const LoggedInMenu: React.FC<UnifiedConfigMenuProps> = memo(function LoggedInMen
                 )}
             </div>
         );
-    }, [mobileSection, searchQuery, onAgentSelect, displayAgent, isLoading, placeholderSunaAgent, renderAgentIcon, selectedAgentId, AgentsList, CreateWorkerButton, ModeToggle, WorkerSettingsButtons]);
+    }, [mobileSection, searchQuery, onAgentSelect, displayAgent, isLoading, placeholderSunaAgent, renderAgentIcon, selectedAgentId, AgentsList, CreateWorkerButton, ModeToggle, WorkerSettingsButtons, isKortixAgent]);
 
     // Trigger button
     const TriggerButton = (

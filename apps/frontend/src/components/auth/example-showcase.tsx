@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import Image from 'next/image';
-import { Computer, CornerDownLeft, Paperclip, Mic, Zap, FolderOpen, Globe, CircleDashed, Presentation, BarChart3, FileText, Search, Image as ImageIcon, ChevronRight, File, Database } from 'lucide-react';
+import { Computer, CornerDownLeft, Paperclip, Mic, Zap, FolderOpen, Globe, Presentation, BarChart3, FileText, Search, Image as ImageIcon, ChevronRight, File, Database } from 'lucide-react';
+import { KortixLoader } from '@/components/ui/kortix-loader';
 import { motion } from 'framer-motion';
 import { Logo } from '@/components/sidebar/logo';
 
@@ -353,7 +354,7 @@ export function ExampleShowcase() {
                         <IconComponent className="h-2.5 w-2.5 text-muted-foreground flex-shrink-0" />
                         <span className="font-mono text-[9px] text-foreground">{step.title}</span>
                         {isCurrentStep && (
-                          <CircleDashed className="h-2.5 w-2.5 text-muted-foreground flex-shrink-0 animate-spin ml-0.5" />
+                          <KortixLoader size="small" className="ml-0.5" />
                         )}
                       </button>
                     </div>

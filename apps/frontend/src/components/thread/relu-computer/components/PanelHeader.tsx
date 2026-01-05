@@ -9,6 +9,7 @@ import { Logo } from '@/components/sidebar/logo';
 import { cn } from '@/lib/utils';
 import { ViewToggle } from './ViewToggle';
 import { ToolbarButtons } from './ToolbarButtons';
+import Image from 'next/image';
 
 function useBatteryStatus() {
   const [batteryInfo, setBatteryInfo] = useState<{ level: number; charging: boolean } | null>(null);
@@ -170,12 +171,12 @@ export const PanelHeader = memo(function PanelHeader({
           isMaximized={isMaximized}
         />
       </div>
-      <div 
-        onClick={() => onMaximize?.()} 
-        className="flex items-center justify-center gap-1.5 cursor-pointer select-none hover:opacity-80 transition-opacity"
+      <div
+        onClick={() => onMaximize?.()}
+        className="flex items-center justify-center cursor-pointer select-none hover:opacity-80 transition-opacity"
       >
         <div className="w-5 h-5 flex items-center justify-center">
-          <ReluLogo size={14}/>
+          <Logo size={14}/>
         </div>
         <h2 className="text-sm font-semibold text-foreground">
           {title}
