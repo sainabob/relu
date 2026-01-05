@@ -62,6 +62,10 @@ class Configuration:
     DISABLE_PRESENCE: bool = False  # Disable presence tracking entirely
     # ==================================
     
+    # ===== MEMORY CONFIGURATION =====
+    ENABLE_MEMORY: bool = False  # Disable memory feature entirely
+    # ================================
+    
     SYSTEM_ADMIN_USER_ID: Optional[str] = None  # User ID that owns shared/fallback agents
 
     # Subscription tier IDs - Production
@@ -293,6 +297,7 @@ class Configuration:
     VOYAGE_API_KEY: Optional[str] = None
     GROQ_API_KEY: Optional[str] = None
     OPENROUTER_API_KEY: Optional[str] = None
+    MINIMAX_API_KEY: Optional[str] = None
     XAI_API_KEY: Optional[str] = None
     MORPH_API_KEY: Optional[str] = None
     GEMINI_API_KEY: Optional[str] = None
@@ -320,7 +325,6 @@ class Configuration:
     REDIS_PASSWORD: Optional[str] = None
     REDIS_USERNAME: Optional[str] = None  # Required for Redis Cloud
     REDIS_MAX_CONNECTIONS: Optional[int] = 10  # Max connections per process (default 10)
-    REDIS_DRAMATIQ_MAX_CONNECTIONS: Optional[int] = 5  # Max connections for Dramatiq broker per process (default 5)
     REDIS_SSL: Optional[bool] = True
     
     # Daytona sandbox configuration (optional - sandbox features disabled if not configured)
@@ -369,8 +373,8 @@ class Configuration:
     STRIPE_PRODUCT_ID_STAGING: Optional[str] = 'prod_SCgIj3G7yPOAWY'
     
     # Sandbox configuration
-    SANDBOX_IMAGE_NAME = "kortix/suna:0.1.3.26"
-    SANDBOX_SNAPSHOT_NAME = "kortix/suna:0.1.3.26"
+    SANDBOX_IMAGE_NAME = "kortix/suna:0.1.3.28"
+    SANDBOX_SNAPSHOT_NAME = "kortix/suna:0.1.3.28"
     SANDBOX_ENTRYPOINT = "/usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.conf"
     
     # Debug configuration

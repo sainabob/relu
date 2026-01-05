@@ -14,6 +14,7 @@ from redis.backoff import ExponentialBackoff
 from redis.retry import Retry
 import os
 import threading
+import asyncio
 from typing import Optional, Dict, List, Any
 from dotenv import load_dotenv
 from core.utils.logger import logger
@@ -39,7 +40,8 @@ class RedisClient:
         """Get Redis configuration from environment."""
         load_dotenv()
         
-        redis_host = os.getenv("REDIS_HOST", "redis")
+        # Default to localhost for local dev, redis for Docker
+        redis_host = os.getenv("REDIS_HOST", "localhost")
         redis_port = int(os.getenv("REDIS_PORT", 6379))
         redis_password = os.getenv("REDIS_PASSWORD", "")
         redis_username = os.getenv("REDIS_USERNAME", None)
@@ -99,10 +101,17 @@ class RedisClient:
                 retry_on_error=[BusyLoadingError, RedisConnectionError]
             )
             
-            # Verify connection
-            await self._client.ping()
-            self._initialized = True
-            logger.info("Successfully connected to Redis")
+            # Verify connection with timeout
+            try:
+                await asyncio.wait_for(self._client.ping(), timeout=5.0)
+                self._initialized = True
+                logger.info("Successfully connected to Redis")
+            except asyncio.TimeoutError:
+                logger.error("Redis ping timed out after 5 seconds")
+                raise ConnectionError("Redis connection timeout - is Redis running?")
+            except Exception as e:
+                logger.error(f"Redis ping failed: {e}")
+                raise ConnectionError(f"Redis connection failed: {e}")
             
             return self._client
     
@@ -313,6 +322,30 @@ class RedisClient:
         client = await self.get_client()
         return await client.xtrim(stream_key, minid=minid, approximate=approximate)
     
+    # ========== Pub/Sub Operations ==========
+    
+    async def publish(self, channel: str, message: str) -> int:
+        """Publish message to Redis channel.
+        
+        Args:
+            channel: Channel name to publish to
+            message: Message string to publish
+            
+        Returns:
+            Number of subscribers that received the message
+        """
+        client = await self.get_client()
+        return await client.publish(channel, message)
+
+    async def get_pubsub(self):
+        """Get a new PubSub instance for subscribing to channels.
+        
+        Returns:
+            Redis PubSub object
+        """
+        client = await self.get_client()
+        return client.pubsub()
+    
     # ========== Control Signal Helpers ==========
     
     async def set_stop_signal(self, agent_run_id: str) -> None:
@@ -468,6 +501,15 @@ async def clear_stop_signal(agent_run_id: str):
     """Clear stop signal (compatibility function)."""
     await redis.clear_stop_signal(agent_run_id)
 
+# Pub/Sub operations
+async def publish(channel: str, message: str) -> int:
+    """Publish to channel (compatibility function)."""
+    return await redis.publish(channel, message)
+
+async def get_pubsub():
+    """Get PubSub instance (compatibility function)."""
+    return await redis.get_pubsub()
+
 
 # Export everything for backward compatibility
 __all__ = [
@@ -503,4 +545,6 @@ __all__ = [
     'set_stop_signal',
     'check_stop_signal',
     'clear_stop_signal',
+    'publish',
+    'get_pubsub',
 ]

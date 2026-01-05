@@ -121,6 +121,14 @@ class ThreadManager:
             if result.data and len(result.data) > 0 and 'message_id' in result.data[0]:
                 saved_message = result.data[0]
                 
+                # Invalidate message history cache when new message is added
+                if is_llm_message:
+                    try:
+                        from core.cache.runtime_cache import invalidate_message_history_cache
+                        await invalidate_message_history_cache(thread_id)
+                    except Exception as e:
+                        logger.debug(f"Failed to invalidate message history cache: {e}")
+                
                 if type == "llm_response_end" and isinstance(content, dict):
                     await self._handle_billing(thread_id, content, saved_message)
                 
@@ -241,6 +249,15 @@ class ThreadManager:
             lightweight: If True, fetch only recent messages with minimal payload (for bootstrap)
         """
         logger.debug(f"Getting messages for thread {thread_id} (lightweight={lightweight})")
+        
+        # Check cache first (only for non-lightweight mode)
+        if not lightweight:
+            from core.cache.runtime_cache import get_cached_message_history
+            cached = await get_cached_message_history(thread_id)
+            if cached is not None:
+                logger.debug(f"⏱️ [TIMING] Message history: cache hit ({len(cached)} messages)")
+                return cached
+        
         client = await self.db.client
 
         try:
@@ -326,11 +343,39 @@ class ThreadManager:
                         'message_id': item['message_id']
                     })
 
+            # Cache the result (only for non-lightweight mode)
+            if not lightweight:
+                from core.cache.runtime_cache import set_cached_message_history
+                await set_cached_message_history(thread_id, messages)
+
             return messages
 
         except Exception as e:
             logger.error(f"Failed to get messages for thread {thread_id}: {str(e)}", exc_info=True)
             return []
+    
+    async def thread_has_images(self, thread_id: str) -> bool:
+        """
+        Check if a thread has any image_context messages.
+        
+        Used to determine if the LLM model should be switched to one that supports
+        image input (e.g., Bedrock) instead of the default (e.g., MiniMax).
+        
+        Args:
+            thread_id: The thread ID to check
+            
+        Returns:
+            True if the thread has at least one image_context message, False otherwise
+        """
+        try:
+            client = await self.db.client
+            result = await client.table('messages').select('message_id').eq('thread_id', thread_id).eq('type', 'image_context').limit(1).execute()
+            has_images = bool(result.data and len(result.data) > 0)
+            logger.info(f"🖼️ Thread {thread_id} has_images check: {has_images}")
+            return has_images
+        except Exception as e:
+            logger.error(f"Error checking thread for images: {str(e)}")
+            return False
     
     async def run_thread(
         self,
@@ -412,6 +457,21 @@ class ThreadManager:
             ENABLE_CONTEXT_MANAGER = True   # Set to False to disable context compression
             ENABLE_PROMPT_CACHING = True    # Set to False to disable prompt caching
             # ==================================
+            
+            # Store registry model ID for lookups (before any switching)
+            registry_model_id = llm_model
+            
+            # ===== MODEL SWITCHING FOR IMAGES =====
+            # Check if thread has images - if yes, use the model's vision variant
+            # The registry handles switching to the appropriate LLM (e.g., Haiku Bedrock)
+            has_images = await self.thread_has_images(thread_id)
+            if has_images:
+                from core.ai_models import model_manager
+                # Get the vision-specific LLM model ID from registry
+                llm_model = model_manager.get_litellm_model_id(registry_model_id, has_images=True)
+                if llm_model != registry_model_id:
+                    logger.info(f"🖼️ Thread has images - switching model from {registry_model_id} to vision model: {llm_model}")
+            # ======================================
             
             # Fast path: Check stored token count + new message tokens
             skip_fetch = False
@@ -504,11 +564,21 @@ class ThreadManager:
                                         )
                                         logger.debug(f"First turn (DB fallback): counting {new_msg_tokens} tokens from DB query")
                             
-                            estimated_total = last_total_tokens + new_msg_tokens
+                            # Count memory context tokens (only on first turn - auto-continue already has it in last_total_tokens)
+                            memory_context_tokens = 0
+                            if not is_auto_continue and self._memory_context:
+                                memory_context_tokens = token_counter(
+                                    model=llm_model,
+                                    messages=[self._memory_context]
+                                )
+                                logger.debug(f"📝 Memory context: {memory_context_tokens} tokens")
+                            
+                            estimated_total = last_total_tokens + new_msg_tokens + memory_context_tokens
                             estimated_total_tokens = estimated_total  # Store for response processor
                             
                             # Calculate threshold (same logic as context_manager.py)
-                            context_window = model_manager.get_context_window(llm_model)
+                            # Use registry_model_id with has_images to get correct context window
+                            context_window = model_manager.get_context_window(registry_model_id, has_images=has_images)
                             
                             if context_window >= 1_000_000:
                                 max_tokens = context_window - 300_000
@@ -521,7 +591,10 @@ class ThreadManager:
                             else:
                                 max_tokens = int(context_window * 0.84)
                             
-                            logger.debug(f"⚡ Fast check: {last_total_tokens} + {new_msg_tokens} = {estimated_total} tokens (threshold: {max_tokens})")
+                            if memory_context_tokens > 0:
+                                logger.debug(f"⚡ Fast check: {last_total_tokens} + {new_msg_tokens} + {memory_context_tokens} (memory) = {estimated_total} tokens (threshold: {max_tokens})")
+                            else:
+                                logger.debug(f"⚡ Fast check: {last_total_tokens} + {new_msg_tokens} = {estimated_total} tokens (threshold: {max_tokens})")
                             
                             if estimated_total < max_tokens:
                                 logger.debug(f"✅ Under threshold, skipping compression")
@@ -662,11 +735,8 @@ class ThreadManager:
                 logger.warning(f"⚠️ PRE-SEND VALIDATION: Found pairing issues - attempting repair")
                 logger.warning(f"⚠️ Orphaned tool_results: {orphaned_ids}")
                 logger.warning(f"⚠️ Unanswered tool_calls: {unanswered_ids}")
-                
-                # Attempt to repair by fixing both directions
+
                 prepared_messages = context_manager.repair_tool_call_pairing(prepared_messages)
-                
-                # Re-validate after repair
                 is_valid_after, orphans_after, unanswered_after = context_manager.validate_tool_call_pairing(prepared_messages)
                 if not is_valid_after:
                     logger.error(f"🚨 CRITICAL: Could not repair message structure. Orphaned: {len(orphans_after)}, Unanswered: {len(unanswered_after)}")
@@ -676,8 +746,60 @@ class ThreadManager:
                 logger.debug(f"✅ Pre-send validation passed: all tool calls properly paired")
             logger.debug(f"⏱️ [TIMING] Pre-send validation: {(time.time() - validation_start) * 1000:.1f}ms")
             
+            actual_tokens = token_counter(model=llm_model, messages=prepared_messages)
+            if estimated_total_tokens is not None:
+                token_diff = actual_tokens - estimated_total_tokens
+                diff_pct = (token_diff / estimated_total_tokens * 100) if estimated_total_tokens > 0 else 0
+                logger.info(f"📤 PRE-SEND: {len(prepared_messages)} messages, {actual_tokens} tokens (fast check: {estimated_total_tokens}, diff: {token_diff:+d} / {diff_pct:+.1f}%)")
+            else:
+                estimated_total_tokens = actual_tokens
+                logger.info(f"📤 PRE-SEND: {len(prepared_messages)} messages, {actual_tokens} tokens (no fast check available)")
+            
+            # Calculate threshold (same logic as fast check)
+            from core.ai_models import model_manager
+            context_window = model_manager.get_context_window(registry_model_id, has_images=has_images)
+            if context_window >= 1_000_000:
+                safety_threshold = context_window - 300_000
+            elif context_window >= 400_000:
+                safety_threshold = context_window - 64_000
+            elif context_window >= 200_000:
+                safety_threshold = context_window - 32_000
+            elif context_window >= 100_000:
+                safety_threshold = context_window - 16_000
+            else:
+                safety_threshold = int(context_window * 0.84)
+            
+            # Late compression: if actual exceeds threshold, compress now
+            if actual_tokens >= safety_threshold:
+                logger.warning(f"⚠️ PRE-SEND OVER THRESHOLD: actual={actual_tokens} >= threshold={safety_threshold}. Compressing now!")
+                # Compress messages (use raw messages, not prepared_messages which has cache markers)
+                if 'context_manager' not in locals():
+                    context_manager = ContextManager()
+                compressed_messages = await context_manager.compress_messages(
+                    messages, llm_model, max_tokens=llm_max_tokens,
+                    actual_total_tokens=actual_tokens,
+                    system_prompt=system_prompt,
+                    thread_id=thread_id
+                )
+                # Rebuild messages_with_context
+                messages_with_context = compressed_messages
+                if self._memory_context and len(compressed_messages) > 0:
+                    messages_with_context = [self._memory_context] + compressed_messages
+                # Rebuild prepared_messages with caching
+                if ENABLE_PROMPT_CACHING and len(messages_with_context) > 2:
+                    prepared_messages = await apply_anthropic_caching_strategy(
+                        system_prompt, messages_with_context, llm_model,
+                        thread_id=thread_id, force_recalc=True
+                    )
+                    prepared_messages = validate_cache_blocks(prepared_messages, llm_model)
+                else:
+                    prepared_messages = [system_prompt] + messages_with_context
+                # Recount tokens
+                actual_tokens = token_counter(model=llm_model, messages=prepared_messages)
+                estimated_total_tokens = actual_tokens
+                logger.info(f"📤 POST-COMPRESSION: {len(prepared_messages)} messages, {actual_tokens} tokens")
+            
             llm_call_start = time.time()
-            logger.debug(f"📤 Sending {len(prepared_messages)} prepared messages to LLM")
 
             # Make LLM call
             try:

@@ -212,6 +212,9 @@ def load_existing_env_vars():
             "LANGFUSE_SECRET_KEY": backend_env.get("LANGFUSE_SECRET_KEY", ""),
             "LANGFUSE_HOST": backend_env.get("LANGFUSE_HOST", ""),
         },
+        "braintrust": {
+            "BRAINTRUST_API_KEY": backend_env.get("BRAINTRUST_API_KEY", ""),
+        },
         "monitoring": {
             "SENTRY_DSN": backend_env.get("SENTRY_DSN", ""),
             "FREESTYLE_API_KEY": backend_env.get("FREESTYLE_API_KEY", ""),
@@ -337,6 +340,7 @@ class SetupWizard:
             "vapi": existing_env_vars.get("vapi", {}),
             "stripe": existing_env_vars.get("stripe", {}),
             "langfuse": existing_env_vars.get("langfuse", {}),
+            "braintrust": existing_env_vars.get("braintrust", {}),
             "monitoring": existing_env_vars.get("monitoring", {}),
             "storage": existing_env_vars.get("storage", {}),
             "email": existing_env_vars.get("email", {}),
@@ -674,7 +678,7 @@ class SetupWizard:
                 "git": "https://git-scm.com/downloads",
                 "uv": "https://github.com/astral-sh/uv#installation",
                 "node": "https://nodejs.org/en/download/",
-                "npm": "https://docs.npmjs.com/downloading-and-installing-node-js-and-npm",
+                "pnpm": "https://pnpm.io/installation",
                 "docker": "https://docs.docker.com/get-docker/",  # For Redis
             }
 
@@ -1086,9 +1090,9 @@ class SetupWizard:
         )
         print_info("Create a snapshot with these exact settings:")
         print_info(
-            f"   - Name:\t\t{Colors.GREEN}kortix/suna:0.1.3.25{Colors.ENDC}")
+            f"   - Name:\t\t{Colors.GREEN}kortix/suna:0.1.3.28{Colors.ENDC}")
         print_info(
-            f"   - Snapshot name:\t{Colors.GREEN}kortix/suna:0.1.3.25{Colors.ENDC}")
+            f"   - Snapshot name:\t{Colors.GREEN}kortix/suna:0.1.3.28{Colors.ENDC}")
         print_info(
             f"   - Entrypoint:\t{Colors.GREEN}/usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.conf{Colors.ENDC}"
         )
@@ -1565,6 +1569,7 @@ class SetupWizard:
             **self.env_vars.get("vapi", {}),
             **self.env_vars.get("stripe", {}),
             **self.env_vars.get("langfuse", {}),
+            **self.env_vars.get("braintrust", {}),
             **self.env_vars.get("monitoring", {}),
             **self.env_vars.get("storage", {}),
             **self.env_vars.get("email", {}),
@@ -1664,7 +1669,7 @@ class SetupWizard:
             )
         except (subprocess.SubprocessError, FileNotFoundError):
             print_error(
-                "Node.js/npm not found or Supabase CLI not available. Make sure Node.js is installed."
+                "Node.js/pnpm not found or Supabase CLI not available. Make sure Node.js and pnpm are installed."
             )
             print_warning("Skipping migration application. Apply manually later.")
             return
@@ -1721,7 +1726,7 @@ class SetupWizard:
             )
         except (subprocess.SubprocessError, FileNotFoundError):
             print_error(
-                "Node.js/npm not found or Supabase CLI not available. Make sure Node.js is installed."
+                "Node.js/pnpm not found or Supabase CLI not available. Make sure Node.js and pnpm are installed."
             )
             print_warning("Skipping migration application. Apply manually later.")
             return
@@ -1781,9 +1786,9 @@ class SetupWizard:
             return
 
         try:
-            print_info("Installing frontend dependencies with npm...")
+            print_info("Installing frontend dependencies with pnpm...")
             subprocess.run(
-                ["npm", "install"], cwd="frontend", check=True, shell=IS_WINDOWS
+                ["pnpm", "install"], cwd="frontend", check=True, shell=IS_WINDOWS
             )
             print_success("Frontend dependencies installed.")
 
@@ -1858,7 +1863,7 @@ class SetupWizard:
                     "\nIf that doesn't work, you may need to:"
                 )
                 print_info(f"  1. {Colors.CYAN}cd frontend{Colors.ENDC}")
-                print_info(f"  2. {Colors.CYAN}npm run build{Colors.ENDC}")
+                print_info(f"  2. {Colors.CYAN}pnpm run build{Colors.ENDC}")
                 print_info(f"  3. {Colors.CYAN}cd .. && {compose_cmd_str} up -d{Colors.ENDC}")
                 # Don't exit, let the final instructions show
                 return
@@ -1947,7 +1952,7 @@ class SetupWizard:
 
             print(
                 f"\n{Colors.BOLD}{step_num}. Start Frontend (in a new terminal):{Colors.ENDC}")
-            print(f"{Colors.CYAN}   cd frontend && npm run dev{Colors.ENDC}")
+            print(f"{Colors.CYAN}   cd frontend && pnpm run dev{Colors.ENDC}")
             step_num += 1
 
             print(

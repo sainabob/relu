@@ -31,6 +31,7 @@ import { AppDock } from './components/Dock';
 import { SandboxDesktop } from './components/Desktop';
 import { EnhancedFileBrowser } from './components/EnhancedFileBrowser';
 import { useDirectoryQuery } from '@/hooks/files';
+import { getToolNumber } from '@/hooks/messages/tool-tracking';
 
 export interface ToolCallInput {
   toolCall: ToolCallData;
@@ -243,10 +244,13 @@ export const ReluComputer = memo(function ReluComputer({
   }, [isMaximized]);
 
   const newSnapshots = useMemo(() => {
+<<<<<<<< HEAD:frontend/src/components/thread/relu-computer/ReluComputer.tsx
     // #region agent log - track toolCalls prop
     fetch('http://127.0.0.1:7242/ingest/8574b837-03d2-4ece-8422-988bb17343e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ReluComputer.tsx:245',message:'toolCalls prop changed',data:{toolCallsLength:toolCalls.length,isOpen,toolCalls:toolCalls.map(tc=>({functionName:tc.toolCall?.function_name,hasResult:!!tc.toolResult}))},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'TOOL_CALLS_PROP'})}).catch(()=>{});
     // #endregion
     
+========
+>>>>>>>> e7b931586d13db02008d89b285ef110842d2dfa2:apps/frontend/src/components/thread/kortix-computer/KortixComputer.tsx
     return toolCalls.map((toolCall, index) => ({
       id: `${index}-${toolCall.assistantTimestamp || Date.now()}`,
       toolCall,
@@ -323,12 +327,15 @@ export const ReluComputer = memo(function ReluComputer({
     );
     const completedCount = completed.length;
 
+<<<<<<<< HEAD:frontend/src/components/thread/relu-computer/ReluComputer.tsx
     // #region agent log - track current tool call state
     if (isOpen) {
       fetch('http://127.0.0.1:7242/ingest/8574b837-03d2-4ece-8422-988bb17343e8',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ReluComputer.tsx:310',message:'currentToolCall computed',data:{safeIndex,internalIndex,totalCalls:total,toolCallSnapshotsLength:toolCallSnapshots.length,hasCurrentToolCall:!!toolCall,currentToolCallFunctionName:toolCall?.toolCall?.function_name,currentIndex},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'CURRENT_TOOL_CALL'})}).catch(()=>{});
     }
     // #endregion
 
+========
+>>>>>>>> e7b931586d13db02008d89b285ef110842d2dfa2:apps/frontend/src/components/thread/kortix-computer/KortixComputer.tsx
     return {
       safeInternalIndex: safeIndex,
       currentSnapshot: snapshot,
@@ -347,11 +354,27 @@ export const ReluComputer = memo(function ReluComputer({
   const isCurrentToolStreaming = currentToolCall != null && currentToolCall.toolResult === undefined;
 
   const currentToolName = currentToolCall?.toolCall?.function_name?.replace(/_/g, '-').toLowerCase();
+  
+  // Track previous displayToolCall for render logging
+  const prevDisplayToolCallRef = useRef<ToolCallInput | undefined>(undefined);
+  
+  // Log when a tool is rendered
+  useEffect(() => {
+    if (displayToolCall && displayToolCall !== prevDisplayToolCallRef.current) {
+      const toolCallId = displayToolCall.toolCall?.tool_call_id;
+      const functionName = displayToolCall.toolCall?.function_name;
+      const hasResult = !!displayToolCall.toolResult;
+      const isStreaming = !hasResult;
+      
+      prevDisplayToolCallRef.current = displayToolCall;
+    }
+  }, [displayToolCall, displayIndex]);
 
   const showDuringStreaming = currentToolName && [
     'create-file', 'edit-file', 'full-file-rewrite', 'read-file', 'delete-file',
     'execute-command', 'check-command-output', 'terminate-command',
-    'spreadsheet-create', 'spreadsheet-add-rows', 'spreadsheet-update-cell', 'spreadsheet-format-cells', 'spreadsheet-read'
+    'spreadsheet-create', 'spreadsheet-add-rows', 'spreadsheet-update-cell', 'spreadsheet-format-cells', 'spreadsheet-read',
+    'web-search', 'image-search'
   ].includes(currentToolName);
 
   if (isCurrentToolStreaming && totalCompletedCalls > 0 && !showDuringStreaming) {
@@ -728,9 +751,28 @@ export const ReluComputer = memo(function ReluComputer({
   };
 
   if (isMobile) {
+    const handleDrawerKeyDown = (e: React.KeyboardEvent) => {
+      // Vaul drawers are dismissible by Escape by default.
+      // Prevent Escape / Esc from closing the Kortix Computer.
+      if (e.key === 'Escape' || e.key === 'Esc') {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
     return (
-      <Drawer open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-        <DrawerContent className="h-[85vh] max-h-[85vh] overflow-hidden" style={{ contain: 'strict' }}>
+      <Drawer
+        open={isOpen}
+        onOpenChange={(open) => !open && handleClose()}
+        // Never allow Esc/Escape to dismiss the Kortix Computer.
+        // (Users commonly hit Escape in editors / sandbox UIs.)
+        dismissible={false}
+      >
+        <DrawerContent
+          className="h-[85vh] max-h-[85vh] overflow-hidden"
+          style={{ contain: 'strict' }}
+          onKeyDown={handleDrawerKeyDown}
+        >
           <PanelHeader
             agentName={agentName}
             onClose={handleClose}
@@ -960,4 +1002,3 @@ export const ReluComputer = memo(function ReluComputer({
     </motion.div>
   );
 });
-
