@@ -40,7 +40,7 @@ services:
       retries: 3
 
   backend:
-    image: relu-backend:latest
+    image: ghcr.io/sainabob/suna/suna-backend:latest
     platform: linux/amd64
     build:
       context: ./backend
@@ -61,7 +61,7 @@ services:
         condition: service_started
 
   worker:
-    image: relu-backend:latest
+    image: ghcr.io/sainabob/suna/suna-backend:latest
     platform: linux/amd64
     build:
       context: ./backend
@@ -79,8 +79,7 @@ services:
         condition: service_healthy
 
   frontend:
-    image: relu-frontend:latest
-    platform: linux/amd64
+    init: true
     build:
       context: ./frontend
       dockerfile: Dockerfile
