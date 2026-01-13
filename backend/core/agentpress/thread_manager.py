@@ -26,6 +26,52 @@ import litellm
 
 ToolChoice = Literal["auto", "required", "none"]
 
+
+async def set_thread_has_images(thread_id: str, client=None) -> bool:
+    """
+    Set has_images=True in thread metadata and Redis cache.
+    
+    Called when an image is added to a thread (user upload or agent load_image).
+    This flag is read by thread_has_images() to determine if vision model is needed.
+    
+    Args:
+        thread_id: The thread ID
+        client: Optional Supabase client (unused, kept for backwards compatibility)
+        
+    Returns:
+        True if successfully set, False otherwise
+    """
+    from core.services import redis
+    from core.threads import repo as threads_repo
+    
+    cache_key = f"thread_has_images:{thread_id}"
+    
+    try:
+        # Check Redis first - if already set, skip DB write
+        cached = await redis.get(cache_key)
+        if cached == "1":
+            return True
+        
+        # Check current metadata using direct SQL
+        metadata = await threads_repo.get_thread_metadata(thread_id)
+        if metadata is None:
+            logger.warning(f"Thread {thread_id} not found when setting has_images flag")
+            return False
+        
+        # Skip DB write if already set
+        if not (metadata or {}).get('has_images'):
+            await threads_repo.set_thread_has_images(thread_id)
+        
+        # Set in Redis with 2 hour TTL (refreshed on each access)
+        await redis.set(cache_key, "1", ex=7200)
+        
+        logger.info(f"🖼️ Set has_images=True for thread {thread_id}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to set has_images flag for thread {thread_id}: {e}")
+        return False
+
+
 class ThreadManager:
     def __init__(self, trace: Optional[StatefulTraceClient] = None, agent_config: Optional[dict] = None, 
                  project_id: Optional[str] = None, thread_id: Optional[str] = None, account_id: Optional[str] = None,
@@ -70,18 +116,16 @@ class ThreadManager:
         is_public: bool = False,
         metadata: Optional[Dict[str, Any]] = None
     ) -> str:
-        client = await self.db.client
-
-        thread_data = {'is_public': is_public, 'metadata': metadata or {}}
-        if account_id:
-            thread_data['account_id'] = account_id
-        if project_id:
-            thread_data['project_id'] = project_id
-
+        from core.threads import repo as threads_repo
+        
         try:
-            result = await client.table('threads').insert(thread_data).execute()
-            if result.data and len(result.data) > 0 and 'thread_id' in result.data[0]:
-                thread_id = result.data[0]['thread_id']
+            thread_id = await threads_repo.insert_thread(
+                account_id=account_id,
+                project_id=project_id,
+                is_public=is_public,
+                metadata=metadata
+            )
+            if thread_id:
                 logger.info(f"Successfully created thread: {thread_id}")
                 return thread_id
             else:
@@ -100,43 +144,37 @@ class ThreadManager:
         agent_id: Optional[str] = None,
         agent_version_id: Optional[str] = None
     ):
-        from core.services.supabase import execute_with_reconnect
+        from core.threads import repo as threads_repo
 
-        data_to_insert = {
-            'thread_id': thread_id,
-            'type': type,
-            'content': content,
-            'is_llm_message': is_llm_message,
-            'metadata': metadata or {},
-        }
-
-        if agent_id:
-            data_to_insert['agent_id'] = agent_id
-        if agent_version_id:
-            data_to_insert['agent_version_id'] = agent_version_id
-
-        result = await execute_with_reconnect(
-            self.db,
-            lambda c: c.table('messages').insert(data_to_insert).execute()
-        )
-
-        if result.data and len(result.data) > 0 and 'message_id' in result.data[0]:
-            saved_message = result.data[0]
+        try:
+            saved_message = await threads_repo.insert_message(
+                thread_id=thread_id,
+                message_type=type,
+                content=content,
+                is_llm_message=is_llm_message,
+                metadata=metadata,
+                agent_id=agent_id,
+                agent_version_id=agent_version_id
+            )
             
-            # Invalidate message history cache when new message is added
-            if is_llm_message:
-                try:
-                    from core.cache.runtime_cache import invalidate_message_history_cache
-                    await invalidate_message_history_cache(thread_id)
-                except Exception as e:
-                    logger.debug(f"Failed to invalidate message history cache: {e}")
-            
-            if type == "llm_response_end" and isinstance(content, dict):
-                await self._handle_billing(thread_id, content, saved_message)
-            
-            return saved_message
-        else:
-            logger.error(f"Insert operation failed for thread {thread_id}")
+            if saved_message and 'message_id' in saved_message:
+                # Invalidate message history cache when new message is added
+                if is_llm_message:
+                    try:
+                        from core.cache.runtime_cache import invalidate_message_history_cache
+                        await invalidate_message_history_cache(thread_id)
+                    except Exception as e:
+                        logger.debug(f"Failed to invalidate message history cache: {e}")
+                
+                if type == "llm_response_end" and isinstance(content, dict):
+                    await self._handle_billing(thread_id, content, saved_message)
+                
+                return saved_message
+            else:
+                logger.error(f"Insert operation failed for thread {thread_id}")
+                return None
+        except Exception as e:
+            logger.error(f"Failed to add message to thread {thread_id}: {e}")
             return None
 
     async def _handle_billing(self, thread_id: str, content: dict, saved_message: dict):
@@ -182,13 +220,17 @@ class ThreadManager:
                 else:
                     logger.debug(f"❌ NO CACHE: All {prompt_tokens} tokens processed fresh")
 
+                # Convert UUID objects to strings for billing system (still uses PostgREST)
+                message_id_str = str(saved_message['message_id'])
+                thread_id_str = str(thread_id)
+                
                 deduct_result = await billing_integration.deduct_usage(
                     account_id=user_id,
                     prompt_tokens=prompt_tokens,
                     completion_tokens=completion_tokens,
                     model=model or "unknown",
-                    message_id=saved_message['message_id'],
-                    thread_id=thread_id,
+                    message_id=message_id_str,
+                    thread_id=thread_id_str,
                     cache_read_tokens=cache_read_tokens,
                     cache_creation_tokens=cache_creation_tokens
                 )
@@ -275,7 +317,6 @@ class ThreadManager:
             if cached is not None:
                 logger.debug(f"⏱️ [TIMING] Message history: cache hit ({len(cached)} messages)")
                 # Validate and normalize tool_calls in cached messages
-                # This ensures consistency even if cache was populated before tool_call fixes
                 validated_cached = []
                 for msg in cached:
                     if msg.get('role') == 'assistant' and msg.get('tool_calls'):
@@ -283,28 +324,43 @@ class ThreadManager:
                     validated_cached.append(msg)
                 return validated_cached
         
-        client = await self.db.client
-
+        from core.threads import repo as threads_repo
+        import asyncio
+        import time as _time
+        
+        MESSAGE_QUERY_TIMEOUT = 10.0
+        
         try:
             all_messages = []
             
             if lightweight:
-                result = await client.table('messages').select('message_id, type, content').eq('thread_id', thread_id).eq('is_llm_message', True).order('created_at').limit(100).execute()
-                
-                if result.data:
-                    all_messages = result.data
+                logger.info(f"📊 Starting lightweight message fetch for thread {thread_id}")
+                t0 = _time.time()
+                all_messages = await asyncio.wait_for(
+                    threads_repo.get_llm_messages(thread_id, lightweight=True, limit=100),
+                    timeout=MESSAGE_QUERY_TIMEOUT
+                )
+                elapsed = (_time.time() - t0) * 1000
+                logger.info(f"📊 Lightweight message fetch completed: {elapsed:.0f}ms, {len(all_messages)} messages")
             else:
                 batch_size = 1000
                 offset = 0
                 
                 while True:
-                    result = await client.table('messages').select('message_id, type, content, metadata').eq('thread_id', thread_id).eq('is_llm_message', True).order('created_at').range(offset, offset + batch_size - 1).execute()
+                    logger.info(f"📊 Starting message fetch (offset={offset}) for thread {thread_id}")
+                    t0 = _time.time()
+                    batch = await asyncio.wait_for(
+                        threads_repo.get_llm_messages_paginated(thread_id, offset=offset, batch_size=batch_size),
+                        timeout=MESSAGE_QUERY_TIMEOUT
+                    )
+                    elapsed = (_time.time() - t0) * 1000
+                    logger.info(f"📊 Message fetch (offset={offset}) completed: {elapsed:.0f}ms, {len(batch)} messages")
                     
-                    if not result.data:
+                    if not batch:
                         break
                         
-                    all_messages.extend(result.data)
-                    if len(result.data) < batch_size:
+                    all_messages.extend(batch)
+                    if len(batch) < batch_size:
                         break
                     offset += batch_size
 
@@ -342,7 +398,6 @@ class ThreadManager:
                         
                         messages.append(parsed_item)
                     except json.JSONDecodeError:
-                        # If compressed, content is a plain string (not JSON) - this is expected
                         if is_compressed:
                             messages.append({
                                 'role': 'user',
@@ -379,13 +434,16 @@ class ThreadManager:
 
             return messages
 
+        except asyncio.TimeoutError:
+            logger.error(f"⏱️ Timeout getting messages for thread {thread_id} after {MESSAGE_QUERY_TIMEOUT}s - connection pool likely exhausted")
+            raise
         except Exception as e:
             logger.error(f"Failed to get messages for thread {thread_id}: {str(e)}", exc_info=True)
-            return []
+            raise
     
     async def thread_has_images(self, thread_id: str) -> bool:
         """
-        Check if a thread has any image_context messages.
+        Check if a thread has images. First checks Redis cache, falls back to DB.
         
         Used to determine if the LLM model should be switched to one that supports
         image input (e.g., Bedrock) instead of the default (e.g., MiniMax).
@@ -394,16 +452,60 @@ class ThreadManager:
             thread_id: The thread ID to check
             
         Returns:
-            True if the thread has at least one image_context message, False otherwise
+            True if the thread has images, False otherwise
         """
+        import asyncio
+        import time
+        from core.services import redis
+        from core.threads import repo as threads_repo
+        
+        start = time.time()
+        cache_key = f"thread_has_images:{thread_id}"
+        
         try:
-            client = await self.db.client
-            result = await client.table('messages').select('message_id').eq('thread_id', thread_id).eq('type', 'image_context').limit(1).execute()
-            has_images = bool(result.data and len(result.data) > 0)
-            logger.info(f"🖼️ Thread {thread_id} has_images check: {has_images}")
+            # Check Redis first (fast path) - cache stores "1" for True, "0" for False
+            try:
+                cached = await asyncio.wait_for(redis.get(cache_key), timeout=0.5)
+                if cached == "1":
+                    elapsed = (time.time() - start) * 1000
+                    logger.info(f"🖼️ Thread {thread_id} has_images: True (from Redis, {elapsed:.1f}ms)")
+                    return True
+                elif cached == "0":
+                    # Cached "no images" - skip DB query entirely
+                    elapsed = (time.time() - start) * 1000
+                    logger.debug(f"🖼️ Thread {thread_id} has_images: False (from Redis, {elapsed:.1f}ms)")
+                    return False
+            except Exception:
+                pass  # Redis miss or error, fall through to DB
+            
+            # Fall back to direct SQL
+            try:
+                has_images = await asyncio.wait_for(
+                    threads_repo.check_thread_has_images(thread_id),
+                    timeout=5.0  # 5s timeout for slow connections (e.g., local dev to remote Supabase)
+                )
+            except asyncio.TimeoutError:
+                elapsed = (time.time() - start) * 1000
+                logger.warning(f"⚠️ thread_has_images QUERY timeout after {elapsed:.1f}ms for {thread_id} - assuming no images")
+                return False
+            
+            # Cache result in Redis
+            # has_images=True: 2 hour TTL (images don't disappear)
+            # has_images=False: 5 min TTL (image might be added soon, check again later)
+            try:
+                if has_images:
+                    await redis.set(cache_key, "1", ex=7200)
+                else:
+                    await redis.set(cache_key, "0", ex=300)
+            except Exception:
+                pass  # Best effort caching
+            
+            elapsed = (time.time() - start) * 1000
+            logger.debug(f"🖼️ Thread {thread_id} has_images: {has_images} (from DB, {elapsed:.1f}ms)")
             return has_images
         except Exception as e:
-            logger.error(f"Error checking thread for images: {str(e)}")
+            elapsed = (time.time() - start) * 1000
+            logger.error(f"Error checking thread for images after {elapsed:.1f}ms: {str(e)}")
             return False
     
     async def run_thread(
@@ -421,6 +523,8 @@ class ThreadManager:
         generation: Optional[StatefulGenerationClient] = None,
         latest_user_message_content: Optional[str] = None,
         cancellation_event: Optional[asyncio.Event] = None,
+        prefetch_messages_task: Optional[asyncio.Task] = None,
+        prefetch_llm_end_task: Optional[asyncio.Task] = None,
     ) -> Union[Dict[str, Any], AsyncGenerator]:
         """Run a conversation thread with LLM integration and tool execution."""
         logger.debug(f"🚀 Starting thread execution for {thread_id} with model {llm_model}")
@@ -446,21 +550,20 @@ class ThreadManager:
                 thread_id, system_prompt, llm_model, llm_temperature, llm_max_tokens,
                 tool_choice, config, stream,
                 generation, auto_continue_state, temporary_message, latest_user_message_content,
-                cancellation_event
+                cancellation_event, prefetch_messages_task, prefetch_llm_end_task
             )
             
-            # If result is an error dict, convert it to a generator that yields the error
             if isinstance(result, dict) and result.get("status") == "error":
                 return self._create_single_error_generator(result)
             
             return result
 
-        # Auto-continue execution
         return self._auto_continue_generator(
             thread_id, system_prompt, llm_model, llm_temperature, llm_max_tokens,
             tool_choice, config, stream,
             generation, auto_continue_state, temporary_message,
-            native_max_auto_continues, latest_user_message_content, cancellation_event
+            native_max_auto_continues, latest_user_message_content, cancellation_event,
+            prefetch_messages_task, prefetch_llm_end_task
         )
 
     async def _execute_run(
@@ -468,7 +571,8 @@ class ThreadManager:
         llm_temperature: float, llm_max_tokens: Optional[int], tool_choice: ToolChoice,
         config: ProcessorConfig, stream: bool, generation: Optional[StatefulGenerationClient],
         auto_continue_state: Dict[str, Any], temporary_message: Optional[Dict[str, Any]] = None,
-        latest_user_message_content: Optional[str] = None, cancellation_event: Optional[asyncio.Event] = None
+        latest_user_message_content: Optional[str] = None, cancellation_event: Optional[asyncio.Event] = None,
+        prefetch_messages_task: Optional[asyncio.Task] = None, prefetch_llm_end_task: Optional[asyncio.Task] = None
     ) -> Union[Dict[str, Any], AsyncGenerator]:
         """Execute a single LLM run."""
         # Simple run counter - increments with each call
@@ -487,47 +591,78 @@ class ThreadManager:
             ENABLE_PROMPT_CACHING = True    # Set to False to disable prompt caching
             # ==================================
             
-            # Store registry model ID for lookups (before any switching)
             registry_model_id = llm_model
             
             # ===== MODEL SWITCHING FOR IMAGES =====
-            # Check if thread has images - if yes, use the model's vision variant
-            # The registry handles switching to the appropriate LLM (e.g., Haiku Bedrock)
-            has_images = await self.thread_has_images(thread_id)
-            if has_images:
-                from core.ai_models import model_manager
-                # Get the vision-specific LLM model ID from registry
-                llm_model = model_manager.get_litellm_model_id(registry_model_id, has_images=True)
-                if llm_model != registry_model_id:
-                    logger.info(f"🖼️ Thread has images - switching model from {registry_model_id} to vision model: {llm_model}")
+            # Switch to image model only if current model doesn't support vision natively
+            from core.ai_models import model_manager
+            from core.ai_models.registry import IMAGE_MODEL_ID
+            if not model_manager.supports_vision(registry_model_id) and await self.thread_has_images(thread_id):
+                registry_model_id = IMAGE_MODEL_ID
+                llm_model = model_manager.get_litellm_model_id(IMAGE_MODEL_ID)
+                logger.info(f"🖼️ Thread has images - switching to image model: {llm_model}")
             # ======================================
             
-            # Fast path: Check stored token count + new message tokens
             skip_fetch = False
             need_compression = False
-            estimated_total_tokens = None  # Will be passed to response processor to avoid recalculation
+            estimated_total_tokens = None
+            messages = None
             
-            # CRITICAL: Check if this is an auto-continue iteration FIRST (before any token counting)
             is_auto_continue = auto_continue_state.get('count', 0) > 0
+            
+            openapi_tool_schemas_task = None
+            if config.native_tool_calling:
+                openapi_tool_schemas_task = asyncio.create_task(
+                    asyncio.to_thread(self.tool_registry.get_openapi_schemas)
+                )
             
             if ENABLE_PROMPT_CACHING:
                 try:
-                    from core.ai_models import model_manager
                     from litellm.utils import token_counter
-                    client = await self.db.client
+                    from core.threads import repo as threads_repo
+                    import time as _time
                     
-                    # Query last llm_response_end message from messages table (already stored there!)
-                    last_usage_result = await client.table('messages')\
-                        .select('content')\
-                        .eq('thread_id', thread_id)\
-                        .eq('type', 'llm_response_end')\
-                        .order('created_at', desc=True)\
-                        .limit(1)\
-                        .maybe_single()\
-                        .execute()
+                    _t2 = _time.time()
+                    prefetch_succeeded = False
+                    llm_end_content = None
                     
-                    if last_usage_result and last_usage_result.data:
-                        llm_end_content = last_usage_result.data.get('content', {})
+                    if prefetch_messages_task and prefetch_llm_end_task:
+                        try:
+                            if not prefetch_messages_task.done():
+                                await asyncio.wait_for(asyncio.shield(prefetch_messages_task), timeout=10.0)
+                            if not prefetch_llm_end_task.done():
+                                await asyncio.wait_for(asyncio.shield(prefetch_llm_end_task), timeout=5.0)
+                            
+                            prefetch_messages_result = prefetch_messages_task.result()
+                            prefetch_llm_end_result = prefetch_llm_end_task.result()
+                            
+                            if prefetch_messages_result is not None:
+                                messages = prefetch_messages_result
+                                llm_end_content = prefetch_llm_end_result
+                                prefetch_succeeded = True
+                                _query_time = (_time.time() - _t2) * 1000
+                                logger.info(f"⚡ [PREFETCH] Used prefetched data in {_query_time:.1f}ms ({len(messages)} msgs)")
+                        except asyncio.CancelledError:
+                            logger.warning("Prefetch tasks were cancelled, falling back to fresh fetch")
+                        except asyncio.TimeoutError:
+                            logger.warning("Prefetch tasks timed out, falling back to fresh fetch")
+                        except Exception as e:
+                            logger.warning(f"Prefetch failed ({type(e).__name__}), falling back to fresh fetch: {e}")
+                    
+                    if not prefetch_succeeded:
+                        llm_end_task = asyncio.create_task(
+                            asyncio.wait_for(threads_repo.get_last_llm_response_end(thread_id), timeout=5.0)
+                        )
+                        messages_task = asyncio.create_task(
+                            self.get_llm_messages(thread_id)
+                        )
+                        
+                        llm_end_content, messages = await asyncio.gather(llm_end_task, messages_task)
+                        _query_time = (_time.time() - _t2) * 1000
+                        if _query_time > 500:
+                            logger.info(f"⚡ [PARALLEL] llm_response_end + messages fetch took {_query_time:.1f}ms")
+                    
+                    if llm_end_content:
                         if isinstance(llm_end_content, str):
                             llm_end_content = json.loads(llm_end_content)
                         
@@ -537,57 +672,46 @@ class ThreadManager:
                         logger.debug(f"Fast check data - stored model: {stored_model}, current model: {llm_model}")
                         
                         # Use fast path if we have usage data
-                        # Token counts are similar enough for compression decisions even if model changed
                         if usage:
-                            # Use total_tokens (includes prev completion) for better accuracy
                             last_total_tokens = int(usage.get('total_tokens', 0))
+                            # Note: cache_creation_input_tokens is NOT added here - it's a billing metric,
+                            # not actual context window usage. The context window is just prompt_tokens.
                             
-                            # Add cache creation tokens for accurate count (AWS Bedrock quota calculation)
-                            cache_creation = int(usage.get("cache_creation_input_tokens", 0) or 0)
-                            if cache_creation > 0:
-                                last_total_tokens += cache_creation
-                                logger.debug(f"Added {cache_creation} cache creation tokens to fast check total")
-                            
-                            # Count tokens in new message (only for first turn, not auto-continue)
                             new_msg_tokens = 0
                             
                             if is_auto_continue:
-                                # Auto-continue: Get tool result tokens from auto_continue_state
-                                # These are tracked by _auto_continue_generator when tool chunks are yielded
                                 new_msg_tokens = auto_continue_state.get('tool_result_tokens', 0)
                                 if new_msg_tokens > 0:
                                     logger.debug(f"🔧 Auto-continue: adding {new_msg_tokens} tool result tokens from state")
                                 else:
                                     logger.debug(f"✅ Auto-continue: no tool result tokens in state")
-                                # Reset AFTER consuming - ready for next iteration
                                 auto_continue_state['tool_result_tokens'] = 0
                             elif latest_user_message_content:
-                                # First turn: Use passed content (avoids DB query)
-                                new_msg_tokens = token_counter(
+                                new_msg_tokens = await asyncio.to_thread(
+                                    token_counter,
                                     model=llm_model, 
                                     messages=[{"role": "user", "content": latest_user_message_content}]
                                 )
                                 logger.debug(f"First turn: counting {new_msg_tokens} tokens from latest_user_message_content")
                             else:
                                 # First turn fallback: Query DB if content not provided
-                                latest_msg_result = await client.table('messages')\
-                                    .select('content')\
-                                    .eq('thread_id', thread_id)\
-                                    .eq('type', 'user')\
-                                    .order('created_at', desc=True)\
-                                    .limit(1)\
-                                    .single()\
-                                    .execute()
+                                _t3 = _time.time()
+                                latest_msg_content = await asyncio.wait_for(
+                                    threads_repo.get_latest_user_message(thread_id),
+                                    timeout=5.0
+                                )
+                                _user_msg_time = (_time.time() - _t3) * 1000
+                                if _user_msg_time > 500:
+                                    logger.warning(f"⚠️ [SLOW] latest user message query took {_user_msg_time:.1f}ms")
                                 
-                                if latest_msg_result and latest_msg_result.data:
-                                    # DB stores content as {"role": "user", "content": "actual text"}
-                                    db_content = latest_msg_result.data.get('content', {})
-                                    if isinstance(db_content, dict):
-                                        new_msg_content = db_content.get('content', '')
+                                if latest_msg_content:
+                                    if isinstance(latest_msg_content, dict):
+                                        new_msg_content = latest_msg_content.get('content', '')
                                     else:
-                                        new_msg_content = db_content
+                                        new_msg_content = latest_msg_content
                                     if new_msg_content:
-                                        new_msg_tokens = token_counter(
+                                        new_msg_tokens = await asyncio.to_thread(
+                                            token_counter,
                                             model=llm_model, 
                                             messages=[{"role": "user", "content": new_msg_content}]
                                         )
@@ -596,7 +720,9 @@ class ThreadManager:
                             # Count memory context tokens (only on first turn - auto-continue already has it in last_total_tokens)
                             memory_context_tokens = 0
                             if not is_auto_continue and self._memory_context:
-                                memory_context_tokens = token_counter(
+                                # Wrap token_counter in thread pool (CPU-heavy tiktoken operation)
+                                memory_context_tokens = await asyncio.to_thread(
+                                    token_counter,
                                     model=llm_model,
                                     messages=[self._memory_context]
                                 )
@@ -606,8 +732,7 @@ class ThreadManager:
                             estimated_total_tokens = estimated_total  # Store for response processor
                             
                             # Calculate threshold (same logic as context_manager.py)
-                            # Use registry_model_id with has_images to get correct context window
-                            context_window = model_manager.get_context_window(registry_model_id, has_images=has_images)
+                            context_window = model_manager.get_context_window(registry_model_id)
                             
                             if context_window >= 1_000_000:
                                 max_tokens = context_window - 300_000
@@ -638,13 +763,13 @@ class ThreadManager:
                         logger.debug(f"Fast check skipped - no last llm_response_end message found")
                 except Exception as e:
                     logger.debug(f"Fast path check failed, falling back to full fetch: {e}")
+                    messages = None
             
-            # Always fetch messages (needed for LLM call)
-            # Fast path just skips compression, not fetching!
             import time
-            fetch_start = time.time()
-            messages = await self.get_llm_messages(thread_id)
-            logger.debug(f"⏱️ [TIMING] get_llm_messages(): {(time.time() - fetch_start) * 1000:.1f}ms ({len(messages)} messages)")
+            if messages is None:
+                fetch_start = time.time()
+                messages = await self.get_llm_messages(thread_id)
+                logger.debug(f"⏱️ [TIMING] get_llm_messages(): {(time.time() - fetch_start) * 1000:.1f}ms ({len(messages)} messages)")
             
             # Note: We no longer need to manually append partial assistant messages
             # because we now save complete assistant messages with tool calls before auto-continuing
@@ -661,7 +786,7 @@ class ThreadManager:
                     # We know we're over threshold, compress now
                     compress_start = time.time()
                     logger.debug(f"Applying context compression on {len(messages)} messages")
-                    context_manager = ContextManager()
+                    context_manager = ContextManager(db=self.db)
                     compressed_messages = await context_manager.compress_messages(
                         messages, llm_model, max_tokens=llm_max_tokens, 
                         actual_total_tokens=estimated_total_tokens,  # Use estimated from fast check!
@@ -674,7 +799,7 @@ class ThreadManager:
                     # First turn or no fast path data: Run compression check
                     compress_start = time.time()
                     logger.debug(f"Running compression check on {len(messages)} messages")
-                    context_manager = ContextManager()
+                    context_manager = ContextManager(db=self.db)
                     compressed_messages = await context_manager.compress_messages(
                         messages, llm_model, max_tokens=llm_max_tokens, 
                         actual_total_tokens=None,
@@ -688,16 +813,11 @@ class ThreadManager:
             force_rebuild = False
             if ENABLE_PROMPT_CACHING:
                 try:
-                    client = await self.db.client
-                    result = await client.table('threads').select('metadata').eq('thread_id', thread_id).single().execute()
-                    if result and result.data:
-                        metadata = result.data.get('metadata', {})
-                        if metadata.get('cache_needs_rebuild'):
-                            force_rebuild = True
-                            logger.info("🔄 Rebuilding cache due to compression/model change")
-                            # Clear the flag
-                            metadata['cache_needs_rebuild'] = False
-                            await client.table('threads').update({'metadata': metadata}).eq('thread_id', thread_id).execute()
+                    from core.threads import repo as threads_repo
+                    if await threads_repo.get_cache_needs_rebuild(thread_id):
+                        force_rebuild = True
+                        logger.info("🔄 Rebuilding cache due to compression/model change")
+                        await threads_repo.set_cache_needs_rebuild(thread_id, False)
                 except Exception as e:
                     logger.debug(f"Failed to check cache_needs_rebuild flag: {e}")
 
@@ -708,12 +828,14 @@ class ThreadManager:
             
             cache_start = time.time()
             if ENABLE_PROMPT_CACHING and len(messages_with_context) > 2:
+                client = await self.db.client
                 prepared_messages = await apply_anthropic_caching_strategy(
                     system_prompt, 
                     messages_with_context, 
                     llm_model,
                     thread_id=thread_id,
-                    force_recalc=force_rebuild
+                    force_recalc=force_rebuild,
+                    client=client
                 )
                 prepared_messages = validate_cache_blocks(prepared_messages, llm_model)
                 logger.debug(f"⏱️ [TIMING] Prompt caching: {(time.time() - cache_start) * 1000:.1f}ms")
@@ -722,10 +844,12 @@ class ThreadManager:
                     logger.debug(f"First message: Skipping caching and validation ({len(messages_with_context)} messages)")
                 prepared_messages = [system_prompt] + messages_with_context
 
-            # Get tool schemas for LLM API call (after compression)
             schema_start = time.time()
-            openapi_tool_schemas = self.tool_registry.get_openapi_schemas() if config.native_tool_calling else None
-            logger.debug(f"⏱️ [TIMING] Get tool schemas: {(time.time() - schema_start) * 1000:.1f}ms")
+            if openapi_tool_schemas_task:
+                openapi_tool_schemas = await openapi_tool_schemas_task
+                logger.debug(f"⏱️ [TIMING] Get tool schemas (parallel): {(time.time() - schema_start) * 1000:.1f}ms")
+            else:
+                openapi_tool_schemas = None
 
             # Update generation tracking
             if generation:
@@ -757,7 +881,7 @@ class ThreadManager:
             
             # Ensure we have a ContextManager instance for validation (may not exist if compression was skipped)
             if 'context_manager' not in locals():
-                context_manager = ContextManager()
+                context_manager = ContextManager(db=self.db)
             
             is_valid, orphaned_ids, unanswered_ids = context_manager.validate_tool_call_pairing(prepared_messages)
             if not is_valid:
@@ -775,7 +899,8 @@ class ThreadManager:
                 logger.debug(f"✅ Pre-send validation passed: all tool calls properly paired")
             logger.debug(f"⏱️ [TIMING] Pre-send validation: {(time.time() - validation_start) * 1000:.1f}ms")
             
-            actual_tokens = token_counter(model=llm_model, messages=prepared_messages)
+            # Wrap token_counter in thread pool (CPU-heavy tiktoken operation)
+            actual_tokens = await asyncio.to_thread(token_counter, model=llm_model, messages=prepared_messages)
             if estimated_total_tokens is not None:
                 token_diff = actual_tokens - estimated_total_tokens
                 diff_pct = (token_diff / estimated_total_tokens * 100) if estimated_total_tokens > 0 else 0
@@ -785,8 +910,7 @@ class ThreadManager:
                 logger.info(f"📤 PRE-SEND: {len(prepared_messages)} messages, {actual_tokens} tokens (no fast check available)")
             
             # Calculate threshold (same logic as fast check)
-            from core.ai_models import model_manager
-            context_window = model_manager.get_context_window(registry_model_id, has_images=has_images)
+            context_window = model_manager.get_context_window(registry_model_id)
             if context_window >= 1_000_000:
                 safety_threshold = context_window - 300_000
             elif context_window >= 400_000:
@@ -803,7 +927,7 @@ class ThreadManager:
                 logger.warning(f"⚠️ PRE-SEND OVER THRESHOLD: actual={actual_tokens} >= threshold={safety_threshold}. Compressing now!")
                 # Compress messages (use raw messages, not prepared_messages which has cache markers)
                 if 'context_manager' not in locals():
-                    context_manager = ContextManager()
+                    context_manager = ContextManager(db=self.db)
                 compressed_messages = await context_manager.compress_messages(
                     messages, llm_model, max_tokens=llm_max_tokens,
                     actual_total_tokens=actual_tokens,
@@ -816,15 +940,16 @@ class ThreadManager:
                     messages_with_context = [self._memory_context] + compressed_messages
                 # Rebuild prepared_messages with caching
                 if ENABLE_PROMPT_CACHING and len(messages_with_context) > 2:
+                    client = await self.db.client
                     prepared_messages = await apply_anthropic_caching_strategy(
                         system_prompt, messages_with_context, llm_model,
-                        thread_id=thread_id, force_recalc=True
+                        thread_id=thread_id, force_recalc=True, client=client
                     )
                     prepared_messages = validate_cache_blocks(prepared_messages, llm_model)
                 else:
                     prepared_messages = [system_prompt] + messages_with_context
-                # Recount tokens
-                actual_tokens = token_counter(model=llm_model, messages=prepared_messages)
+                # Recount tokens (wrap in thread pool - CPU-heavy tiktoken operation)
+                actual_tokens = await asyncio.to_thread(token_counter, model=llm_model, messages=prepared_messages)
                 estimated_total_tokens = actual_tokens
                 logger.info(f"📤 POST-COMPRESSION: {len(prepared_messages)} messages, {actual_tokens} tokens")
             
@@ -885,7 +1010,8 @@ class ThreadManager:
         config: ProcessorConfig, stream: bool, generation: Optional[StatefulGenerationClient],
         auto_continue_state: Dict[str, Any], temporary_message: Optional[Dict[str, Any]],
         native_max_auto_continues: int, latest_user_message_content: Optional[str] = None,
-        cancellation_event: Optional[asyncio.Event] = None
+        cancellation_event: Optional[asyncio.Event] = None,
+        prefetch_messages_task: Optional[asyncio.Task] = None, prefetch_llm_end_task: Optional[asyncio.Task] = None
     ) -> AsyncGenerator:
         """Generator that handles auto-continue logic."""
         logger.debug(f"Starting auto-continue generator, max: {native_max_auto_continues}")
@@ -926,13 +1052,16 @@ class ThreadManager:
                         logger.error(f"Error checking credits in auto-continue: {e}")
                         # Continue execution if credit check fails (don't block on billing errors)
                 
+                is_first_turn = auto_continue_state['count'] == 0
                 response_gen = await self._execute_run(
                     thread_id, system_prompt, llm_model, llm_temperature, llm_max_tokens,
                     tool_choice, config, stream,
                     generation, auto_continue_state,
-                    temporary_message if auto_continue_state['count'] == 0 else None,
-                    latest_user_message_content if auto_continue_state['count'] == 0 else None,
-                    cancellation_event
+                    temporary_message if is_first_turn else None,
+                    latest_user_message_content if is_first_turn else None,
+                    cancellation_event,
+                    prefetch_messages_task if is_first_turn else None,
+                    prefetch_llm_end_task if is_first_turn else None
                 )
 
                 # Handle error responses
@@ -958,7 +1087,9 @@ class ThreadManager:
                                 # Extract the actual content string for token counting
                                 content_str = content.get('content', '') if isinstance(content, dict) else str(content)
                                 if content_str:
-                                    tool_tokens = token_counter(
+                                    # Wrap token_counter in thread pool (CPU-heavy tiktoken operation)
+                                    tool_tokens = await asyncio.to_thread(
+                                        token_counter,
                                         model=llm_model,
                                         messages=[{"role": "tool", "content": content_str}]
                                     )

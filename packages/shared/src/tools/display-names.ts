@@ -3,10 +3,34 @@
  * Single source of truth for both frontend and mobile
  */
 
+export const TOOL_COMPLETED_NAMES: ReadonlyMap<string, string> = new Map([
+  ['web-search', 'Searched Web'],
+  ['web_search', 'Searched Web'],
+  ['image-search', 'Searched Images'],
+  ['image_search', 'Searched Images'],
+  ['scrape-webpage', 'Scraped Website'],
+  ['scrape_webpage', 'Scraped Website'],
+  ['crawl-webpage', 'Crawled Website'],
+  ['crawl_webpage', 'Crawled Website'],
+  ['execute-command', 'Executed Command'],
+  ['execute_command', 'Executed Command'],
+  ['create-file', 'Created File'],
+  ['create_file', 'Created File'],
+  ['edit-file', 'Edited File'],
+  ['edit_file', 'Edited File'],
+  ['read-file', 'Read File'],
+  ['read_file', 'Read File'],
+  ['delete-file', 'Deleted File'],
+  ['delete_file', 'Deleted File'],
+  ['create-slide', 'Created Slide'],
+  ['create_slide', 'Created Slide'],
+]);
+
+
 export const TOOL_DISPLAY_NAMES: ReadonlyMap<string, string> = new Map([
   // Initialization
-  ['initialize-tools', 'Initializing Tools'],
-  ['initialize_tools', 'Initializing Tools'],
+  ['initialize-tools', 'Mode Activated'],
+  ['initialize_tools', 'Mode Activated'],
 
   // Command execution
   ['execute-command', 'Executing Command'],
@@ -90,8 +114,8 @@ export const TOOL_DISPLAY_NAMES: ReadonlyMap<string, string> = new Map([
   ['expose_port', 'Exposing Port'],
   
   // Image operations
-  ['load-image', 'Loading Image'],
-  ['load_image', 'Loading Image'],
+  ['load-image', 'Loaded Image'],
+  ['load_image', 'Loaded Image'],
   ['clear-images-from-context', 'Clearing Images'],
   ['image-edit-or-generate', 'Generate Media'],
   ['image_edit_or_generate', 'Generate Media'],
@@ -226,8 +250,7 @@ export const HIDE_STREAMING_XML_TAGS: ReadonlySet<string> = new Set([
  * These are internal/initialization tools that don't provide meaningful user feedback
  */
 export const HIDDEN_TOOLS: ReadonlySet<string> = new Set([
-  'initialize-tools',
-  'initialize_tools',
+  // initialize_tools is now shown with a friendly message via InitializeToolsToolView
 ]);
 
 /**

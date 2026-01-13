@@ -1,54 +1,62 @@
-from typing import Optional
+"""
+Supabase Database Connection - Production Configuration
+
+Architecture:
+- Gunicorn runs 8-16 workers (separate processes)
+- Each worker has its own DBConnection singleton
+- Each singleton creates one HTTP/2 connection to Supabase
+- HTTP/2 supports 100 concurrent streams per connection
+- Total capacity: 8 workers × 100 streams = 800 concurrent requests (per container)
+
+PERFORMANCE OPTIMIZATIONS (Jan 2026):
+- Increased pool timeout to handle burst traffic
+- Added connection stats for monitoring
+- Optimized keepalive settings for cloud deployments
+
+Configuration is simple and explicit via environment variables.
+"""
+
+from typing import Optional, Dict, Any
 from supabase import create_async_client, AsyncClient
 from core.utils.logger import logger
 from core.utils.config import config
-import base64
-import uuid
 import os
-from datetime import datetime
 import threading
 import httpx
-import time
 import asyncio
+import time
 
-# =============================================================================
-# Connection Pool Configuration
-# =============================================================================
-# Tuned for Supabase 2XL tier:
-#   - Max client connections: 1500
-#   - Pool size: 250 (per user+db combination)
-#
-# With 12 workers x 48 concurrency = 576 max concurrent operations
-# We allocate ~120 connections per worker (12 * 120 = 1440, within 1500 limit)
-#
-# Key considerations:
-# - Each worker has its own connection pool (singleton per process)
-# - HTTP/2 multiplexes many requests over fewer TCP connections
-# - Pool timeout should be generous to avoid failures during traffic spikes
-# - Keepalive prevents connection churn under sustained load
-# =============================================================================
+# Connection pool settings (per worker)
+# These are conservative for cloud Supabase (HTTP/2 multiplexing handles concurrency)
+SUPABASE_MAX_CONNECTIONS = int(os.getenv('SUPABASE_MAX_CONNECTIONS', '50'))
+SUPABASE_MAX_KEEPALIVE = int(os.getenv('SUPABASE_MAX_KEEPALIVE', '30'))
+SUPABASE_KEEPALIVE_EXPIRY = float(os.getenv('SUPABASE_KEEPALIVE_EXPIRY', '60.0'))  # Increased from 30
 
-# Connection limits (per worker process)
-# With 12 workers: 12 * 30 = 360 max connections (reduced to avoid overwhelming PostgREST)
-SUPABASE_MAX_CONNECTIONS = 30
-SUPABASE_MAX_KEEPALIVE = 20
-SUPABASE_KEEPALIVE_EXPIRY = 30.0  # 30s keepalive
+# Timeout settings (seconds)
+SUPABASE_CONNECT_TIMEOUT = float(os.getenv('SUPABASE_CONNECT_TIMEOUT', '15.0'))  # Increased from 10
+SUPABASE_READ_TIMEOUT = float(os.getenv('SUPABASE_READ_TIMEOUT', '60.0'))
+SUPABASE_WRITE_TIMEOUT = float(os.getenv('SUPABASE_WRITE_TIMEOUT', '60.0'))
+SUPABASE_POOL_TIMEOUT = float(os.getenv('SUPABASE_POOL_TIMEOUT', '45.0'))  # Increased from 30
 
-# Timeout settings (in seconds) - aggressive to fail fast
-SUPABASE_CONNECT_TIMEOUT = 5.0   # TCP connect
-SUPABASE_READ_TIMEOUT = 10.0        # Response read
-SUPABASE_WRITE_TIMEOUT = 10.0      # Request write
-SUPABASE_POOL_TIMEOUT = 5.0         # Wait for pool slot
-
-# HTTP transport settings
+# Transport settings
 SUPABASE_HTTP2_ENABLED = True
-SUPABASE_RETRIES = 1  # Single retry only
+SUPABASE_RETRIES = 3
 
 
 class DBConnection:
+    """
+    Singleton database connection per worker process.
+    
+    Provides connection pooling stats for monitoring and diagnostics.
+    """
+    
     _instance: Optional['DBConnection'] = None
     _lock = threading.Lock()
-    _async_lock: Optional[asyncio.Lock] = None
+    
+    # Connection stats for monitoring
+    _init_time: Optional[float] = None
+    _request_count: int = 0
+    _error_count: int = 0
 
     def __new__(cls):
         if cls._instance is None:
@@ -57,68 +65,56 @@ class DBConnection:
                     cls._instance = super().__new__(cls)
                     cls._instance._initialized = False
                     cls._instance._client = None
-                    cls._instance._http_client = None
-                    cls._instance._last_reset_time = 0
-                    cls._instance._consecutive_errors = 0
+                    cls._instance._async_lock = None
+                    cls._instance._init_time = None
+                    cls._instance._request_count = 0
+                    cls._instance._error_count = 0
         return cls._instance
 
     def __init__(self):
         pass
     
-    @classmethod
-    def is_route_not_found_error(cls, error) -> bool:
-        """Check if an error is a PostgREST 'Route not found' error indicating stale connection."""
-        error_str = str(error).lower()
-        return (
-            'route' in error_str and 'not found' in error_str
-        ) or (
-            'statuscode' in error_str and '404' in error_str and 'route' in error_str
-        )
+    def get_connection_stats(self) -> Dict[str, Any]:
+        """Get connection pool statistics for monitoring."""
+        uptime = time.time() - self._init_time if self._init_time else 0
+        return {
+            'initialized': self._initialized,
+            'uptime_seconds': round(uptime, 1),
+            'request_count': self._request_count,
+            'error_count': self._error_count,
+            'config': {
+                'max_connections': SUPABASE_MAX_CONNECTIONS,
+                'max_keepalive': SUPABASE_MAX_KEEPALIVE,
+                'keepalive_expiry': SUPABASE_KEEPALIVE_EXPIRY,
+                'connect_timeout': SUPABASE_CONNECT_TIMEOUT,
+                'read_timeout': SUPABASE_READ_TIMEOUT,
+                'pool_timeout': SUPABASE_POOL_TIMEOUT,
+                'http2_enabled': SUPABASE_HTTP2_ENABLED,
+            }
+        }
     
-    @classmethod
-    def is_client_closed_error(cls, error) -> bool:
-        """Check if an error indicates the HTTP client has been closed."""
-        error_str = str(error).lower()
-        return (
-            'client has been closed' in error_str or
-            'cannot send a request' in error_str and 'closed' in error_str
-        )
+    def increment_request_count(self):
+        """Increment request counter (call on each DB request)."""
+        self._request_count += 1
     
-    @classmethod
-    def is_recoverable_connection_error(cls, error) -> bool:
-        """Check if an error is recoverable via reconnection (route-not-found or client-closed)."""
-        return cls.is_route_not_found_error(error) or cls.is_client_closed_error(error)
-    
-    async def force_reconnect(self):
-        """Force reconnection - call this when you detect route-not-found errors."""
-        current_time = time.time()
-        # Prevent reconnection spam (max once per 1 second to allow retries with backoff)
-        if current_time - self._last_reset_time < 1:
-            logger.debug("Skipping reconnect - too soon since last reset")
-            return
-        
-        logger.warning("🔄 Forcing Supabase reconnection due to connection issues...")
-        self._last_reset_time = current_time
-        await self.reset_connection()
-        await self.initialize()
-        logger.info("✅ Supabase connection re-established")
+    def increment_error_count(self):
+        """Increment error counter (call on each DB error)."""
+        self._error_count += 1
 
-    def _create_http_client(self) -> httpx.AsyncClient:
-        """
-        Create an HTTP client with optimized settings for high-concurrency workloads.
-        
-        Features:
-        - Connection pooling with keepalive
-        - Transport-level retries for transient failures
-        - HTTP/2 multiplexing (configurable)
-        - Generous timeouts for stability under load
-        """
-        limits = httpx.Limits(
-            max_connections=SUPABASE_MAX_CONNECTIONS,
-            max_keepalive_connections=SUPABASE_MAX_KEEPALIVE,
-            keepalive_expiry=SUPABASE_KEEPALIVE_EXPIRY,
+    def _create_transport(self) -> httpx.AsyncHTTPTransport:
+        """Create HTTP transport with connection pooling."""
+        return httpx.AsyncHTTPTransport(
+            http2=SUPABASE_HTTP2_ENABLED,
+            limits=httpx.Limits(
+                max_connections=SUPABASE_MAX_CONNECTIONS,
+                max_keepalive_connections=SUPABASE_MAX_KEEPALIVE,
+                keepalive_expiry=SUPABASE_KEEPALIVE_EXPIRY,
+            ),
+            retries=SUPABASE_RETRIES,
         )
-        
+
+    def _configure_clients(self):
+        """Configure httpx clients with optimized settings."""
         timeout = httpx.Timeout(
             connect=SUPABASE_CONNECT_TIMEOUT,
             read=SUPABASE_READ_TIMEOUT,
@@ -126,134 +122,120 @@ class DBConnection:
             pool=SUPABASE_POOL_TIMEOUT,
         )
         
-        # Create transport with retries for connection-level failures
-        # This handles TCP connect failures, TLS handshake failures, etc.
-        transport = httpx.AsyncHTTPTransport(
-            retries=SUPABASE_RETRIES,
-            http2=SUPABASE_HTTP2_ENABLED,
-        )
-        
-        return httpx.AsyncClient(
-            limits=limits,
-            timeout=timeout,
-            transport=transport,
-        )
+        if self._client:
+            # Configure PostgREST client
+            pg = self._client.postgrest
+            pg.session.timeout = timeout
+            old_transport = pg.session._transport
+            pg.session._transport = self._create_transport()
+            asyncio.create_task(old_transport.aclose())
+            
+            # Configure Storage client
+            storage = self._client.storage
+            storage._client.timeout = timeout
+            old_storage = storage._client._transport
+            storage._client._transport = self._create_transport()
+            asyncio.create_task(old_storage.aclose())
 
     async def initialize(self):
+        """Initialize database connection."""
         if self._initialized:
             return
+        
+        # Lazily create the async lock (thread-safe via __new__)
+        if self._async_lock is None:
+            self._async_lock = asyncio.Lock()
+        
+        async with self._async_lock:
+            # Double-check after acquiring lock to prevent race condition
+            if self._initialized:
+                return
                 
-        try:
-            supabase_url = config.SUPABASE_URL
-            supabase_key = config.SUPABASE_SERVICE_ROLE_KEY or config.SUPABASE_ANON_KEY
-            
-            if not supabase_url or not supabase_key:
-                logger.error("Missing required environment variables for Supabase connection")
-                raise RuntimeError("SUPABASE_URL and a key (SERVICE_ROLE_KEY or ANON_KEY) environment variables must be set.")
+        supabase_url = config.SUPABASE_URL
+        supabase_key = config.SUPABASE_SERVICE_ROLE_KEY or config.SUPABASE_ANON_KEY
+        
+        if not supabase_url or not supabase_key:
+            raise RuntimeError("SUPABASE_URL and key must be set")
 
-            from supabase.lib.client_options import AsyncClientOptions
-            
-            # Create our custom HTTP client with optimized settings
-            self._http_client = self._create_http_client()
-            
-            # Pass the custom httpx client directly to the Supabase SDK
-            # This ensures ALL Supabase operations use our pooled/optimized client
-            options = AsyncClientOptions(
-                httpx_client=self._http_client,  # <-- KEY FIX: Use our custom client
-                postgrest_client_timeout=SUPABASE_READ_TIMEOUT,
-                storage_client_timeout=SUPABASE_READ_TIMEOUT,
-                function_client_timeout=SUPABASE_READ_TIMEOUT,
-            )
-            
-            self._client = await create_async_client(
-                supabase_url, 
-                supabase_key,
-                options=options
-            )
-            
-            self._initialized = True
-            key_type = "SERVICE_ROLE_KEY" if config.SUPABASE_SERVICE_ROLE_KEY else "ANON_KEY"
-            logger.info(
-                f"Database connection initialized with Supabase using {key_type} | "
-                f"pool(max={SUPABASE_MAX_CONNECTIONS}, keepalive={SUPABASE_MAX_KEEPALIVE}) | "
-                f"timeout(connect={SUPABASE_CONNECT_TIMEOUT}s, pool={SUPABASE_POOL_TIMEOUT}s) | "
-                f"transport(http2={SUPABASE_HTTP2_ENABLED}, retries={SUPABASE_RETRIES})"
-            )
-            
-        except Exception as e:
-            logger.error(f"Database initialization error: {e}")
-            raise RuntimeError(f"Failed to initialize database connection: {str(e)}")
+        from supabase.lib.client_options import AsyncClientOptions
+        
+        options = AsyncClientOptions(
+            postgrest_client_timeout=SUPABASE_READ_TIMEOUT,
+            storage_client_timeout=SUPABASE_READ_TIMEOUT,
+            function_client_timeout=SUPABASE_READ_TIMEOUT,
+        )
+        
+        self._client = await create_async_client(supabase_url, supabase_key, options=options)
+        self._configure_clients()
+        self._initialized = True
+        self._init_time = time.time()
+        self._request_count = 0
+        self._error_count = 0
+        
+        key_type = "SERVICE_ROLE" if config.SUPABASE_SERVICE_ROLE_KEY else "ANON"
+        logger.info(
+            f"Database initialized | key={key_type} pool={SUPABASE_MAX_CONNECTIONS} "
+            f"http2={SUPABASE_HTTP2_ENABLED} connect_timeout={SUPABASE_CONNECT_TIMEOUT}s "
+            f"pool_timeout={SUPABASE_POOL_TIMEOUT}s"
+        )
 
-    @classmethod
-    async def disconnect(cls):
-        if cls._instance:
-            try:
-                if cls._instance._http_client:
-                    await cls._instance._http_client.aclose()
-                if cls._instance._client and hasattr(cls._instance._client, 'close'):
-                    await cls._instance._client.close()
-            except Exception as e:
-                logger.warning(f"Error during disconnect: {e}")
-            finally:
-                cls._instance._initialized = False
-                cls._instance._client = None
-                cls._instance._http_client = None
-                logger.info("Database disconnected successfully")
+    async def force_reconnect(self):
+        """Force reconnection on errors."""
+        logger.warning("Forcing database reconnection...")
+        await self.reset_connection()
+        await self.initialize()
+        logger.info("Database reconnected")
 
     async def reset_connection(self):
-        try:
-            if self._http_client:
-                await self._http_client.aclose()
-            if self._client and hasattr(self._client, 'close'):
+        """Reset connection state."""
+        if self._client:
+            try:
                 await self._client.close()
-        except Exception as e:
-            logger.warning(f"Error closing client during reset: {e}")
-        
+            except Exception:
+                pass
         self._initialized = False
         self._client = None
-        self._http_client = None
-        logger.debug("Database connection reset")
 
     @property
     async def client(self) -> AsyncClient:
+        """Get database client, initializing if needed."""
         if not self._initialized:
             await self.initialize()
         if not self._client:
-            logger.error("Database client is None after initialization")
             raise RuntimeError("Database not initialized")
         return self._client
-    
-    async def get_client_with_retry(self, max_retries: int = 2) -> AsyncClient:
-        """
-        Get client with automatic reconnection on recoverable errors.
-        Use this for critical operations that need resilience.
-        Handles both route-not-found and client-closed errors.
-        """
-        for attempt in range(max_retries + 1):
+
+    @classmethod
+    async def disconnect(cls):
+        """Disconnect database."""
+        if cls._instance and cls._instance._client:
             try:
-                if not self._initialized:
-                    await self.initialize()
-                if not self._client:
-                    raise RuntimeError("Database not initialized")
-                return self._client
-            except Exception as e:
-                if self.is_recoverable_connection_error(e) and attempt < max_retries:
-                    error_type = "client-closed" if self.is_client_closed_error(e) else "route-not-found"
-                    logger.warning(f"🔄 Recoverable {error_type} error (attempt {attempt + 1}/{max_retries + 1}), forcing reconnect...")
-                    await self.force_reconnect()
-                else:
-                    raise
-        return self._client
+                await cls._instance._client.close()
+            except Exception:
+                pass
+            cls._instance._initialized = False
+            cls._instance._client = None
+            logger.info("Database disconnected")
+
+    @staticmethod
+    def is_recoverable_connection_error(error) -> bool:
+        """Check if error is recoverable via reconnection."""
+        error_str = str(error).lower()
+        return (
+            ('route' in error_str and 'not found' in error_str) or
+            ('client has been closed' in error_str) or
+            ('cannot send a request' in error_str and 'closed' in error_str)
+        )
+
+    @staticmethod
+    def is_client_closed_error(error) -> bool:
+        """Check if error indicates closed client."""
+        error_str = str(error).lower()
+        return 'client has been closed' in error_str or 'closed' in error_str
 
 
 async def execute_with_reconnect(db: DBConnection, operation, max_retries: int = 2):
-    """
-    Execute a database operation with automatic reconnection on recoverable errors.
-    Handles both route-not-found and client-closed errors.
-    
-    Usage:
-        result = await execute_with_reconnect(db, lambda client: client.table('x').select('*').execute())
-    """
+    """Execute database operation with automatic reconnection on errors."""
     last_error = None
     for attempt in range(max_retries + 1):
         try:
@@ -262,8 +244,7 @@ async def execute_with_reconnect(db: DBConnection, operation, max_retries: int =
         except Exception as e:
             last_error = e
             if DBConnection.is_recoverable_connection_error(e) and attempt < max_retries:
-                error_type = "client-closed" if DBConnection.is_client_closed_error(e) else "route-not-found"
-                logger.warning(f"🔄 Recoverable {error_type} error (attempt {attempt + 1}/{max_retries + 1}), reconnecting...")
+                logger.warning(f"Recoverable error (attempt {attempt + 1}/{max_retries + 1}), reconnecting...")
                 await db.force_reconnect()
             else:
                 raise

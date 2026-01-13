@@ -12,10 +12,11 @@ import { formatTimestamp, getToolTitle } from '../utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { LoadingState } from '../shared/LoadingState';
+import { ToolViewIconTitle } from '../shared/ToolViewIconTitle';
+import { ToolViewFooter } from '../shared/ToolViewFooter';
 import { extractCommandData } from './_utils';
 import { useToolStreamStore } from '@/stores/tool-stream-store';
-import { useSmoothToolField } from '@/hooks/messages/useSmoothToolArguments';
-import { useSmoothText } from '@/hooks/messages/useSmoothText';
+import { useSmoothToolField, useSmoothText } from '@/hooks/messages';
 
 export function CommandToolView({
   toolCall,
@@ -50,19 +51,19 @@ export function CommandToolView({
 
   // Apply smooth text streaming for command field
   const rawArguments = toolCall?.rawArguments || toolCall?.arguments;
-  const { displayedValue: smoothCommand, isAnimating: isCommandAnimating } = useSmoothToolField(
-    rawArguments,
-    'command',
-    120,
-    isStreaming && !toolResult
+  const smoothFields = useSmoothToolField(
+    (typeof rawArguments === 'object' && rawArguments) ? rawArguments : {},
+    { interval: 50 }
   );
+  const smoothCommand = (smoothFields as any).command || (typeof rawArguments === 'object' ? rawArguments?.command : '') || '';
+  const isCommandAnimating = isStreaming && !toolResult;
 
   // Apply smooth text streaming for output (use useSmoothText since output is a plain string)
-  const { text: smoothOutput, isAnimating: isOutputAnimating } = useSmoothText(
+  const smoothOutput = useSmoothText(
     streamingOutput || output || '',
-    120,
-    isStreaming && isOutputStreaming && !toolResult
+    { speed: 120 }
   );
+  const isOutputAnimating = isStreaming && isOutputStreaming && !toolResult;
   
   // Use smooth streaming output when available, otherwise use regular streaming output or result output
   const displayOutput = isStreaming && isOutputStreaming && smoothOutput 
@@ -182,17 +183,7 @@ export function CommandToolView({
     <Card className="flex flex-col h-full overflow-hidden border-0 shadow-none p-0 rounded-none bg-card">
       <CardHeader className="flex-shrink-0 h-14 bg-zinc-50/80 dark:bg-zinc-900/80 backdrop-blur-sm border-b p-2 px-4 space-y-2">
         <div className="flex flex-row items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="relative p-2 rounded-lg border flex-shrink-0 bg-zinc-200/60 dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700">
-              <Terminal className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />
-            </div>
-            <div>
-              <CardTitle className="text-base font-medium text-zinc-900 dark:text-zinc-100">
-                {toolTitle}
-              </CardTitle>
-            </div>
-          </div>
-
+          <ToolViewIconTitle icon={Terminal} title={toolTitle} />
         </div>
       </CardHeader>
 
@@ -212,7 +203,7 @@ export function CommandToolView({
                     </div>
                     <div className="p-4 overflow-x-auto">
                       <pre className="text-xs text-foreground font-mono whitespace-pre-wrap break-words">
-                        <span className="text-green-500 dark:text-green-400 font-semibold">{displayPrefix} </span>
+                        <span className="text-zinc-500 dark:text-zinc-400 font-semibold">{displayPrefix} </span>
                         <span className="text-foreground">{displayCommand}</span>
                         {isCommandAnimating && <span className="animate-pulse text-muted-foreground">▌</span>}
                       </pre>
@@ -230,8 +221,8 @@ export function CommandToolView({
                         </Badge>
                         <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                           <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-zinc-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-zinc-500"></span>
                           </span>
                           Live
                         </span>
@@ -252,8 +243,8 @@ export function CommandToolView({
               <div className="flex-1 min-h-0 flex items-center justify-center">
                 <LoadingState
                   icon={Terminal}
-                  iconColor="text-blue-500 dark:text-blue-400"
-                  bgColor="bg-gradient-to-b from-blue-100 to-blue-50 shadow-inner dark:from-blue-800/40 dark:to-blue-900/60 dark:shadow-blue-950/20"
+                  iconColor="text-zinc-500 dark:text-zinc-400"
+                  bgColor="bg-gradient-to-b from-zinc-100 to-zinc-50 shadow-inner dark:from-zinc-800/40 dark:to-zinc-900/60"
                   title={name === 'check-command-output' ? 'Checking command output' : 'Executing command'}
                   filePath={displayText || 'Processing command...'}
                   showProgress={true}
@@ -277,7 +268,7 @@ export function CommandToolView({
                     </div>
                     <div className="p-4 overflow-x-auto">
                       <pre className="text-xs text-foreground font-mono whitespace-pre-wrap break-words">
-                        <span className="text-green-500 dark:text-green-400 font-semibold">{displayPrefix} </span>
+                        <span className="text-zinc-500 dark:text-zinc-400 font-semibold">{displayPrefix} </span>
                         <span className="text-foreground">{displayCommand}</span>
                       </pre>
                     </div>
@@ -289,7 +280,7 @@ export function CommandToolView({
                   <div className="bg-card border border-border rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <Badge variant="outline" className="text-xs px-2.5 py-0.5 h-5 font-normal">
-                        <CircleDashed className="h-2.5 w-2.5 mr-1 opacity-70 text-blue-500" />
+                        <CircleDashed className="h-2.5 w-2.5 mr-1 opacity-70 text-zinc-500 dark:text-zinc-400" />
                         Status
                       </Badge>
                     </div>
@@ -354,25 +345,18 @@ export function CommandToolView({
         )}
       </CardContent>
 
-      <div className="flex-shrink-0 px-4 py-2 h-10 bg-gradient-to-r from-zinc-50/90 to-zinc-100/90 dark:from-zinc-900/90 dark:to-zinc-800/90 backdrop-blur-sm border-t border-zinc-200 dark:border-zinc-800 flex justify-between items-center gap-4">
-        <div className="h-full flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
-          {!isStreaming && displayText && (
-            <Badge variant="outline" className="h-6 py-0.5 bg-zinc-50 dark:bg-zinc-900">
-              <Terminal className="h-3 w-3 mr-1" />
-              {displayLabel}
-            </Badge>
-          )}
-        </div>
-
-        <div className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-2">
-          <Clock className="h-3.5 w-3.5" />
-          {actualToolTimestamp && !isStreaming
-            ? formatTimestamp(actualToolTimestamp)
-            : actualAssistantTimestamp
-              ? formatTimestamp(actualAssistantTimestamp)
-              : ''}
-        </div>
-      </div>
+      <ToolViewFooter
+        assistantTimestamp={actualAssistantTimestamp}
+        toolTimestamp={actualToolTimestamp}
+        isStreaming={isStreaming}
+      >
+        {!isStreaming && displayText && (
+          <Badge variant="outline" className="h-6 py-0.5 bg-zinc-50 dark:bg-zinc-900">
+            <Terminal className="h-3 w-3 mr-1" />
+            {displayLabel}
+          </Badge>
+        )}
+      </ToolViewFooter>
     </Card>
   );
 }

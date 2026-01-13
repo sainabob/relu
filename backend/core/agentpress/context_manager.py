@@ -7,6 +7,7 @@ reaching the context window limitations of LLM models.
 
 import json
 import os
+import asyncio
 from typing import List, Dict, Any, Optional, Union
 
 from litellm.utils import token_counter
@@ -14,7 +15,7 @@ from anthropic import Anthropic
 from core.services.supabase import DBConnection
 from core.utils.logger import logger
 from core.ai_models import model_manager
-from core.agentpress.prompt_caching import apply_anthropic_caching_strategy
+from core.agentpress.prompt_caching import apply_anthropic_caching_strategy, supports_prompt_caching
 
 DEFAULT_TOKEN_THRESHOLD = 120000
 
@@ -51,13 +52,14 @@ def _get_bedrock_client_singleton():
 class ContextManager:
     """Manages thread context including token counting and summarization."""
     
-    def __init__(self, token_threshold: int = DEFAULT_TOKEN_THRESHOLD):
+    def __init__(self, token_threshold: int = DEFAULT_TOKEN_THRESHOLD, db=None):
         """Initialize the ContextManager.
         
         Args:
             token_threshold: Token count threshold to trigger summarization
+            db: Optional DBConnection instance to reuse (avoids creating new ones)
         """
-        self.db = DBConnection()
+        self.db = db if db is not None else DBConnection()
         self.token_threshold = token_threshold
         # Tool output management
         self.keep_recent_tool_outputs = 5  # Number of recent tool outputs to preserve
@@ -90,49 +92,14 @@ class ContextManager:
         if not compressed_messages:
             return 0
         
-        saved_count = 0
-        upgraded_count = 0
-        client = await self.db.client
+        from core.threads import repo as threads_repo
         
-        for msg_data in compressed_messages:
-            message_id = msg_data.get('message_id')
-            compressed_content = msg_data.get('compressed_content')
-            is_omission = msg_data.get('is_omission', False)  # Flag for omission placeholders
-            
-            if not message_id or not compressed_content:
-                continue
-            
-            try:
-                # Get existing metadata
-                result = await client.table('messages').select('metadata').eq('message_id', message_id).single().execute()
-                
-                if result.data:
-                    existing_metadata = result.data.get('metadata', {}) or {}
-                    was_already_compressed = existing_metadata.get('compressed', False)
-                    
-                    # Always update compressed content - allows upgrading to more aggressive compression
-                    # (e.g., tiered compression placeholder replacing LLM summary)
-                    existing_metadata['compressed'] = True
-                    existing_metadata['compressed_content'] = compressed_content
-                    if is_omission:
-                        existing_metadata['omitted'] = True
-                    
-                    await client.table('messages').update({
-                        'metadata': existing_metadata
-                    }).eq('message_id', message_id).execute()
-                    
-                    if was_already_compressed:
-                        upgraded_count += 1
-                    else:
-                        saved_count += 1
-                    
-            except Exception as e:
-                logger.warning(f"Failed to save compressed message {message_id}: {e}")
+        saved_count = await threads_repo.save_compressed_messages_batch(compressed_messages)
         
-        if saved_count > 0 or upgraded_count > 0:
-            logger.info(f"💾 Compression save: {saved_count} new, {upgraded_count} upgraded")
+        if saved_count > 0:
+            logger.info(f"💾 Compression save: {saved_count} messages saved")
         
-        return saved_count + upgraded_count
+        return saved_count
     
     def _get_bedrock_client(self):
         """Get the singleton Bedrock client."""
@@ -161,7 +128,7 @@ class ContextManager:
         messages_to_count = messages
         system_to_count = system_prompt
         
-        if apply_caching and ('claude' in model.lower() or 'anthropic' in model.lower()):
+        if apply_caching and supports_prompt_caching(model):
             try:
                 # Temporarily apply caching transformation
                 prepared = await apply_anthropic_caching_strategy(
@@ -292,11 +259,11 @@ class ContextManager:
             except Exception as e:
                 logger.debug(f"Bedrock token counting failed, falling back to LiteLLM: {e}")
         
-        # Fallback to LiteLLM token_counter
+        # Fallback to LiteLLM token_counter (wrap in thread pool - CPU-heavy tiktoken operation)
         if system_to_count:
-            return token_counter(model=model, messages=[system_to_count] + messages_to_count)
+            return await asyncio.to_thread(token_counter, model=model, messages=[system_to_count] + messages_to_count)
         else:
-            return token_counter(model=model, messages=messages_to_count)
+            return await asyncio.to_thread(token_counter, model=model, messages=messages_to_count)
 
     async def estimate_token_usage(self, prompt_messages: List[Dict[str, Any]], completion_content: str, model: str) -> Dict[str, Any]:
         """
@@ -318,10 +285,10 @@ class ContextManager:
             # Count prompt tokens using accurate provider APIs
             prompt_tokens = await self.count_tokens(model, prompt_messages, apply_caching=False)
             
-            # Count completion tokens (just the text)
+            # Count completion tokens (just the text) - wrap in thread pool (CPU-heavy tiktoken operation)
             completion_tokens = 0
             if completion_content:
-                completion_tokens = token_counter(model=model, text=completion_content)
+                completion_tokens = await asyncio.to_thread(token_counter, model=model, text=completion_content)
             
             total_tokens = prompt_tokens + completion_tokens
             
@@ -1006,7 +973,8 @@ class ContextManager:
                         if _i > self.keep_recent_user_messages:  # If this is not one of the most recent N User messages
                             message_id = msg.get('message_id')  # Get the message_id
                             if message_id:
-                                msg["content"] = self.compress_message(msg["content"], message_id, token_threshold * 3)
+                                # Secondary compression - just placeholder
+                                msg["content"] = f"[Content compressed]\n\nmessage_id \"{message_id}\"\nUse expand-message tool to see contents"
                             else:
                                 logger.warning(f"UNEXPECTED: Message has no message_id {str(msg)[:100]}")
                         else:
@@ -1036,7 +1004,8 @@ class ContextManager:
                         if _i > self.keep_recent_assistant_messages:  # If this is not one of the most recent N Assistant messages
                             message_id = msg.get('message_id')  # Get the message_id
                             if message_id:
-                                msg["content"] = self.compress_message(msg["content"], message_id, token_threshold * 3)
+                                # Secondary compression - just placeholder
+                                msg["content"] = f"[Content compressed]\n\nmessage_id \"{message_id}\"\nUse expand-message tool to see contents"
                             else:
                                 logger.warning(f"UNEXPECTED: Message has no message_id {str(msg)[:100]}")
                         else:
@@ -1183,8 +1152,8 @@ class ContextManager:
 
         # Recurse if still too large
         if max_iterations <= 0:
-            logger.warning(f"Max iterations reached, omitting messages")
-            result = await self.compress_messages_by_omitting_messages(result, llm_model, max_tokens, system_prompt=system_prompt)
+            logger.warning(f"Max iterations reached, omitting messages to target ({target_tokens})")
+            result = await self.compress_messages_by_omitting_messages(result, llm_model, target_tokens, system_prompt=system_prompt)
             compressed_total = await self.count_tokens(llm_model, result, system_prompt, apply_caching=True)
             # Fall through to last_usage update
         elif compressed_total > max_tokens:
@@ -1351,6 +1320,25 @@ class ContextManager:
             if omitted_to_save:
                 try:
                     await self.save_compressed_messages(omitted_to_save)
+                    
+                    # Also mark any tool results belonging to omitted assistant messages
+                    # This handles the case where tool results were compressed separately
+                    omitted_tool_call_ids = []
+                    for msg in all_omitted_messages:
+                        if msg.get('tool_calls'):
+                            for tc in msg['tool_calls']:
+                                tc_id = tc.get('id')
+                                if tc_id:
+                                    omitted_tool_call_ids.append(tc_id)
+                    
+                    if omitted_tool_call_ids and self.thread_id:
+                        from core.threads import repo as threads_repo
+                        marked_count = await threads_repo.mark_tool_results_as_omitted(
+                            self.thread_id, 
+                            omitted_tool_call_ids
+                        )
+                        if marked_count > 0:
+                            logger.info(f"📝 Also marked {marked_count} orphaned tool results as omitted")
                 except Exception as e:
                     logger.warning(f"Failed to save omitted messages: {e}")
 
@@ -1448,6 +1436,25 @@ class ContextManager:
             if omitted_to_save:
                 try:
                     await self.save_compressed_messages(omitted_to_save)
+                    
+                    # Also mark any tool results belonging to omitted assistant messages
+                    omitted_tool_call_ids = []
+                    for group in removed_groups:
+                        for msg in group:
+                            if msg.get('tool_calls'):
+                                for tc in msg['tool_calls']:
+                                    tc_id = tc.get('id')
+                                    if tc_id:
+                                        omitted_tool_call_ids.append(tc_id)
+                    
+                    if omitted_tool_call_ids and self.thread_id:
+                        from core.threads import repo as threads_repo
+                        marked_count = await threads_repo.mark_tool_results_as_omitted(
+                            self.thread_id, 
+                            omitted_tool_call_ids
+                        )
+                        if marked_count > 0:
+                            logger.info(f"📝 Also marked {marked_count} orphaned tool results as omitted")
                 except Exception as e:
                     logger.warning(f"Failed to save middle-out omitted messages: {e}")
         

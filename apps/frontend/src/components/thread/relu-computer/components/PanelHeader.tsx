@@ -1,7 +1,7 @@
 'use client';
 
 import { memo, useState, useEffect } from 'react';
-import { CircleDashed, Minimize2, Maximize2, Wifi, Battery, BatteryLow, BatteryMedium, BatteryFull, BatteryCharging } from 'lucide-react';
+import { Minimize2, Wifi, BatteryLow, BatteryMedium, BatteryFull, BatteryCharging, Library, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DrawerTitle } from '@/components/ui/drawer';
 import { ViewType } from '@/stores/relu-computer-store';
@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { ViewToggle } from './ViewToggle';
 import { ToolbarButtons } from './ToolbarButtons';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
 
 function useBatteryStatus() {
   const [batteryInfo, setBatteryInfo] = useState<{ level: number; charging: boolean } | null>(null);
@@ -98,6 +99,85 @@ function StatusBar() {
   );
 }
 
+interface ActionFilesSwitcherProps {
+  currentView: ViewType;
+  onViewChange: (view: ViewType) => void;
+  size?: 'sm' | 'md';
+}
+
+function ActionFilesSwitcher({ currentView, onViewChange, size = 'md' }: ActionFilesSwitcherProps) {
+  const isAction = currentView === 'tools';
+  const isFiles = currentView === 'files';
+  
+  // Responsive sizing
+  const containerPadding = size === 'sm' ? 'p-1' : 'p-1';
+  const buttonPadding = size === 'sm' ? 'px-3 py-1.5' : 'px-4 py-2';
+  const fontSize = size === 'sm' ? 'text-[11px]' : 'text-xs';
+  const iconSize = size === 'sm' ? 'h-3 w-3' : 'h-3.5 w-3.5';
+  const indicatorHeight = size === 'sm' ? 'h-7' : 'h-8';
+  const gap = size === 'sm' ? 'gap-1.5' : 'gap-2';
+
+  return (
+    <div className={cn(
+      "relative flex items-center bg-muted rounded-2xl",
+      containerPadding
+    )}>
+      {/* Sliding indicator */}
+      <motion.div
+        className={cn(
+          "absolute top-1 bg-white dark:bg-zinc-700 rounded-xl shadow-sm",
+          indicatorHeight
+        )}
+        style={{
+          left: 4,
+          width: 'calc(50% - 4px)',
+        }}
+        initial={false}
+        animate={{
+          x: isAction ? 0 : 'calc(100% + 0px)',
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 400,
+          damping: 30
+        }}
+      />
+      
+      <button
+        onClick={() => onViewChange('tools')}
+        className={cn(
+          "relative z-10 flex items-center justify-center rounded-xl font-medium transition-colors duration-150 flex-1",
+          buttonPadding,
+          fontSize,
+          gap,
+          isAction
+            ? "text-zinc-900 dark:text-white"
+            : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300"
+        )}
+      >
+        <Zap className={cn(iconSize, isAction && "fill-current")} />
+        <span>Action</span>
+      </button>
+      
+      <button
+        onClick={() => onViewChange('files')}
+        className={cn(
+          "relative z-10 flex items-center justify-center rounded-xl font-medium transition-colors duration-150 flex-1",
+          buttonPadding,
+          fontSize,
+          gap,
+          isFiles
+            ? "text-zinc-900 dark:text-white"
+            : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300"
+        )}
+      >
+        <Library className={cn(iconSize)} />
+        <span>Files</span>
+      </button>
+    </div>
+  );
+}
+
 interface PanelHeaderProps {
   agentName?: string;
   onClose: () => void;
@@ -143,7 +223,11 @@ export const PanelHeader = memo(function PanelHeader({
           </DrawerTitle>
         </div>
         <div className="flex items-center gap-2">
-          <ViewToggle currentView={currentView} onViewChange={onViewChange} showFilesTab={showFilesTab} />
+          <ActionFilesSwitcher 
+            currentView={currentView} 
+            onViewChange={onViewChange} 
+            size="sm"
+          />
           <Button
             variant="ghost"
             size="icon"
@@ -184,15 +268,11 @@ export const PanelHeader = memo(function PanelHeader({
       </div>
       
       <div className="flex items-center justify-end gap-2">
-        {isStreaming && (
-          <div className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-primary/10 text-primary flex items-center gap-1">
-            <CircleDashed className="h-2.5 w-2.5 animate-spin" />
-            <span>Running</span>
-          </div>
-        )}
-        {!hideViewToggle && (
-          <ViewToggle currentView={currentView} onViewChange={onViewChange} showFilesTab={showFilesTab} />
-        )}
+        <ActionFilesSwitcher 
+          currentView={currentView} 
+          onViewChange={onViewChange} 
+          size={isMaximized ? 'sm' : 'md'}
+        />
         {isMaximized && (
           <>
             <StatusBar />

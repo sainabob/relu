@@ -40,6 +40,7 @@ import {
   MessageSquare,
   ExternalLink,
 } from 'lucide-react';
+import { KortixLoader } from '@/components/ui/kortix-loader';
 import { useAdminUserDetails, useAdminUserThreads, useAdminUserActivity } from '@/hooks/admin/use-admin-users';
 import {
   useUserBillingSummary,
@@ -48,7 +49,7 @@ import {
   useAdminUserTransactions,
 } from '@/hooks/billing';
 import type { UserSummary } from '@/hooks/admin/use-admin-users';
-import { formatCredits, dollarsToCredits, formatCreditsWithSign } from '@/lib/utils/credit-formatter';
+import { formatCredits, dollarsToCredits, formatCreditsWithSign } from '@agentpress/shared';
 
 interface AdminUserDetailsDialogProps {
   user: UserSummary | null;
@@ -615,7 +616,7 @@ export function AdminUserDetailsDialog({
                       >
                         {processRefundMutation.isPending ? (
                           <>
-                            <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                            <KortixLoader size="small" className="mr-2" />
                             Processing...
                           </>
                         ) : (

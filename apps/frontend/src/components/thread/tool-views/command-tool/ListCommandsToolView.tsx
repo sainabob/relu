@@ -14,6 +14,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { LoadingState } from '../shared/LoadingState';
+import { ToolViewIconTitle } from '../shared/ToolViewIconTitle';
+import { ToolViewFooter } from '../shared/ToolViewFooter';
 
 interface CommandSession {
   session_name?: string;
@@ -98,17 +100,7 @@ export function ListCommandsToolView({
     <Card className="gap-0 flex border-0 shadow-none p-0 py-0 rounded-none flex-col h-full overflow-hidden bg-card">
       <CardHeader className="h-14 bg-zinc-50/80 dark:bg-zinc-900/80 backdrop-blur-sm border-b p-2 px-4 space-y-2">
         <div className="flex flex-row items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="relative p-2 rounded-xl bg-gradient-to-br from-zinc-500/20 to-zinc-600/10 border border-zinc-500/20">
-              <Terminal className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />
-            </div>
-            <div>
-              <CardTitle className="text-base font-medium text-zinc-900 dark:text-zinc-100">
-                {toolTitle}
-              </CardTitle>
-            </div>
-          </div>
-
+          <ToolViewIconTitle icon={Terminal} title={toolTitle} />
         </div>
       </CardHeader>
 
@@ -116,8 +108,8 @@ export function ListCommandsToolView({
         {isStreaming ? (
           <LoadingState
             icon={Terminal}
-            iconColor="text-blue-500 dark:text-blue-400"
-            bgColor="bg-gradient-to-b from-blue-100 to-blue-50 shadow-inner dark:from-blue-800/40 dark:to-blue-900/60 dark:shadow-blue-950/20"
+            iconColor="text-zinc-500 dark:text-zinc-400"
+            bgColor="bg-gradient-to-b from-zinc-100 to-zinc-50 shadow-inner dark:from-zinc-800/40 dark:to-zinc-900/60"
             title="Listing commands"
             filePath="Retrieving running commands..."
             showProgress={true}
@@ -148,7 +140,7 @@ export function ListCommandsToolView({
                             variant="outline"
                             className={`text-xs h-4 px-1.5 ${
                               status.toLowerCase().includes('running')
-                                ? 'border-emerald-700/30 text-emerald-400'
+                                ? 'border-zinc-700/30 text-zinc-400'
                                 : ''
                             }`}
                           >
@@ -170,7 +162,7 @@ export function ListCommandsToolView({
                             </Badge>
                           </div>
                           <div className="font-mono text-xs text-foreground">
-                            <span className="text-green-500 dark:text-green-400 font-semibold">$ </span>
+                            <span className="text-zinc-500 dark:text-zinc-400 font-semibold">$ </span>
                             <span className="text-foreground">{command}</span>
                           </div>
                         </div>

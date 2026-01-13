@@ -22,7 +22,6 @@ import { X, Image as ImageIcon, Presentation, BarChart3, FileText, Search, Palet
 import { ReluLoader } from '@/components/ui/kortix-loader';
 import { VoiceRecorder } from './voice-recorder';
 import { useTheme } from 'next-themes';
-import { UnifiedConfigMenu } from './unified-config-menu';
 import { AttachmentGroup } from '../file-attachment';
 import { cn } from '@/lib/utils';
 import { useModelSelection } from '@/hooks/agents';
@@ -43,6 +42,7 @@ import { isStagingMode, isLocalMode } from '@/lib/config';
 import { PlanSelectionModal } from '@/components/billing/pricing';
 import { AgentConfigurationDialog } from '@/components/agents/agent-configuration-dialog';
 import { SpotlightCard } from '@/components/ui/spotlight-card';
+import { UnifiedConfigMenu } from './unified-config-menu';
 
 import posthog from 'posthog-js';
 import { trackCtaUpgrade } from '@/lib/analytics/gtm';
@@ -414,23 +414,24 @@ const ModeButton = memo(function ModeButton({
 
   const getModeIcon = (mode: string) => {
     const iconClass = "w-4 h-4";
+    const strokeWidth = 2;
     switch (mode) {
       case 'research':
-        return <Search className={iconClass} />;
+        return <Search className={iconClass} strokeWidth={strokeWidth} />;
       case 'canvas':
-        return <Palette className={iconClass} />;
+        return <Palette className={iconClass} strokeWidth={strokeWidth} />;
       case 'video':
-        return <Video className={iconClass} />;
+        return <Video className={iconClass} strokeWidth={strokeWidth} />;
       case 'code':
-        return <Code2 className={iconClass} />;
+        return <Code2 className={iconClass} strokeWidth={strokeWidth} />;
       case 'docs':
-        return <FileText className={iconClass} />;
+        return <FileText className={iconClass} strokeWidth={strokeWidth} />;
       case 'data':
-        return <BarChart3 className={iconClass} />;
+        return <BarChart3 className={iconClass} strokeWidth={strokeWidth} />;
       case 'slides':
-        return <Presentation className={iconClass} />;
+        return <Presentation className={iconClass} strokeWidth={strokeWidth} />;
       case 'image':
-        return <ImageIcon className={iconClass} />;
+        return <ImageIcon className={iconClass} strokeWidth={strokeWidth} />;
       default:
         return null;
     }
@@ -459,7 +460,7 @@ const ModeButton = memo(function ModeButton({
           {selectedMode.charAt(0).toUpperCase()}{selectedMode.slice(1)}
         </span>
       )}
-      <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+      <X className="w-4 h-4" strokeWidth={2} />
     </Button>
   );
 });
@@ -906,7 +907,7 @@ export const ChatInput = memo(forwardRef<ChatInputHandles, ChatInputProps>(
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const { data: agentsResponse, isLoading: isLoadingAgents } = useAgents({}, { enabled: isLoggedIn });
-    const agents = agentsResponse?.agents || [];
+    const agents = Array.isArray(agentsResponse?.agents) ? agentsResponse.agents : [];
 
     // Check if selected agent is Relu based on agent data
     // While loading, default to Relu (assume Relu is the default agent)
@@ -1065,18 +1066,8 @@ export const ChatInput = memo(forwardRef<ChatInputHandles, ChatInputProps>(
 
       let message = currentValue;
 
-      if (currentUploadedFiles.length > 0) {
-        const fileInfo = currentUploadedFiles
-          .map((file) => {
-            // Convert absolute path to relative (strip /workspace/ prefix)
-            const relativePath = file.path.startsWith('/workspace/') 
-              ? file.path.replace('/workspace/', '') 
-              : file.path;
-            return `[Uploaded File: ${relativePath}]`;
-          })
-          .join('\n');
-        message = message ? `${message}\n\n${fileInfo}` : fileInfo;
-      }
+      // File references are now built by backend - frontend just passes file_ids
+      // No need to add file references here
 
       // Append Markdown for data visualization options
       const dataOptionsMarkdown = generateDataOptionsMarkdown();
@@ -1204,29 +1195,6 @@ export const ChatInput = memo(forwardRef<ChatInputHandles, ChatInputProps>(
       setIsDraggingOver(false);
     };
 
-    const renderConfigDropdown = useMemo(() => {
-      // Don't render dropdown components until after hydration to prevent ID mismatches
-      if (!mounted) {
-        return <div className="flex items-center gap-2 h-8" />; // Placeholder with same height
-      }
-      // Unified compact menu for both logged and non-logged (non-logged shows only models subset via menu trigger)
-      return (
-        <div className="flex items-center gap-2">
-          <UnifiedConfigMenu
-            isLoggedIn={isLoggedIn}
-            selectedAgentId={!hideAgentSelection ? selectedAgentId : undefined}
-            onAgentSelect={!hideAgentSelection ? onAgentSelect : undefined}
-            selectedModel={selectedModel}
-            onModelChange={handleModelChange}
-            modelOptions={modelOptions}
-            subscriptionStatus={subscriptionStatus}
-            canAccessModel={canAccessModel}
-            refreshCustomModels={refreshCustomModels}
-          />
-        </div>
-      );
-    }, [mounted, isLoggedIn, hideAgentSelection, selectedAgentId, onAgentSelect, selectedModel, handleModelChange, modelOptions, subscriptionStatus, canAccessModel, refreshCustomModels]);
-
     // Stable callback for submit from textarea
     const handleTextareaSubmit = useCallback(() => {
       handleSubmit({ preventDefault: () => {} } as React.FormEvent);
@@ -1272,7 +1240,7 @@ export const ChatInput = memo(forwardRef<ChatInputHandles, ChatInputProps>(
     // Controls are split into left and right to minimize re-renders
     // Memoized to prevent recreation on every keystroke
     const leftControls = useMemo(() => (
-      <div className="flex items-center gap-2 min-w-0 flex-shrink overflow-visible">
+      <div className="flex items-center gap-1.5 min-w-0 flex-shrink overflow-visible">
         {!hideAttachments && (
           <FileUploadHandler
             ref={fileInputRef}
@@ -1325,7 +1293,13 @@ export const ChatInput = memo(forwardRef<ChatInputHandles, ChatInputProps>(
 
     const rightControls = useMemo(() => (
       <div className='flex items-center gap-2 flex-shrink-0'>
-        {renderConfigDropdown}
+        {!hideAgentSelection && (
+          <UnifiedConfigMenu
+            isLoggedIn={isLoggedIn}
+            selectedAgentId={selectedAgentId}
+            onAgentSelect={onAgentSelect}
+          />
+        )}
 
         {isLoggedIn && <VoiceRecorder
           onTranscription={handleTranscription}
@@ -1345,7 +1319,7 @@ export const ChatInput = memo(forwardRef<ChatInputHandles, ChatInputProps>(
           pendingFilesCount={pendingFilesCount}
         />
       </div>
-    ), [renderConfigDropdown, isLoggedIn, loading, disabled, handleTranscription, isAgentRunning, hasContent, hasFiles, isUploading, onStopAgent, handleSubmit, buttonLoaderVariant, pendingFilesCount]);
+    ), [isLoggedIn, loading, disabled, handleTranscription, isAgentRunning, hasContent, hasFiles, isUploading, onStopAgent, handleSubmit, buttonLoaderVariant, pendingFilesCount, hideAgentSelection, selectedAgentId, onAgentSelect]);
 
     const renderControls = useMemo(() => (
       <div className="flex items-center justify-between mt-0 mb-1 px-2 gap-1.5">

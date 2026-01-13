@@ -8,7 +8,7 @@ from core.utils.cache import Cache
 from core.utils.logger import logger
 
 
-ACCOUNT_STATE_CACHE_TTL = 30  # 30 seconds - reduced to prevent stale data after checkout
+ACCOUNT_STATE_CACHE_TTL = 600
 
 
 async def invalidate_account_state_cache(account_id: str):
@@ -19,10 +19,13 @@ async def invalidate_account_state_cache(account_id: str):
 
 
 async def invalidate_all_billing_caches(account_id: str):
-    """Invalidate all billing-related caches for a user."""
-    await Cache.invalidate(f"account_state:{account_id}")
-    await Cache.invalidate(f"credit_balance:{account_id}")
-    await Cache.invalidate(f"credit_summary:{account_id}")
-    await Cache.invalidate(f"subscription_tier:{account_id}")
+    """Invalidate all billing-related caches for a user using batch operation."""
+    keys = [
+        f"account_state:{account_id}",
+        f"credit_balance:{account_id}",
+        f"credit_summary:{account_id}",
+        f"subscription_tier:{account_id}"
+    ]
+    await Cache.invalidate_multiple(keys)
     logger.info(f"[BILLING CACHE] All caches invalidated for {account_id}")
 

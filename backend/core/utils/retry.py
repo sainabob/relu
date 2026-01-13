@@ -9,9 +9,9 @@ from core.services.supabase import DBConnection
 
 T = TypeVar("T")
 
-DB_DEFAULT_MAX_RETRIES = 4
+DB_DEFAULT_MAX_RETRIES = 6
 DB_RETRY_INITIAL_DELAY = 0.5
-DB_RETRY_MAX_DELAY = 3.0
+DB_RETRY_MAX_DELAY = 10.0
 DB_RETRY_JITTER_FACTOR = 0.3
 
 DB_RETRYABLE_EXCEPTIONS: Tuple[Type[Exception], ...] = (
@@ -149,6 +149,7 @@ async def retry_db_operation(
         max_delay = DB_RETRY_MAX_DELAY
     
     last_exception: Optional[Exception] = None
+    # Use singleton - already initialized at startup
     db = DBConnection()
     op_name = operation_name or "Database operation"
     
