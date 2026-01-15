@@ -50,7 +50,7 @@ export function getFrontendUrl(): string {
     case EnvMode.PRODUCTION:
       return 'https://relu.work';
     case EnvMode.STAGING:
-      return 'https://staging.suna.so';
+      return 'https://staging.relu.work';
     case EnvMode.LOCAL:
     default:
       return 'http://localhost:3000';

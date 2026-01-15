@@ -63,7 +63,7 @@ import {
   AreaChart,
   type LucideIcon,
 } from 'lucide-react';
-import { KortixLoader } from '@/components/ui/kortix-loader';
+import { ReluLoader } from '@/components/ui/relu-loader';
 import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Card } from '@/components/ui/card';
@@ -72,7 +72,7 @@ import { getPdfUrl } from '@/components/thread/tool-views/utils/presentation-uti
 import { useTranslations } from 'next-intl';
 import { PromptExamples } from '@/components/shared/prompt-examples';
 
-interface SunaModesPanelProps {
+interface ReluModesPanelProps {
   selectedMode: string | null;
   onModeSelect: (mode: string | null) => void;
   onSelectPrompt: (prompt: string) => void;
@@ -1251,7 +1251,7 @@ const ChartIcon = ({ type, className }: { type: string; className?: string }) =>
   }
 };
 
-export function SunaModesPanel({ 
+export function ReluModesPanel({ 
   selectedMode, 
   onModeSelect, 
   onSelectPrompt, 
@@ -1264,8 +1264,8 @@ export function SunaModesPanel({
   onTemplateChange,
   isFreeTier = false,
   onUpgradeClick,
-}: SunaModesPanelProps) {
-  const t = useTranslations('suna');
+}: ReluModesPanelProps) {
+  const t = useTranslations('relu');
   const currentMode = selectedMode ? modes.find((m) => m.id === selectedMode) : null;
   const promptCount = isMobile ? 2 : 4;
   
@@ -1284,7 +1284,7 @@ export function SunaModesPanel({
         const key = `prompts.${modeId}.${index}` as any;
         const translatedText = t(key);
         // Check if translation exists (next-intl returns the key if missing)
-        if (!translatedText || translatedText === `suna.${key}` || translatedText.startsWith('suna.prompts.') || translatedText.includes(modeId)) {
+        if (!translatedText || translatedText === `relu.${key}` || translatedText.startsWith('relu.prompts.') || translatedText.includes(modeId)) {
           // If translation is missing, use the hardcoded prompt
           prompts.push(originalPrompt);
         } else {
@@ -1401,7 +1401,7 @@ export function SunaModesPanel({
 
   return (
     <div className="w-full space-y-4">
-      {/* Mode Tabs - Kortix minimal design */}
+      {/* Mode Tabs - Relu minimal design */}
       <div className="flex items-center justify-center animate-in fade-in-0 zoom-in-95 duration-300 px-2 sm:px-0">
         <div className="grid grid-cols-3 gap-2 sm:inline-flex sm:gap-2">
           {modes.map((mode) => {
@@ -1414,7 +1414,7 @@ export function SunaModesPanel({
                 whileTap={{ scale: 0.98 }}
                 transition={{ type: "spring", stiffness: 400, damping: 25 }}
                 className={cn(
-                  // Base button styles matching Kortix design
+                  // Base button styles matching Relu design
                   "inline-flex items-center justify-center whitespace-nowrap text-sm font-medium",
                   "outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]",
                   "relative h-10 px-3 sm:px-4 gap-2 shrink-0 rounded-2xl cursor-pointer",
@@ -2169,7 +2169,7 @@ export function SunaModesPanel({
                 {isPdfLoading && (
                   <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-lg z-10">
                     <div className="flex flex-col items-center gap-3">
-                      <KortixLoader size="medium" />
+                      <ReluLoader size="medium" />
                       <p className="text-sm text-muted-foreground">Loading preview...</p>
                     </div>
                   </div>

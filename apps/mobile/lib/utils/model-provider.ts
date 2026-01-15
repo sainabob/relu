@@ -9,7 +9,7 @@ import OAIIcon from '@/assets/images/models/OAI.svg';
 import GeminiIcon from '@/assets/images/models/Gemini.svg';
 import GrokIcon from '@/assets/images/models/Grok.svg';
 import MoonshotIcon from '@/assets/images/models/Moonshot.svg';
-import ReluSymbolIcon from '@/assets/brand/kortix-symbol.svg';
+import ReluSymbolIcon from '@/assets/brand/relu-symbol.svg';
 import type { SvgProps } from 'react-native-svg';
 import type React from 'react';
 
@@ -21,15 +21,15 @@ export type ModelProvider =
   | 'moonshotai'
   | 'bedrock'
   | 'openrouter'
-  | 'kortix';
+  | 'relu';
 
 /**
  * Check if a model ID corresponds to a Relu mode (Basic or Advanced)
  */
 export function isReluMode(modelId: string): boolean {
   // New Relu registry IDs
-  if (modelId === 'kortix/basic' || modelId === 'kortix/power' ||
-      modelId === 'kortix-basic' || modelId === 'kortix-power') {
+  if (modelId === 'relu/basic' || modelId === 'relu/power' ||
+      modelId === 'relu-basic' || modelId === 'relu-power') {
     return true;
   }
   // Legacy: Relu Basic (Haiku 4.5)
@@ -49,7 +49,7 @@ export function isReluMode(modelId: string): boolean {
 export function getModelProvider(modelId: string): ModelProvider {
   // Check for Relu modes first
   if (isReluMode(modelId)) {
-    return 'kortix';
+    return 'relu';
   }
   if (modelId.includes('anthropic') || modelId.includes('claude')) {
     return 'anthropic';
@@ -77,7 +77,7 @@ export function getModelProvider(modelId: string): ModelProvider {
   const parts = modelId.split('/');
   if (parts.length > 1) {
     const provider = parts[0].toLowerCase();
-    if (['openai', 'anthropic', 'google', 'xai', 'moonshotai', 'bedrock', 'openrouter', 'kortix'].includes(provider)) {
+    if (['openai', 'anthropic', 'google', 'xai', 'moonshotai', 'bedrock', 'openrouter', 'relu'].includes(provider)) {
       return provider as ModelProvider;
     }
   }
@@ -92,7 +92,7 @@ export function getModelProviderName(modelId: string): string {
   const provider = getModelProvider(modelId);
 
   const nameMap: Record<ModelProvider, string> = {
-    kortix: 'Relu',
+    relu: 'Relu',
     anthropic: 'Anthropic',
     openai: 'OpenAI',
     google: 'Google',
@@ -112,7 +112,7 @@ export function getModelProviderIcon(modelId: string): React.FC<SvgProps> {
   const provider = getModelProvider(modelId);
 
   const iconMap: Record<ModelProvider, React.FC<SvgProps>> = {
-    kortix: ReluSymbolIcon, // Relu modes use the Relu symbol
+    relu: ReluSymbolIcon, // Relu modes use the Relu symbol
     anthropic: AnthropicIcon,
     openai: OAIIcon,
     google: GeminiIcon,

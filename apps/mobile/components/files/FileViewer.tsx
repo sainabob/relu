@@ -329,7 +329,7 @@ export function FileViewer({
                 className="relative p-2"
                 style={{ opacity: isDownloading ? 0.6 : 1 }}>
                 {isDownloading ? (
-                  <KortixLoader size={22} />
+                  <ReluLoader size={22} />
                 ) : (
                   <Icon
                     as={hasFreeTier ? Lock : Download}

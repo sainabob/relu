@@ -13,14 +13,14 @@ import {
   FileText,
   LogOut,
   Image as ImageIcon,
-  Loader2,
   Globe,
   FolderOpen,
   Zap,
   CheckCircle2,
   Database,
 } from 'lucide-react-native';
-import { Logo } from '@/components/ui/Logo';
+import { ReluLoader } from '@/components/ui/relu-loader';
+import { ReluLogo } from '@/components/ui/ReluLogo';
 import * as Haptics from 'expo-haptics';
 import Animated, {
   useAnimatedStyle,
@@ -42,6 +42,7 @@ import { useOnboarding } from '@/hooks/useOnboarding';
 import { useQueryClient } from '@tanstack/react-query';
 import { agentKeys } from '@/lib/agents';
 import { modelKeys } from '@/lib/models';
+import { log } from '@/lib/logger';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const DRAWER_COLLAPSED_HEIGHT = 72;
@@ -284,7 +285,7 @@ export default function OnboardingScreen() {
       await loadAgents();
       router.replace('/home');
     } catch (error) {
-      console.error('Failed to complete onboarding:', error);
+      log.error('Failed to complete onboarding:', error);
       router.replace('/home');
     }
   }, [loadAgents, refetchBilling, queryClient, router, markSetupComplete, markAsCompleted]);
@@ -295,7 +296,7 @@ export default function OnboardingScreen() {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       await signOut();
     } catch (error) {
-      console.error('Logout error:', error);
+      log.error('Logout error:', error);
     }
   }, [signOut, isSigningOut]);
 
@@ -328,7 +329,7 @@ export default function OnboardingScreen() {
       <View className="flex-1 bg-background">
         {/* Header */}
         <View className="pt-14 px-6 pb-2 flex-row justify-between items-center">
-          <Logo variant="logomark" size={64} color={isDark ? 'dark' : 'light'} />
+          <Relu variant="logomark" size={14} color={isDark ? 'dark' : 'light'} />
           <TouchableOpacity
             onPress={handleLogout}
             disabled={isSigningOut}
@@ -826,7 +827,7 @@ function ExampleCard({ example, index, scrollX, isActive, isDark, t }: ExampleCa
           {/* AI Response */}
           <View className="flex-1">
             <View className="flex-row items-center gap-1.5 mb-2">
-              <Logo variant="symbol" size={14} color={isDark ? 'dark' : 'light'} />
+              <Relu variant="symbol" size={14} color={isDark ? 'dark' : 'light'} />
               <Text className="text-[13px] font-roobert-medium text-foreground opacity-50">
                 Relu
               </Text>
@@ -896,9 +897,9 @@ function ExampleCard({ example, index, scrollX, isActive, isDark, t }: ExampleCa
 
             <View className="px-4 py-2 flex-row items-center justify-between">
               <View className="flex-row items-center gap-2">
-                <Logo variant="symbol" size={14} color={isDark ? 'dark' : 'light'} />
+                <Relu variant="symbol" size={14} color={isDark ? 'dark' : 'light'} />
                 <Text className="text-[14px] font-roobert-medium text-foreground">
-                  {t('onboarding.kortixComputer')}
+                  {t('onboarding.reluComputer')}
                 </Text>
               </View>
 
@@ -947,25 +948,7 @@ const styles = StyleSheet.create({
 });
 
 function SpinningLoader() {
-  const rotation = useSharedValue(0);
-
-  React.useEffect(() => {
-    rotation.value = withRepeat(
-      withTiming(360, { duration: 1000, easing: Easing.linear }),
-      -1,
-      false
-    );
-  }, []);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${rotation.value}deg` }],
-  }));
-
-  return (
-    <AnimatedView style={animatedStyle}>
-      <Icon as={Loader2} size={16} className="text-primary" />
-    </AnimatedView>
-  );
+  return <ReluLoader size="small" customSize={16} />;
 }
 
 interface PaginationDotProps {

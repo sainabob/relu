@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
-import { KortixLoader } from '@/components/ui/kortix-loader';
+import { ReluLoader } from '@/components/ui/relu-loader';
 import { getToolIcon, getUserFriendlyToolName, extractPrimaryParam } from '@/components/thread/utils';
 import { AppIcon } from '../tool-views/shared/AppIcon';
 import { useSmoothToolField } from '@/hooks/messages';
@@ -611,7 +611,7 @@ export const ShowToolStream: React.FC<ShowToolStreamProps> = ({
                         <span className="font-mono text-xs text-foreground flex-1">{displayName}</span>
                         {paramDisplay && <span className="ml-1 text-xs text-muted-foreground truncate max-w-[200px]" title={paramDisplay}>{paramDisplay}</span>}
                         {!isCompleted && (
-                            <KortixLoader size="small" className="ml-auto" />
+                            <ReluLoader size="small" className="ml-auto" />
                         )}
                     </button>
 

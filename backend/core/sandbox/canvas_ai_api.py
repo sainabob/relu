@@ -191,7 +191,7 @@ async def process_with_gemini(
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
-        "HTTP-Referer": "https://kortix.ai",
+        "HTTP-Referer": "https://relu.ai",
         "X-Title": "Relu Canvas AI"
     }
     
@@ -515,9 +515,9 @@ Create a single cohesive image that combines these images according to the instr
 The result should be a high-quality merged image."""
 
         _get_replicate_token()
-
+        
         logger.info(f"Calling Replicate openai/gpt-image-1.5 for merge with {len(input_images)} images")
-
+        
         try:
             # Wrap replicate.run() in thread pool to avoid blocking event loop
             output = await asyncio.to_thread(

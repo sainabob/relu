@@ -6,13 +6,13 @@ import { CheckCircle2, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/components/AuthProvider';
 import { useInitializeAccount } from '@/hooks/account';
 import { createClient } from '@/lib/supabase/client';
-import { Logo } from '@/components/sidebar/logo';
+import { ReluLogo } from '@/components/sidebar/relu-logo';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 // Lazy load heavy components
 const AnimatedBg = lazy(() => import('@/components/ui/animated-bg').then(mod => ({ default: mod.AnimatedBg })));
-const ReluLoader = lazy(() => import('@/components/ui/kortix-loader').then(mod => ({ default: mod.ReluLoader })));
+const ReluLoader = lazy(() => import('@/components/ui/relu-loader').then(mod => ({ default: mod.ReluLoader })));
 
 export default function SettingUpPage() {
   const router = useRouter();
@@ -128,7 +128,7 @@ export default function SettingUpPage() {
         </Suspense>
 
         <div className="relative z-10 w-full max-w-[456px] flex flex-col items-center gap-8">
-          <Logo size={32} />
+          <Relu size={32} />
 
           {(status === 'checking' || status === 'initializing') && (
             <>
@@ -146,14 +146,14 @@ export default function SettingUpPage() {
                     <div className="flex items-center gap-3">
                       <div className="flex flex-col gap-1">
                         <div className='flex items-center gap-2'>
-                          <div className="h-2.5 w-2.5 bg-blue-500 rounded-full animate-pulse"></div>
+                          <div className="h-2.5 w-2.5 border border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                           <span className="text-base font-medium text-blue-400">Initializing</span>
                         </div>
                         <p className="text-base text-gray-400">Setting up your account...</p>
                       </div>
                     </div>
                     <div className="h-12 w-12 flex items-center justify-center">
-                      <Suspense fallback={<div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />}>
+                      <Suspense fallback={<ReluLoader size="small" />}>
                         <ReluLoader size="small" customSize={24} />
                       </Suspense>
                     </div>

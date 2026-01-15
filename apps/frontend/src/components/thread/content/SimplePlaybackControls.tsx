@@ -9,7 +9,7 @@ import {
   PanelRightOpen 
 } from 'lucide-react';
 import Link from 'next/link';
-import { Logo } from '@/components/sidebar/logo';
+import { ReluLogo } from '@/components/sidebar/relu-logo';
 
 interface SimplePlaybackControlsProps {
   projectName: string;
@@ -40,7 +40,7 @@ export function SimplePlaybackControls({
           rel="noopener noreferrer"
           className="flex items-center gap-2 text-sm font-medium hover:opacity-80 transition-opacity"
         >
-          <Logo className="h-5 w-5" />
+          <Relu className="h-5 w-5" />
           <span className="hidden sm:inline">Relu</span>
         </Link>
 

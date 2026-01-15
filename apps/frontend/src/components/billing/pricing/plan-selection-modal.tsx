@@ -10,7 +10,7 @@ import {
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PricingSection } from './pricing-section';
-import { Logo } from '@/components/sidebar/logo';
+import { ReluLogo } from '@/components/sidebar/relu-logo';
 import { cn } from '@/lib/utils';
 import { usePricingModalStore } from '@/stores/pricing-modal-store';
 import { trackRouteChangeForModal } from '@/lib/analytics/gtm';
@@ -76,7 +76,7 @@ export function PlanSelectionModal({
                     <div className="flex-1" />
                     
                     <div className="absolute -translate-y-1/2 top-1/2 left-1/2 -translate-x-1/2 pointer-events-none">
-                        <Logo size={20} variant="logomark" />
+                        <Relu size={20} variant="logomark" />
                     </div>
                     
                     <div className="flex-1 flex justify-end pointer-events-auto">

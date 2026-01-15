@@ -6,18 +6,18 @@ from ....shared.config import get_tier_by_name
 
 class ProductMapper:
     PRODUCT_MAPPING = {
-        'kortix_plus_monthly': 'tier_2_20',
-        'kortix_plus_yearly': 'tier_2_20',
+        'relu_plus_monthly': 'tier_2_20',
+        'relu_plus_yearly': 'tier_2_20',
         'plus:plus-monthly' : 'tier_2_20',
         'plus:plus-monthly' : 'tier_2_20',
 
-        'kortix_pro_monthly': 'tier_6_50',
-        'kortix_pro_yearly': 'tier_6_50',
+        'relu_pro_monthly': 'tier_6_50',
+        'relu_pro_yearly': 'tier_6_50',
         'pro:pro-monthly' : 'tier_6_50',
         'pro:pro-monthly' : 'tier_6_50',
         
-        'kortix_ultra_monthly': 'tier_25_200',
-        'kortix_ultra_yearly': 'tier_25_200',
+        'relu_ultra_monthly': 'tier_25_200',
+        'relu_ultra_yearly': 'tier_25_200',
         'ultra:ultra-monthly' : 'tier_25_200',
     }
     

@@ -63,25 +63,25 @@ jobs:
           # Check if environment is explicitly set to production
           if [ "${{ github.event.inputs.environment }}" = "production" ]; then
             echo "environment=production" >> $GITHUB_OUTPUT
-            echo "api_url=https://api.kortix.com" >> $GITHUB_OUTPUT
+            echo "api_url=https://api.relu.com" >> $GITHUB_OUTPUT
             exit 0
           fi
           
           # Main branch maps to staging
           if [ "${{ github.ref }}" = "refs/heads/main" ] || [ "${{ github.base_ref }}" = "main" ]; then
             echo "environment=staging" >> $GITHUB_OUTPUT
-            echo "api_url=https://staging-api.suna.so" >> $GITHUB_OUTPUT
+            echo "api_url=https://staging-api.relu.work" >> $GITHUB_OUTPUT
             exit 0
           fi
           
           # Default to staging
           echo "environment=staging" >> $GITHUB_OUTPUT
-          echo "api_url=https://staging-api.suna.so" >> $GITHUB_OUTPUT
+          echo "api_url=https://staging-api.relu.work" >> $GITHUB_OUTPUT
       
       - name: Trigger E2E tests via API
         env:
           API_URL: ${{ steps.env.outputs.api_url }}
-          ADMIN_API_KEY: ${{ steps.env.outputs.environment == 'production' && secrets.PRODUCTION_KORTIX_ADMIN_API_KEY || secrets.STAGING_KORTIX_ADMIN_API_KEY }}
+          ADMIN_API_KEY: ${{ steps.env.outputs.environment == 'production' && secrets.PRODUCTION_RELU_ADMIN_API_KEY || secrets.STAGING_RELU_ADMIN_API_KEY }}
           ENVIRONMENT: ${{ steps.env.outputs.environment }}
         run: |
           set -e
@@ -89,9 +89,9 @@ jobs:
           # Validate admin API key is configured
           if [ -z "$ADMIN_API_KEY" ]; then
             if [ "$ENVIRONMENT" = "production" ]; then
-              echo "❌ Error: PRODUCTION_KORTIX_ADMIN_API_KEY is not set"
+              echo "❌ Error: PRODUCTION_RELU_ADMIN_API_KEY is not set"
             else
-              echo "❌ Error: STAGING_KORTIX_ADMIN_API_KEY is not set"
+              echo "❌ Error: STAGING_RELU_ADMIN_API_KEY is not set"
             fi
             echo "Please add it at: https://github.com/${{ github.repository }}/settings/secrets/actions"
             exit 1
@@ -150,7 +150,7 @@ jobs:
             echo ""
             echo "🔍 Troubleshooting:"
             echo "  1. Verify API URL is correct: $API_URL"
-            echo "  2. Check that STAGING_KORTIX_ADMIN_API_KEY or PRODUCTION_KORTIX_ADMIN_API_KEY is valid"
+            echo "  2. Check that STAGING_RELU_ADMIN_API_KEY or PRODUCTION_RELU_ADMIN_API_KEY is valid"
             echo "  3. Ensure the API server is running and accessible"
             echo "  4. Check API server logs for more details"
             exit 1

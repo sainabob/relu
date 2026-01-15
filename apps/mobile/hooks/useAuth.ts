@@ -358,7 +358,7 @@ export function useAuth() {
       
       // Create redirect URL using expo-auth-session
       const redirectTo = makeRedirectUri({
-        scheme: 'kortix',
+        scheme: 'relu',
         path: 'auth/callback',
       });
 

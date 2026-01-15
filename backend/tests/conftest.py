@@ -39,7 +39,7 @@ def test_config() -> E2ETestConfig:
         supabase_url=config.SUPABASE_URL or "",
         supabase_anon_key=config.SUPABASE_ANON_KEY or "",
         supabase_jwt_secret=config.SUPABASE_JWT_SECRET or "",
-        admin_api_key=config.KORTIX_ADMIN_API_KEY or "",
+        admin_api_key=config.RELU_ADMIN_API_KEY or "",
     )
 
 

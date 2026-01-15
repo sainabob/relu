@@ -60,7 +60,7 @@ class MockLLMProvider:
         self,
         messages: List[Dict[str, Any]],
         tools: List[Dict[str, Any]],
-        model: str = "kortix/basic"
+        model: str = "relu/basic"
     ) -> AsyncGenerator[Dict[str, Any], None]:
         """
         Generate mock streaming response in LiteLLM format

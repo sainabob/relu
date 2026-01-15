@@ -1,5 +1,5 @@
 {
-  "name": "kortix-desktop",
+  "name": "relu-desktop",
   "version": "1.0.0",
   "description": "Relu Desktop",
   "author": {
@@ -24,11 +24,11 @@
     "electron-builder": "^25.1.8"
   },
   "build": {
-    "appId": "com.kortix.desktop",
+    "appId": "com.relu.desktop",
     "productName": "Relu",
     "protocols": {
       "name": "Relu",
-      "schemes": ["kortix"]
+      "schemes": ["relu"]
     },
     "mac": {
       "target": "dmg",

@@ -36,7 +36,7 @@ import {
     FileIcon,
     Folder,
 } from 'lucide-react';
-import { KortixLoader } from '@/components/ui/kortix-loader';
+import { ReluLoader } from '@/components/ui/relu-loader';
 import { toast } from '@/lib/toast';
 import { createClient } from '@/lib/supabase/client';
 import { useNameValidation } from '@/lib/validation';
@@ -474,7 +474,7 @@ export function UnifiedKbEntryModal({
                                     disabled={!folderValidation.isValid || isCreatingFolder}
                                 >
                                     {isCreatingFolder ? (
-                                        <KortixLoader size="small" />
+                                        <ReluLoader size="small" />
                                     ) : (
                                         <Check className="h-4 w-4" />
                                     )}
@@ -583,7 +583,7 @@ export function UnifiedKbEntryModal({
                                                 <p className="text-xs text-muted-foreground">{formatFileSize(status.file.size)}</p>
                                             </div>
                                             <div className="flex items-center gap-2 shrink-0">
-                                                {status.status === 'uploading' && <KortixLoader size="small" />}
+                                                {status.status === 'uploading' && <ReluLoader size="small" />}
                                                 {status.status === 'success' && <CheckCircle className="h-4 w-4 text-green-500" />}
                                                 {status.status === 'error' && <AlertCircle className="h-4 w-4 text-destructive" />}
                                                 {status.status === 'queued' && !isUploading && (
@@ -670,7 +670,7 @@ export function UnifiedKbEntryModal({
                         >
                             {isUploading ? (
                                 <>
-                                    <KortixLoader size="small" className="mr-2" />
+                                    <ReluLoader size="small" className="mr-2" />
                                     Uploading...
                                 </>
                             ) : (
@@ -688,7 +688,7 @@ export function UnifiedKbEntryModal({
                         >
                             {isCreatingText ? (
                                 <>
-                                    <KortixLoader size="small" className="mr-2" />
+                                    <ReluLoader size="small" className="mr-2" />
                                     Creating...
                                 </>
                             ) : (
@@ -706,7 +706,7 @@ export function UnifiedKbEntryModal({
                         >
                             {isCloning ? (
                                 <>
-                                    <KortixLoader size="small" className="mr-2" />
+                                    <ReluLoader size="small" className="mr-2" />
                                     Cloning...
                                 </>
                             ) : (

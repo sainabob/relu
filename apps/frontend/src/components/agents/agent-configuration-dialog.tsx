@@ -44,10 +44,10 @@ import {
   Lock,
   Sparkles,
 } from 'lucide-react';
-import { KortixLoader } from '@/components/ui/kortix-loader';
+import { ReluLoader } from '@/components/ui/relu-loader';
 import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
-import { Logo } from '@/components/sidebar/logo';
+import { ReluLogo } from '@/components/sidebar/relu-logo';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAccountState } from '@/hooks/billing';
 import { usePricingModalStore } from '@/stores/pricing-modal-store';
@@ -172,11 +172,11 @@ export function AgentConfigurationDialog({
     setEditName(configSource.name || '');
   }, [agent, versionData]);
 
-  const isSunaAgent = agent?.metadata?.is_suna_default || false;
+  const isReluAgent = agent?.metadata?.is_relu_default || false;
   const restrictions = agent?.metadata?.restrictions || {};
-  const isNameEditable = !isViewingOldVersion && (restrictions.name_editable !== false) && !isSunaAgent;
-  const isSystemPromptEditable = !isViewingOldVersion && (restrictions.system_prompt_editable !== false) && !isSunaAgent;
-  const areToolsEditable = !isViewingOldVersion && (restrictions.tools_editable !== false) && !isSunaAgent;
+  const isNameEditable = !isViewingOldVersion && (restrictions.name_editable !== false) && !isReluAgent;
+  const isSystemPromptEditable = !isViewingOldVersion && (restrictions.system_prompt_editable !== false) && !isReluAgent;
+  const areToolsEditable = !isViewingOldVersion && (restrictions.tools_editable !== false) && !isReluAgent;
 
   const hasChanges = useMemo(() => {
     return JSON.stringify(formData) !== JSON.stringify(originalFormData);
@@ -243,7 +243,7 @@ export function AgentConfigurationDialog({
     }
 
     if (!isNameEditable) {
-      if (isSunaAgent) {
+      if (isReluAgent) {
         toast.error("Name cannot be edited", {
           description: "Relu's name is managed centrally and cannot be changed.",
         });
@@ -259,7 +259,7 @@ export function AgentConfigurationDialog({
 
   const handleSystemPromptChange = (value: string) => {
     if (!isSystemPromptEditable) {
-      if (isSunaAgent) {
+      if (isReluAgent) {
         toast.error("System prompt cannot be edited", {
           description: "Relu's system prompt is managed centrally.",
         });
@@ -276,7 +276,7 @@ export function AgentConfigurationDialog({
 
   const handleToolsChange = (tools: Record<string, boolean | { enabled: boolean; description: string }>) => {
     if (!areToolsEditable) {
-      if (isSunaAgent) {
+      if (isReluAgent) {
         toast.error("Tools cannot be edited", {
           description: "Relu's tools are managed centrally.",
         });
@@ -401,9 +401,9 @@ export function AgentConfigurationDialog({
                 <div
                   className="flex-shrink-0"
                 >
-                  {isSunaAgent ? (
+                  {isReluAgent ? (
                     <AgentAvatar
-                      isSunaDefault={true}
+                      isReluDefault={true}
                       agentName={formData.name}
                       size={40}
                       className="ring-1 ring-border"
@@ -512,7 +512,7 @@ export function AgentConfigurationDialog({
                                     iconColor={agent.icon_color}
                                     backgroundColor={agent.icon_background}
                                     agentName={agent.name}
-                                    isSunaDefault={agent.metadata?.is_suna_default}
+                                    isReluDefault={agent.metadata?.is_relu_default}
                                     size={24}
                                     className="flex-shrink-0"
                                   />
@@ -596,7 +596,7 @@ export function AgentConfigurationDialog({
                   disabled={exportMutation.isPending}
                 >
                   {exportMutation.isPending ? (
-                    <KortixLoader customSize={16} />
+                    <ReluLoader customSize={16} />
                   ) : (
                     <Download className="h-4 w-4" />
                   )}
@@ -606,7 +606,7 @@ export function AgentConfigurationDialog({
           </DialogHeader>
           {isLoading ? (
             <div className="flex-1 flex items-center justify-center">
-              <KortixLoader size="large" />
+              <ReluLoader size="large" />
             </div>
           ) : (
             <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)} className="flex-1 flex flex-col min-h-0">
@@ -648,7 +648,7 @@ export function AgentConfigurationDialog({
 
                 <TabsContent value="instructions" className="p-6 mt-0 flex flex-col h-full">
                   <div className="flex flex-col flex-1 min-h-0">
-                    {isSunaAgent && (
+                    {isReluAgent && (
                       <Alert className="mb-4 bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-900">
                         <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                         <AlertDescription className="text-sm text-blue-800 dark:text-blue-300">
@@ -669,7 +669,7 @@ export function AgentConfigurationDialog({
 
                 <TabsContent value="tools" className="p-6 mt-0 flex flex-col h-full">
                   <div className="flex flex-col flex-1 min-h-0 h-full">
-                    {isSunaAgent && (
+                    {isReluAgent && (
                       <Alert className="mb-4 bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-900">
                         <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                         <AlertDescription className="text-sm text-blue-800 dark:text-blue-300">
@@ -681,7 +681,7 @@ export function AgentConfigurationDialog({
                       tools={formData.agentpress_tools}
                       onToolsChange={handleToolsChange}
                       disabled={!areToolsEditable}
-                      isSunaAgent={isSunaAgent}
+                      isReluAgent={isReluAgent}
                       isLoading={isLoading}
                     />
                   </div>
@@ -827,7 +827,7 @@ export function AgentConfigurationDialog({
             >
               {isSaving ? (
                 <>
-                  <KortixLoader customSize={16} className="mr-1" />
+                  <ReluLoader customSize={16} className="mr-1" />
                   Saving...
                 </>
               ) : (

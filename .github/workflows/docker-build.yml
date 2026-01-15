@@ -56,7 +56,7 @@ jobs:
           file: ./backend/Dockerfile
           push: true
           platforms: linux/amd64
-          tags: ghcr.io/${{ github.repository }}/suna-backend:${{ steps.get_tag_name.outputs.branch }}
+          tags: ghcr.io/${{ github.repository }}/relu-backend:${{ steps.get_tag_name.outputs.branch }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -90,7 +90,7 @@ jobs:
           port: 22
           timeout: 300s
           script: |
-            cd /home/ubuntu/suna/backend
+            cd /home/ubuntu/relu/backend
             git fetch origin main
             git reset --hard origin/main
             
@@ -151,7 +151,7 @@ jobs:
           port: 22
           timeout: 300s
           script: |
-            cd /home/ubuntu/suna/backend
+            cd /home/ubuntu/relu/backend
             git fetch origin PRODUCTION
             git reset --hard origin/PRODUCTION
             
@@ -193,8 +193,8 @@ jobs:
           
           # Force new deployment to pull latest image
           aws ecs update-service \
-            --cluster suna-ecs \
-            --service suna-api-svc-6a0ece6 \
+            --cluster relu-ecs \
+            --service relu-api-svc-6a0ece6 \
             --force-new-deployment \
             --region us-west-2
           
@@ -204,13 +204,13 @@ jobs:
           
           # Wait for service to become stable (up to 10 minutes)
           aws ecs wait services-stable \
-            --cluster suna-ecs \
-            --services suna-api-svc-6a0ece6 \
+            --cluster relu-ecs \
+            --services relu-api-svc-6a0ece6 \
             --region us-west-2 || {
               echo "⚠️ Deployment still in progress after timeout, checking status..."
               aws ecs describe-services \
-                --cluster suna-ecs \
-                --services suna-api-svc-6a0ece6 \
+                --cluster relu-ecs \
+                --services relu-api-svc-6a0ece6 \
                 --region us-west-2 \
                 --query 'services[0].{Status:status,Desired:desiredCount,Running:runningCount,Pending:pendingCount}'
             }
@@ -220,8 +220,8 @@ jobs:
           
           # Show final status
           aws ecs describe-services \
-            --cluster suna-ecs \
-            --services suna-api-svc-6a0ece6 \
+            --cluster relu-ecs \
+            --services relu-api-svc-6a0ece6 \
             --region us-west-2 \
             --query 'services[0].{Status:status,Desired:desiredCount,Running:runningCount}' \
             --output table

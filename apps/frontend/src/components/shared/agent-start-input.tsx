@@ -12,8 +12,8 @@ import { ChevronRight } from 'lucide-react';
 import { DynamicGreeting } from '@/components/ui/dynamic-greeting';
 
 // Lazy load heavy components
-const SunaModesPanel = lazy(() => 
-  import('@/components/dashboard/suna-modes-panel').then(mod => ({ default: mod.SunaModesPanel }))
+const ReluModesPanel = lazy(() => 
+  import('@/components/dashboard/relu-modes-panel').then(mod => ({ default: mod.ReluModesPanel }))
 );
 const AgentRunLimitBanner = lazy(() => 
   import('@/components/thread/agent-run-limit-banner').then(mod => ({ default: mod.AgentRunLimitBanner }))
@@ -79,7 +79,7 @@ export function AgentStartInput({
   modesPanelWrapperClassName,
 }: AgentStartInputProps) {
   const t = useTranslations('dashboard');
-  const tSuna = useTranslations('suna');
+  const tRelu = useTranslations('relu');
   const tCommon = useTranslations('common');
   const tBilling = useTranslations('billing');
   
@@ -124,7 +124,7 @@ export function AgentStartInput({
     chatInputRef,
     selectedAgentId,
     setSelectedAgent,
-    isSunaAgent,
+    isReluAgent,
     selectedMode,
     selectedCharts,
     selectedOutputFormat,
@@ -146,7 +146,7 @@ export function AgentStartInput({
     logPrefix: variant === 'hero' ? '[HeroSection]' : '[Dashboard]',
   });
   
-  const resolvedPlaceholder = placeholder || (variant === 'hero' ? tSuna('describeTask') : t('describeWhatYouNeed'));
+  const resolvedPlaceholder = placeholder || (variant === 'hero' ? tRelu('describeTask') : t('describeWhatYouNeed'));
   
   const defaultGreetingClass = variant === 'hero'
     ? "text-2xl sm:text-3xl md:text-3xl lg:text-4xl font-medium text-balance text-center px-4 sm:px-2"
@@ -227,11 +227,11 @@ export function AgentStartInput({
         )}
       </div>
       
-      {/* Suna Modes Panel */}
-      {showModesPanel && isSunaAgent && (
+      {/* Relu Modes Panel */}
+      {showModesPanel && isReluAgent && (
         <div className={modesPanelWrapperClassName || "w-full animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-200 fill-mode-both"}>
           <Suspense fallback={<div className="h-24 bg-muted/10 rounded-lg animate-pulse" />}>
-            <SunaModesPanel
+            <ReluModesPanel
               selectedMode={selectedMode}
               onModeSelect={setSelectedMode}
               onSelectPrompt={setInputValue}

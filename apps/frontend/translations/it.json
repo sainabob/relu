@@ -415,7 +415,7 @@
     "running": "In esecuzione",
     "minimizeToFloatingPreview": "Riduci a anteprima fluttuante",
     "close": "Chiudi",
-    "noActionsYet": "Kortix Computer",
+    "noActionsYet": "Relu Computer",
     "workerActionsDescription": "Avvio in corso",
     "emptyActionsDescription": "Le azioni del Worker appariranno qui",
     "toolIsRunning": "Strumento in esecuzione",
@@ -453,7 +453,7 @@
     "title": "Relu: Il Tuo Worker IA Autonomo",
     "subtitle": "Costruito per compiti complessi, progettato per tutto. L'assistente IA definitivo che gestisce tutto—dalle richieste semplici ai progetti mega-complessi.",
     "tryItOut": "Provalo",
-    "kortixComputer": "Relu Computer",
+    "reluComputer": "Relu Computer",
     "running": "In esecuzione",
     "workers": {
       "images": {
@@ -936,7 +936,7 @@
     "disableAll": "Disabilita Tutte",
     "saveChanges": "Salva modifiche"
   },
-  "suna": {
+  "relu": {
     "samplePrompts": "Prompt di esempio",
     "chooseStyle": "Scegli uno stile",
     "chooseTemplate": "Scegli un modello",

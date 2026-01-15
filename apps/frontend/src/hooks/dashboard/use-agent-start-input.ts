@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useLeadingDebouncedCallback } from '@/hooks/utils';
 import { useOptimisticAgentStart, AgentLimitInfo } from '@/hooks/threads';
 import { useAgentSelection } from '@/stores/agent-selection-store';
-import { useSunaModePersistence } from '@/stores/suna-modes-store';
+import { useReluModePersistence } from '@/stores/relu-modes-store';
 import { useAgents } from '@/hooks/agents/use-agents';
 import { useAuth } from '@/components/AuthProvider';
 import type { ChatInputHandles } from '@/components/thread/chat-input/chat-input';
@@ -46,9 +46,9 @@ export interface UseAgentStartInputReturn {
   agents: any[];
   isLoadingAgents: boolean;
   selectedAgent: any | null;
-  isSunaAgent: boolean;
+  isReluAgent: boolean;
   
-  // Suna modes
+  // Relu modes
   selectedMode: any;
   selectedCharts: any;
   selectedOutputFormat: any;
@@ -105,7 +105,7 @@ export function useAgentStartInput(options: UseAgentStartInputOptions = {}): Use
     initializeFromAgents,
   } = useAgentSelection();
   
-  // Suna modes persistence
+  // Relu modes persistence
   const {
     selectedMode,
     selectedCharts,
@@ -115,7 +115,7 @@ export function useAgentStartInput(options: UseAgentStartInputOptions = {}): Use
     setSelectedCharts,
     setSelectedOutputFormat,
     setSelectedTemplate,
-  } = useSunaModePersistence();
+  } = useReluModePersistence();
   
   // Optimistic agent start hook
   const {
@@ -135,15 +135,15 @@ export function useAgentStartInput(options: UseAgentStartInputOptions = {}): Use
   });
   
   const agents = Array.isArray(agentsResponse?.agents) ? agentsResponse.agents : [];
-  const sunaAgent = agents.find(agent => agent.metadata?.is_suna_default === true);
+  const reluAgent = agents.find(agent => agent.metadata?.is_relu_default === true);
   const selectedAgent = selectedAgentId
     ? agents.find(agent => agent.agent_id === selectedAgentId)
     : null;
   
-  // Determine if Suna agent is selected (for modes panel)
-  const isSunaAgent = isLoadingAgents 
-    ? true // Show Kortix modes while loading
-    : (selectedAgent?.metadata?.is_suna_default || (!selectedAgentId && sunaAgent !== undefined) || false);
+  // Determine if Relu agent is selected (for modes panel)
+  const isReluAgent = isLoadingAgents 
+    ? true // Show Relu modes while loading
+    : (selectedAgent?.metadata?.is_relu_default || (!selectedAgentId && reluAgent !== undefined) || false);
   
   // Initialize agent selection when agents are loaded
   useEffect(() => {
@@ -279,9 +279,9 @@ export function useAgentStartInput(options: UseAgentStartInputOptions = {}): Use
     agents,
     isLoadingAgents,
     selectedAgent,
-    isSunaAgent,
+    isReluAgent,
     
-    // Suna modes
+    // Relu modes
     selectedMode,
     selectedCharts,
     selectedOutputFormat,

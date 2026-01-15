@@ -12,7 +12,7 @@ import { UnifiedMessage } from '@/components/thread/types';
 import { safeJsonParse } from '@/components/thread/utils';
 import Link from 'next/link';
 import { HIDE_STREAMING_XML_TAGS } from '@/components/thread/utils';
-import { Logo } from '@/components/sidebar/logo';
+import { ReluLogo } from '@/components/sidebar/relu-logo';
 
 export interface PlaybackControlsProps {
   messages: UnifiedMessage[];
@@ -525,7 +525,7 @@ export const PlaybackControls = ({
             <div className="flex items-center gap-2">
               <div className="flex items-center justify-center w-6 h-6 rounded-md overflow-hidden bg-primary/10">
                 <Link href="/">
-                  <Logo size={14} />
+                  <Relu size={14} />
                 </Link>
               </div>
               <h1>

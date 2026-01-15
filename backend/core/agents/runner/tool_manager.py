@@ -63,8 +63,8 @@ class ToolManager:
         if not isinstance(raw_tools, dict):
             return set()
         
-        # For default Suna agent with no explicit config, enable all
-        if self.agent_config.get('is_suna_default', False) and not raw_tools:
+        # For default Relu agent with no explicit config, enable all
+        if self.agent_config.get('is_relu_default', False) and not raw_tools:
             return set()
         
         disabled = set()

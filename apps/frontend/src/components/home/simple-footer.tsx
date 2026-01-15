@@ -2,14 +2,14 @@
 
 import Link from 'next/link';
 import { siteConfig } from '@/lib/site-config';
-import { KortixLogo } from '@/components/sidebar/kortix-logo';
+import { ReluLogo } from '@/components/sidebar/relu-logo';
 import { LocaleSwitcher } from '@/components/home/locale-switcher';
 import { ThemeToggle } from '@/components/home/theme-toggle';
 import { useGitHubStars } from '@/hooks/utils';
 
 export function SimpleFooter() {
   const currentYear = new Date().getFullYear();
-  const { formattedStars, loading: starsLoading } = useGitHubStars('kortix-ai', 'suna');
+  const { formattedStars, loading: starsLoading } = useGitHubStars('relu-ai', 'relu');
 
   return (
     <footer className="w-full bg-background/50 backdrop-blur-sm">
@@ -19,12 +19,12 @@ export function SimpleFooter() {
           {/* Brand column */}
           <div className="col-span-2 md:col-span-1 space-y-4">
             <Link href="/" className="inline-flex items-center gap-2 group">
-              <KortixLogo size={24} />
+              <ReluLogo size={24} />
             </Link>
             {/* Social links */}
             <div className="flex items-center gap-3 pt-2">
               <a
-                href="https://github.com/kortix-ai/suna"
+                href="https://github.com/relu-ai/relu"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="GitHub"
@@ -63,7 +63,7 @@ export function SimpleFooter() {
                 </svg>
               </a>
               <a
-                href="https://x.com/kortix"
+                href="https://x.com/relu"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="X (Twitter)"
@@ -81,7 +81,7 @@ export function SimpleFooter() {
                 </svg>
               </a>
               <a
-                href="https://www.linkedin.com/company/kortix/"
+                href="https://www.linkedin.com/company/relu/"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="LinkedIn"
@@ -135,7 +135,7 @@ export function SimpleFooter() {
         <div className="mt-12 pt-8 border-t border-border/40">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="text-sm text-muted-foreground">
-              © {currentYear} Kortix. All rights reserved.
+              © {currentYear} Relu. All rights reserved.
             </p>
             <div className="flex items-center gap-1 text-sm text-muted-foreground">
               <span>Built with</span>

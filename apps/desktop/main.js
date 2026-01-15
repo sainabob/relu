@@ -2,7 +2,7 @@ const { app, BrowserWindow, clipboard, nativeImage, Menu } = require('electron')
 const path = require('path');
 
 // Custom protocol scheme for deep linking
-const PROTOCOL_SCHEME = 'kortix';
+const PROTOCOL_SCHEME = 'relu';
 
 // Get URL from environment variable or default to production
 const APP_URL = process.env.APP_URL || 'https://relu.work/';
@@ -122,7 +122,7 @@ const loadingHTML = `
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Kortix</title>
+  <title>Relu</title>
   <style>
     * {
       margin: 0;

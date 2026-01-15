@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Plus, FileJson, Code } from 'lucide-react';
-import { KortixLoader } from '@/components/ui/kortix-loader';
+import { ReluLoader } from '@/components/ui/relu-loader';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -152,7 +152,7 @@ export function NewAgentDialogLegacy({ open, onOpenChange, onSuccess }: NewAgent
           >
             {createNewAgentMutation.isPending ? (
               <>
-                <KortixLoader customSize={16} className="mr-1" />
+                <ReluLoader customSize={16} className="mr-1" />
                 Creating...
               </>
             ) : (

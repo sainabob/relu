@@ -343,7 +343,7 @@ class AgentRunner:
         if not isinstance(raw_tools, dict):
             return disabled_tools
         
-        if self.config.agent_config.get('is_suna_default', False) and not raw_tools:
+        if self.config.agent_config.get('is_relu_default', False) and not raw_tools:
             return disabled_tools
         
         def is_tool_enabled(tool_name: str) -> bool:

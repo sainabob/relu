@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import Image from 'next/image';
 import { Computer, CornerDownLeft, Paperclip, Mic, Zap, FolderOpen, Globe, Presentation, BarChart3, FileText, Search, Image as ImageIcon, ChevronRight, File, Database } from 'lucide-react';
-import { KortixLoader } from '@/components/ui/kortix-loader';
+import { ReluLoader } from '@/components/ui/relu-loader';
 import { motion } from 'framer-motion';
-import { Logo } from '@/components/sidebar/logo';
+import { ReluLogo } from '@/components/sidebar/relu-logo';
 
 type ViewType = 'terminal' | 'files' | 'browser';
 type IconType = 'computer' | 'presentation' | 'chart' | 'file' | 'search' | 'image' | 'database';
@@ -331,8 +331,12 @@ export function ExampleShowcase() {
                     <div key={idx} className="flex justify-start">
                       <div className="max-w-[90%] space-y-1">
                         <div className="flex items-center gap-1 mb-1">
-                          <Logo size={10} />
-                          <span className="text-[10px] font-medium">Relu</span>
+                          <img
+                            src="/relu-logomark-white.svg"
+                            alt="Relu"
+                            className="dark:invert-0 invert flex-shrink-0"
+                            style={{ height: '8px', width: 'auto' }}
+                          />
                         </div>
                         <p className="text-[9px] leading-relaxed text-foreground">
                           {displayText}
@@ -354,7 +358,7 @@ export function ExampleShowcase() {
                         <IconComponent className="h-2.5 w-2.5 text-muted-foreground flex-shrink-0" />
                         <span className="font-mono text-[9px] text-foreground">{step.title}</span>
                         {isCurrentStep && (
-                          <KortixLoader size="small" className="ml-0.5" />
+                          <ReluLoader size="small" className="ml-0.5" />
                         )}
                       </button>
                     </div>
@@ -441,7 +445,7 @@ export function ExampleShowcase() {
               {/* Computer Header */}
               <div className="border-b px-3 py-2 flex items-center justify-between bg-card shrink-0">
                 <div className="flex items-center gap-1.5">
-                  <Logo size={12} />
+                  <Relu size={12} />
                   <span className="text-xs font-medium">Relu Computer</span>
                 </div>
                 <div className="flex items-center gap-0.5 border rounded-full bg-card p-1 relative">

@@ -1,5 +1,5 @@
 [project]
-name = "kortix"
+name = "relu"
 version = "0.1.0"
 description = "Relu SDK"
 readme = "README.md"

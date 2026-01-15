@@ -8,7 +8,7 @@ import { createPortal } from 'react-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ApiMessageType } from '@/components/thread/types';
 import { Globe, CircleDashed } from 'lucide-react';
-import { KortixLoader } from '@/components/ui/kortix-loader';
+import { ReluLoader } from '@/components/ui/relu-loader';
 import { useIsMobile } from '@/hooks/utils';
 import { ToolView } from '../tool-views/wrapper';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -151,7 +151,7 @@ export const ReluComputer = memo(function ReluComputer({
   // Reset local state when switching projects/threads
   useEffect(() => {
     if (prevProjectIdRef.current !== null && prevProjectIdRef.current !== projectId) {
-      console.log('[KortixComputer] Project changed, resetting local state');
+      console.log('[ReluComputer] Project changed, resetting local state');
       // Reset local component state
       setInternalIndex(0);
       setNavigationMode('live');
@@ -758,7 +758,7 @@ export const ReluComputer = memo(function ReluComputer({
   if (isMobile) {
     const handleDrawerKeyDown = (e: React.KeyboardEvent) => {
       // Vaul drawers are dismissible by Escape by default.
-      // Prevent Escape / Esc from closing the Kortix Computer.
+      // Prevent Escape / Esc from closing the Relu Computer.
       if (e.key === 'Escape' || e.key === 'Esc') {
         e.preventDefault();
         e.stopPropagation();
@@ -769,7 +769,7 @@ export const ReluComputer = memo(function ReluComputer({
       <Drawer
         open={isOpen}
         onOpenChange={(open) => !open && handleClose()}
-        // Never allow Esc/Escape to dismiss the Kortix Computer.
+        // Never allow Esc/Escape to dismiss the Relu Computer.
         // (Users commonly hit Escape in editors / sandbox UIs.)
         dismissible={false}
       >

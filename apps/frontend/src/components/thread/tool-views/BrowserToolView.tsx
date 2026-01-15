@@ -22,8 +22,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ImageLoader } from './shared/ImageLoader';
 import { JsonViewer } from './shared/JsonViewer';
+import { ToolViewIconTitle } from './shared/ToolViewIconTitle';
+import { ToolViewFooter } from './shared/ToolViewFooter';
 import { ReluComputerHeader } from '../relu-computer/ReluComputerHeader';
-import { useSmoothToolField } from '@/hooks/messages/useSmoothToolArguments';
+import { useSmoothToolField } from '@/hooks/messages';
 
 interface BrowserHeaderProps {
   isConnected: boolean;
@@ -85,18 +87,14 @@ export function BrowserToolView({
   const rawArguments = toolCall?.rawArguments || toolCall?.arguments;
 
   // Apply smooth text streaming for URL/instruction fields - MUST be called unconditionally
-  const { displayedValue: smoothUrl, isAnimating: isUrlAnimating } = useSmoothToolField(
-    rawArguments,
-    'url',
-    120,
-    isStreaming && !toolResult && !!toolCall
+  const smoothFields = useSmoothToolField(
+    (typeof rawArguments === 'object' && rawArguments) ? rawArguments : {},
+    { interval: 50 }
   );
-  const { displayedValue: smoothInstruction, isAnimating: isInstructionAnimating } = useSmoothToolField(
-    rawArguments,
-    'instruction',
-    120,
-    isStreaming && !toolResult && !!toolCall
-  );
+  const smoothUrl = (smoothFields as any).url || (typeof rawArguments === 'object' ? rawArguments?.url : '') || '';
+  const smoothInstruction = (smoothFields as any).instruction || (typeof rawArguments === 'object' ? rawArguments?.instruction : '') || '';
+  const isUrlAnimating = isStreaming && !toolResult && !!toolCall;
+  const isInstructionAnimating = isStreaming && !toolResult && !!toolCall;
 
   React.useEffect(() => {
     if (isRunning) {
@@ -289,17 +287,7 @@ export function BrowserToolView({
     <Card className="gap-0 flex border-0 shadow-none p-0 py-0 rounded-none flex-col h-full overflow-scroll bg-card">
       <CardHeader className="h-14 bg-zinc-50/80 dark:bg-zinc-900/80 backdrop-blur-sm border-b p-2 px-4 space-y-2">
         <div className="flex flex-row items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="relative p-2 rounded-xl bg-gradient-to-br from-purple-500/20 to-purple-600/10 border border-purple-500/20">
-              <MonitorPlay className="w-5 h-5 text-purple-500 dark:text-purple-400" />
-            </div>
-            <div className='flex items-center gap-2'>
-              <CardTitle className="text-base font-medium text-zinc-900 dark:text-zinc-100">
-                {toolTitle}
-              </CardTitle>
-            </div>
-          </div>
-
+          <ToolViewIconTitle icon={MonitorPlay} title={toolTitle} />
           <div className='flex items-center gap-2'>
             {viewToggle}
             {(result || parameters) && <Button
@@ -339,8 +327,8 @@ export function BrowserToolView({
             renderScreenshot()
           ) : (
             <div className="p-8 flex flex-col items-center justify-center w-full bg-gradient-to-b from-white to-zinc-50 dark:from-zinc-950 dark:to-zinc-900 text-zinc-700 dark:text-zinc-400 min-h-600">
-              <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6 bg-gradient-to-b from-purple-100 to-purple-50 shadow-inner dark:from-purple-800/40 dark:to-purple-900/60">
-                <MonitorPlay className="h-10 w-10 text-purple-400 dark:text-purple-600" />
+              <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6 bg-gradient-to-b from-zinc-100 to-zinc-50 shadow-inner dark:from-zinc-800/40 dark:to-zinc-900/60">
+                <MonitorPlay className="h-10 w-10 text-zinc-500 dark:text-zinc-400" />
               </div>
               <h3 className="text-xl font-semibold mb-2 text-zinc-900 dark:text-zinc-100">
                 {isRunning ? 'Browser action in progress' : 'Browser action completed'}

@@ -24,8 +24,9 @@ HAIKU_BEDROCK_ARN = build_bedrock_profile_arn(HAIKU_4_5_PROFILE_ID)
 SONNET_BEDROCK_ARN = build_bedrock_profile_arn(SONNET_4_5_PROFILE_ID)
 
 # Default model IDs
-FREE_MODEL_ID = "kortix/basic"
-PREMIUM_MODEL_ID = "kortix/power"
+FREE_MODEL_ID = "relu/basic"
+PREMIUM_MODEL_ID = "relu/power"
+IMAGE_MODEL_ID = "relu/haiku"  # Model to use when thread has images
 
 # Haiku 4.5 pricing (used for billing resolution)
 HAIKU_PRICING = ModelPricing(
@@ -48,7 +49,7 @@ class ModelRegistry:
     def _initialize_models(self):
         # Register Haiku Bedrock ARN pricing for billing resolution
         self._litellm_id_to_pricing[HAIKU_BEDROCK_ARN] = HAIKU_PRICING
-
+        
         # MiniMax M2.1 pricing (LiteLLM may return model ID without openrouter/ prefix)
         minimax_m2_pricing = ModelPricing(
             input_cost_per_million_tokens=0.30,
@@ -58,104 +59,92 @@ class ModelRegistry:
         )
         self._litellm_id_to_pricing["minimax/minimax-m2.1"] = minimax_m2_pricing
         self._litellm_id_to_pricing["openrouter/minimax/minimax-m2.1"] = minimax_m2_pricing
-
+        
         # Relu Basic - using MiniMax M2.1
-        # basic_litellm_id = build_bedrock_profile_arn(HAIKU_4_5_PROFILE_ID) if SHOULD_USE_BEDROCK else "anthropic/claude-haiku-4-5-20251001"
+        # Anthropic: basic_litellm_id = build_bedrock_profile_arn(HAIKU_4_5_PROFILE_ID) if SHOULD_USE_BEDROCK else "anthropic/claude-haiku-4-5-20251001"
         basic_litellm_id = "openrouter/minimax/minimax-m2.1"  # 204,800 context $0.30/M input tokens $1.20/M output tokens
         
         self.register(Model(
-            id="kortix/basic",
+            id="relu/basic",
             name="Relu Basic",
             litellm_model_id=basic_litellm_id,
-            # Vision model: Use Haiku Bedrock when thread has images
-            vision_litellm_model_id=HAIKU_BEDROCK_ARN,
-            vision_context_window=200_000,
-            vision_pricing=HAIKU_PRICING,
             provider=ModelProvider.OPENROUTER,
-            aliases=["kortix-basic", "Relu Basic"],
+            aliases=["relu-basic", "Relu Basic"],
             context_window=200_000,
             capabilities=[
                 ModelCapability.CHAT,
                 ModelCapability.FUNCTION_CALLING,
-                ModelCapability.VISION,
+                # ModelCapability.VISION,
                 ModelCapability.PROMPT_CACHING,
             ],
-            pricing=ModelPricing(
-                input_cost_per_million_tokens=0.30,
-                output_cost_per_million_tokens=1.20,
-                cached_read_cost_per_million_tokens=0.03,
-                cache_write_5m_cost_per_million_tokens=0.375,
-                # OLD Haiku 4.5 pricing:
-                # input_cost_per_million_tokens=1.00,
-                # output_cost_per_million_tokens=5.00,
-                # cached_read_cost_per_million_tokens=0.10,
-                # cache_write_5m_cost_per_million_tokens=1.25,
-                # cache_write_1h_cost_per_million_tokens=2.00
-            ),
+            pricing=minimax_m2_pricing,
             tier_availability=["free", "paid"],
             priority=102,
             recommended=True,
             enabled=True,
-            config=ModelConfig(
-                # OLD Anthropic config:
-                # extra_headers={
-                #     "anthropic-beta": "fine-grained-tool-streaming-2025-05-14,token-efficient-tools-2025-02-19" 
-                # },
-            )
+            config=ModelConfig()
         ))
         
         # Relu Power - using MiniMax M2.1
-        # power_litellm_id = build_bedrock_profile_arn(HAIKU_4_5_PROFILE_ID) if SHOULD_USE_BEDROCK else "anthropic/claude-haiku-4-5-20251001"
+        # Anthropic: power_litellm_id = build_bedrock_profile_arn(HAIKU_4_5_PROFILE_ID) if SHOULD_USE_BEDROCK else "anthropic/claude-haiku-4-5-20251001"
         power_litellm_id = "openrouter/minimax/minimax-m2.1"  # 204,800 context $0.30/M input tokens $1.20/M output tokens
         
         self.register(Model(
-            id="kortix/power",
+            id="relu/power",
             name="Relu Advanced Mode",
             litellm_model_id=power_litellm_id,
-            # Vision model: Use Haiku Bedrock when thread has images
-            vision_litellm_model_id=HAIKU_BEDROCK_ARN,
-            vision_context_window=200_000,
-            vision_pricing=HAIKU_PRICING,
             provider=ModelProvider.OPENROUTER,
-            aliases=["kortix-power", "Relu POWER Mode", "Relu Power", "Relu Advanced Mode"],
+            aliases=["relu-power", "Relu POWER Mode", "Relu Power", "Relu Advanced Mode"],
+            context_window=200_000,
+            capabilities=[
+                ModelCapability.CHAT,
+                ModelCapability.FUNCTION_CALLING,
+                # ModelCapability.VISION,
+                ModelCapability.THINKING,
+                ModelCapability.PROMPT_CACHING,
+            ],
+            pricing=minimax_m2_pricing,
+            tier_availability=["paid"],
+            priority=101,
+            recommended=True,
+            enabled=True,
+            config=ModelConfig()
+        ))
+        
+        # Claude Haiku 4.5 - can be used as a fallback for vision tasks
+        haiku_litellm_id = HAIKU_BEDROCK_ARN if SHOULD_USE_BEDROCK else "anthropic/claude-haiku-4-5-20251001"
+        
+        self.register(Model(
+            id="relu/haiku",
+            name="Claude Haiku 4.5",
+            litellm_model_id=haiku_litellm_id,
+            provider=ModelProvider.BEDROCK if SHOULD_USE_BEDROCK else ModelProvider.ANTHROPIC,
+            aliases=[haiku_litellm_id],
             context_window=200_000,
             capabilities=[
                 ModelCapability.CHAT,
                 ModelCapability.FUNCTION_CALLING,
                 ModelCapability.VISION,
-                ModelCapability.THINKING,
                 ModelCapability.PROMPT_CACHING,
             ],
-            pricing=ModelPricing(
-                input_cost_per_million_tokens=0.30,
-                output_cost_per_million_tokens=1.20,
-                cached_read_cost_per_million_tokens=0.03,
-                cache_write_5m_cost_per_million_tokens=0.375,
-                # OLD Haiku 4.5 pricing:
-                # input_cost_per_million_tokens=1.00,
-                # output_cost_per_million_tokens=5.00,
-                # cached_read_cost_per_million_tokens=0.10,
-                # cache_write_5m_cost_per_million_tokens=1.25,
-                # cache_write_1h_cost_per_million_tokens=2.00
-            ),
-            tier_availability=["paid"],
-            priority=101,
-            recommended=True,
+            pricing=HAIKU_PRICING,
+            tier_availability=["free", "paid"],
+            priority=50,
+            recommended=False,
             enabled=True,
             config=ModelConfig(
-                # OLD Anthropic config:
-                # extra_headers={
-                #     "anthropic-beta": "context-1m-2025-08-07,fine-grained-tool-streaming-2025-05-14,token-efficient-tools-2025-02-19" 
-                # },
+                extra_headers={
+                    "anthropic-beta": "fine-grained-tool-streaming-2025-05-14,token-efficient-tools-2025-02-19"
+                },
             )
         ))
-
-        # Relu Test - uses MiniMax M2 via Bedrock (only in LOCAL and STAGING, not PRODUCTION)
+        
+        # Relu Test - uses MiniMax M2.1 via direct API (only in LOCAL and STAGING, not PRODUCTION)
         if config.ENV_MODE != EnvMode.PRODUCTION:
             # MiniMax direct API - requires MINIMAX_API_KEY env var
             # Docs: https://docs.litellm.ai/docs/providers/minimax
             # test_litellm_id = "minimax/MiniMax-M2.1"  # 204,800 context $0.30/M input $1.20/M output
-            test_litellm_id = "openai/gpt-5-mini-2025-08-07" 
+            test_litellm_id = "openrouter/minimax/minimax-m2.1"  # 204,800 context $0.30/M input $1.20/M output 
             # test_litellm_id = "minimax/MiniMax-M2.1-lightning"  # Faster ~100 tps, $2.40/M output
             # test_litellm_id = "minimax/MiniMax-M2"  # Agentic capabilities
             # test_litellm_id = build_bedrock_profile_arn(MINIMAX_M2_PROFILE_ID)
@@ -166,16 +155,16 @@ class ModelRegistry:
             # test_litellm_id ="groq/moonshotai/kimi-k2-instruct" 
 
             self.register(Model(
-                id="kortix/test",
+                id="relu/test",
                 name="Relu Test",
                 litellm_model_id=test_litellm_id,
-                provider=ModelProvider.OPENROUTER,
-                aliases=["kortix-test", "Relu Test"],
+                provider=ModelProvider.MINIMAX,
+                aliases=["relu-test", "Relu Test"],
                 context_window=200_000,
                 capabilities=[
                     ModelCapability.CHAT,
                     ModelCapability.FUNCTION_CALLING,
-                    ModelCapability.VISION,
+                    ModelCapability.THINKING,
                     ModelCapability.PROMPT_CACHING,
                 ],
                 pricing=ModelPricing(
@@ -235,7 +224,7 @@ class ModelRegistry:
         """Resolve a model ID to its registry ID.
         
         Handles:
-        - Registry model IDs (kortix/basic) → returns as-is
+        - Registry model IDs (relu/basic) → returns as-is
         - Model aliases → resolves to registry ID
         - LiteLLM model IDs (Bedrock ARNs) → reverse lookup to registry ID
         """
@@ -251,17 +240,19 @@ class ModelRegistry:
             
         return model_id
     
-    def get_litellm_model_id(self, model_id: str, has_images: bool = False) -> str:
-        """Get the LiteLLM model ID for a given registry model ID or alias.
-        
-        Args:
-            model_id: Registry model ID or alias
-            has_images: Whether the context has images (uses vision model if available)
-        """
+    def get_litellm_model_id(self, model_id: str) -> str:
+        """Get the LiteLLM model ID for a given registry model ID or alias."""
         model = self.get(model_id)
         if model:
-            return model.get_litellm_model_id_for_context(has_images)
+            return model.litellm_model_id
         return model_id
+    
+    def supports_vision(self, model_id: str) -> bool:
+        """Check if a model supports vision natively."""
+        model = self.get(model_id)
+        if model:
+            return model.supports_vision
+        return False
     
     def get_litellm_params(self, model_id: str, **override_params) -> Dict[str, Any]:
         """Get complete LiteLLM parameters for a model from the registry."""
@@ -329,7 +320,7 @@ class ModelRegistry:
         """Get pricing for a LiteLLM model ID (handles both registry models and raw IDs).
         
         This is the primary method for billing to resolve pricing, as it handles:
-        1. Registry model IDs (kortix/basic)
+        1. Registry model IDs (relu/basic)
         2. LiteLLM model IDs that map to registry models (with/without provider prefix)
         3. Fallback model IDs (like Haiku Bedrock ARN) that have explicit pricing
         """
@@ -374,17 +365,16 @@ class ModelRegistry:
             return True
         return False
     
-    def get_context_window(self, model_id: str, default: int = 31_000, has_images: bool = False) -> int:
+    def get_context_window(self, model_id: str, default: int = 31_000) -> int:
         """Get context window for a model.
         
         Args:
             model_id: Registry model ID or alias
             default: Default context window if model not found
-            has_images: Whether context has images (uses vision context window if available)
         """
         model = self.get(model_id)
         if model:
-            return model.get_context_window_for_context(has_images)
+            return model.context_window
         return default
     
     def get_pricing(self, model_id: str) -> Optional[ModelPricing]:

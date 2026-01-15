@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useAgentFromCache } from '@/hooks/agents/use-agents';
-import { Logo } from '@/components/sidebar/logo';
+import { ReluLogo } from '@/components/sidebar/relu-logo';
 import { DynamicIcon } from 'lucide-react/dynamic';
 import { Bot } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -22,7 +22,7 @@ interface AgentAvatarProps {
   iconColor?: string;
   backgroundColor?: string;
   agentName?: string;
-  isSunaDefault?: boolean;
+  isReluDefault?: boolean;
 
   // Common props
   size?: number;
@@ -40,7 +40,7 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = ({
   iconColor: propIconColor,
   backgroundColor: propBackgroundColor,
   agentName: propAgentName,
-  isSunaDefault: propIsSunaDefault,
+  isReluDefault: propIsReluDefault,
 
   // Common props
   size = 16,
@@ -54,7 +54,7 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = ({
   const iconName = propIconName ?? agent?.icon_name;
   const iconColor = propIconColor ?? agent?.icon_color ?? '#6B7280';
   const backgroundColor = propBackgroundColor ?? agent?.icon_background ?? '#F3F4F6';
-  const isSuna = propIsSunaDefault ?? agent?.metadata?.is_suna_default;
+  const isRelu = propIsReluDefault ?? agent?.metadata?.is_relu_default;
 
   // Calculate responsive border radius - proportional to size
   // Use a ratio that prevents full rounding while maintaining nice corners
@@ -71,7 +71,7 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = ({
     .join(' ');
 
   // Show skeleton when no data is available
-  if (!agent && !propIconName && !propIsSunaDefault && agentId) {
+  if (!agent && !propIconName && !propIsReluDefault && agentId) {
     return (
       <div
         className={cn("bg-muted animate-pulse", filteredClassName)}
@@ -80,7 +80,7 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = ({
     );
   }
 
-  if (isSuna) {
+  if (isRelu) {
     return (
       <div
         className={cn(
@@ -89,7 +89,7 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = ({
         )}
         style={{ width: size, height: size, ...borderRadiusStyle }}
       >
-        <Logo size={size * 0.5} />
+        <Relu size={size * 0.5} />
       </div>
     );
   }

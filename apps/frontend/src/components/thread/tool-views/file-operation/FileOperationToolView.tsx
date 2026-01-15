@@ -12,7 +12,7 @@ import {
   Minus,
   Plus,
 } from 'lucide-react';
-import { KortixLoader } from '@/components/ui/kortix-loader';
+import { ReluLoader } from '@/components/ui/relu-loader';
 import {
   formatTimestamp,
   getToolTitle,
@@ -67,11 +67,14 @@ import {
 } from './_utils';
 import { ToolViewProps } from '../types';
 import { LoadingState } from '../shared/LoadingState';
+import { StreamingLoader } from '../shared/StreamingLoader';
+import { ToolViewIconTitle } from '../shared/ToolViewIconTitle';
+import { ToolViewFooter } from '../shared/ToolViewFooter';
 import { toast } from '@/lib/toast';
 import { PresentationSlidePreview } from '../presentation-tools/PresentationSlidePreview';
 import { usePresentationViewerStore } from '@/stores/presentation-viewer-store';
 import { useReluComputerStore } from '@/stores/relu-computer-store';
-import { useSmoothToolField } from '@/hooks/messages/useSmoothToolArguments';
+import { useSmoothStream } from '@/lib/streaming';
 
 const UnifiedDiffView: React.FC<{ lineDiff: LineDiff[]; fileName?: string }> = ({ lineDiff, fileName }) => (
   <div className="font-mono text-[13px] leading-relaxed">
@@ -81,7 +84,7 @@ const UnifiedDiffView: React.FC<{ lineDiff: LineDiff[]; fileName?: string }> = (
         className={cn(
           "flex border-l-2 transition-colors",
           line.type === 'removed' && "bg-red-50/80 dark:bg-red-950/40 border-l-red-400 dark:border-l-red-500",
-          line.type === 'added' && "bg-emerald-50/80 dark:bg-emerald-950/40 border-l-emerald-400 dark:border-l-emerald-500",
+          line.type === 'added' && "bg-zinc-50/80 dark:bg-zinc-900/40 border-l-zinc-400 dark:border-l-zinc-500",
           line.type === 'unchanged' && "bg-transparent border-l-transparent hover:bg-zinc-50 dark:hover:bg-zinc-900/50",
         )}
       >
@@ -91,7 +94,7 @@ const UnifiedDiffView: React.FC<{ lineDiff: LineDiff[]; fileName?: string }> = (
         <div className={cn(
           "w-6 flex items-center justify-center flex-shrink-0",
           line.type === 'removed' && "text-red-500 dark:text-red-400",
-          line.type === 'added' && "text-emerald-500 dark:text-emerald-400",
+          line.type === 'added' && "text-zinc-500 dark:text-zinc-400",
         )}>
           {line.type === 'removed' && <span className="font-bold">−</span>}
           {line.type === 'added' && <span className="font-bold">+</span>}
@@ -100,7 +103,7 @@ const UnifiedDiffView: React.FC<{ lineDiff: LineDiff[]; fileName?: string }> = (
           <code className={cn(
             "whitespace-pre-wrap break-words",
             line.type === 'removed' && "text-red-800 dark:text-red-300",
-            line.type === 'added' && "text-emerald-800 dark:text-emerald-300",
+            line.type === 'added' && "text-zinc-700 dark:text-zinc-300",
             line.type === 'unchanged' && "text-zinc-600 dark:text-zinc-400",
           )}>
             {line.type === 'removed' ? line.oldLine : line.type === 'added' ? line.newLine : line.oldLine}
@@ -147,8 +150,8 @@ const SplitDiffView: React.FC<{ lineDiff: LineDiff[] }> = ({ lineDiff }) => (
     </div>
     {/* Right side - Added */}
     <div>
-      <div className="px-3 py-2 bg-emerald-50/50 dark:bg-emerald-950/20 border-b border-zinc-200 dark:border-zinc-800">
-        <span className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wide flex items-center gap-1.5">
+      <div className="px-3 py-2 bg-zinc-50/50 dark:bg-zinc-900/20 border-b border-zinc-200 dark:border-zinc-800">
+        <span className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400 uppercase tracking-wide flex items-center gap-1.5">
           <Plus className="h-3 w-3" />
           After
         </span>
@@ -158,7 +161,7 @@ const SplitDiffView: React.FC<{ lineDiff: LineDiff[] }> = ({ lineDiff }) => (
           key={i}
           className={cn(
             "flex border-l-2 transition-colors",
-            line.type === 'added' && "bg-emerald-50/80 dark:bg-emerald-950/40 border-l-emerald-400",
+            line.type === 'added' && "bg-zinc-50/80 dark:bg-zinc-900/40 border-l-zinc-400",
             line.type !== 'added' && "border-l-transparent",
             line.newLine === null && "opacity-40"
           )}
@@ -169,7 +172,7 @@ const SplitDiffView: React.FC<{ lineDiff: LineDiff[] }> = ({ lineDiff }) => (
           <div className="flex-1 py-1 px-2 min-w-0">
             <code className={cn(
               "whitespace-pre-wrap break-words text-xs",
-              line.type === 'added' ? "text-emerald-800 dark:text-emerald-300" : "text-zinc-500 dark:text-zinc-500",
+              line.type === 'added' ? "text-zinc-700 dark:text-zinc-300" : "text-zinc-500 dark:text-zinc-500",
             )}>
               {line.newLine || ''}
             </code>
@@ -272,21 +275,97 @@ export function FileOperationToolView({
   
   const streamingSource = isStreaming ? throttledStreamingSource : rawStreamingSource;
 
-  // Apply smooth text streaming for file_contents (create/rewrite operations)
-  const { displayedValue: smoothFileContents, isAnimating: isFileContentsAnimating } = useSmoothToolField(
-    rawStreamingSource,
-    'file_contents',
-    120,
-    isStreaming && (operation === 'create' || operation === 'rewrite') && !toolResult
-  );
+  const rawFileContents = useMemo(() => {
+    if (!rawStreamingSource) return '';
+    if (typeof rawStreamingSource === 'object') {
+      return (rawStreamingSource as Record<string, any>).file_contents || '';
+    }
+    try {
+      const parsed = JSON.parse(rawStreamingSource);
+      return parsed.file_contents || '';
+    } catch {
+      const pattern = /"file_contents"\s*:\s*"/;
+      const match = rawStreamingSource.match(pattern);
+      if (match && match.index !== undefined) {
+        const startIndex = match.index + match[0].length;
+        let value = '';
+        let i = startIndex;
+        let escaped = false;
+        while (i < rawStreamingSource.length) {
+          const char = rawStreamingSource[i];
+          if (escaped) {
+            switch (char) {
+              case 'n': value += '\n'; break;
+              case 't': value += '\t'; break;
+              case 'r': value += '\r'; break;
+              case '"': value += '"'; break;
+              case '\\': value += '\\'; break;
+              default: value += char;
+            }
+            escaped = false;
+          } else if (char === '\\') {
+            escaped = true;
+          } else if (char === '"') {
+            return value;
+          } else {
+            value += char;
+          }
+          i++;
+        }
+        return value;
+      }
+      return '';
+    }
+  }, [rawStreamingSource]);
 
-  // Apply smooth text streaming for code_edit (edit operations)
-  const { displayedValue: smoothCodeEdit, isAnimating: isCodeEditAnimating } = useSmoothToolField(
-    rawStreamingSource,
-    'code_edit',
-    120,
-    isStreaming && operation === 'edit' && !toolResult
-  );
+  const rawCodeEdit = useMemo(() => {
+    if (!rawStreamingSource) return '';
+    if (typeof rawStreamingSource === 'object') {
+      return (rawStreamingSource as Record<string, any>).code_edit || '';
+    }
+    try {
+      const parsed = JSON.parse(rawStreamingSource);
+      return parsed.code_edit || '';
+    } catch {
+      const pattern = /"code_edit"\s*:\s*"/;
+      const match = rawStreamingSource.match(pattern);
+      if (match && match.index !== undefined) {
+        const startIndex = match.index + match[0].length;
+        let value = '';
+        let i = startIndex;
+        let escaped = false;
+        while (i < rawStreamingSource.length) {
+          const char = rawStreamingSource[i];
+          if (escaped) {
+            switch (char) {
+              case 'n': value += '\n'; break;
+              case 't': value += '\t'; break;
+              case 'r': value += '\r'; break;
+              case '"': value += '"'; break;
+              case '\\': value += '\\'; break;
+              default: value += char;
+            }
+            escaped = false;
+          } else if (char === '\\') {
+            escaped = true;
+          } else if (char === '"') {
+            return value;
+          } else {
+            value += char;
+          }
+          i++;
+        }
+        return value;
+      }
+      return '';
+    }
+  }, [rawStreamingSource]);
+
+  const isFileContentsAnimating = isStreaming && (operation === 'create' || operation === 'rewrite') && !toolResult;
+  const isCodeEditAnimating = isStreaming && operation === 'edit' && !toolResult;
+  
+  const smoothFileContents = useSmoothStream(rawFileContents, isFileContentsAnimating);
+  const smoothCodeEdit = useSmoothStream(rawCodeEdit, isCodeEditAnimating);
 
   const extractedContent = useMemo(() => {
     let filePath: string | null = args.file_path || args.target_file || args.path || null;
@@ -306,9 +385,8 @@ export function FileOperationToolView({
     }
 
     if (isStreaming && streamingSource) {
-      // Use smooth streaming content when available
       if (operation === 'create' || operation === 'rewrite') {
-        if (smoothFileContents) {
+        if (rawFileContents) {
           fileContent = smoothFileContents;
         } else {
           try {
@@ -349,7 +427,7 @@ export function FileOperationToolView({
           }
         }
       } else if (operation === 'edit') {
-        if (smoothCodeEdit) {
+        if (rawCodeEdit) {
           fileContent = smoothCodeEdit;
         } else {
           try {
@@ -583,9 +661,11 @@ export function FileOperationToolView({
     }
 
     return { filePath, fileContent, oldStr, newStr };
-  }, [args, output, isStreaming, streamingSource, operation, isStrReplace, smoothFileContents, smoothCodeEdit]);
+  }, [args, output, isStreaming, streamingSource, operation, isStrReplace, rawFileContents, rawCodeEdit, smoothFileContents, smoothCodeEdit]);
 
   const { filePath, fileContent, oldStr, newStr } = extractedContent;
+  
+  const hasRawContent = !!(rawFileContents || rawCodeEdit);
 
   // Generate diff data for str-replace and edit operations
   const lineDiff = React.useMemo(() => {
@@ -752,8 +832,8 @@ export function FileOperationToolView({
       if (isStreaming) {
         return (
           <div className="w-full h-full flex flex-col items-center justify-center p-8 bg-white dark:bg-zinc-900">
-            <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6 bg-gradient-to-b from-blue-100 to-blue-50 shadow-inner dark:from-blue-800/40 dark:to-blue-900/60">
-              <Presentation className="h-10 w-10 text-blue-500 dark:text-blue-400" />
+            <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6 bg-gradient-to-b from-zinc-100 to-zinc-50 shadow-inner dark:from-zinc-800/40 dark:to-zinc-900/60">
+              <Presentation className="h-10 w-10 text-zinc-500 dark:text-zinc-400" />
             </div>
             <h3 className="text-lg font-semibold mb-2 text-zinc-900 dark:text-zinc-100">
               Updating Presentation
@@ -761,8 +841,8 @@ export function FileOperationToolView({
             <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center mb-4">
               {presentationName}{slideNumber ? ` - Slide ${slideNumber}` : ''}
             </p>
-            <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
-              <KortixLoader customSize={16} />
+            <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+              <ReluLoader customSize={16} />
               <span>Writing slide content...</span>
             </div>
           </div>
@@ -818,8 +898,8 @@ export function FileOperationToolView({
       // Sandbox URL not available yet - show waiting state
       return (
         <div className="w-full h-full flex flex-col items-center justify-center p-8 bg-white dark:bg-zinc-900">
-          <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6 bg-gradient-to-b from-blue-100 to-blue-50 shadow-inner dark:from-blue-800/40 dark:to-blue-900/60">
-            <Presentation className="h-10 w-10 text-blue-500 dark:text-blue-400" />
+          <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6 bg-gradient-to-b from-zinc-100 to-zinc-50 shadow-inner dark:from-zinc-800/40 dark:to-zinc-900/60">
+            <Presentation className="h-10 w-10 text-zinc-500 dark:text-zinc-400" />
           </div>
           <h3 className="text-lg font-semibold mb-2 text-zinc-900 dark:text-zinc-100">
             Presentation Updated
@@ -956,9 +1036,9 @@ export function FileOperationToolView({
 
   // Determine icon and colors based on whether it's a presentation slide
   const HeaderIcon = isPresentationSlide ? Presentation : Icon;
-  const headerIconColor = isPresentationSlide ? 'text-blue-500 dark:text-blue-400' : config.color;
-  const headerGradientBg = isPresentationSlide ? 'from-blue-50 to-blue-100 dark:from-blue-800/40 dark:to-blue-900/60' : config.gradientBg;
-  const headerBorderColor = isPresentationSlide ? 'border-blue-200 dark:border-blue-700' : config.borderColor;
+  const headerIconColor = config.color; // All icons use consistent gray color
+  const headerGradientBg = config.gradientBg;
+  const headerBorderColor = config.borderColor;
   const displayTitle = isPresentationSlide && presentationName 
     ? `${toolTitle} - ${presentationName}${slideNumber ? ` (Slide ${slideNumber})` : ''}`
     : toolTitle;
@@ -974,12 +1054,7 @@ export function FileOperationToolView({
         <CardHeader className="h-14 bg-zinc-50/80 dark:bg-zinc-900/80 backdrop-blur-sm border-b p-2 px-4 space-y-2 mb-0 max-w-full min-w-0">
           <div className="flex flex-row items-center justify-between gap-3 max-w-full min-w-0">
             <div className="flex items-center gap-3 min-w-0 flex-1 max-w-full">
-              <div className={cn("relative p-2 rounded-lg border flex-shrink-0", `bg-gradient-to-br ${headerGradientBg}`, headerBorderColor)}>
-                <HeaderIcon className={cn("h-5 w-5", headerIconColor)} />
-              </div>
-              <CardTitle className="text-base font-medium text-zinc-900 dark:text-zinc-100 truncate">
-                {displayTitle}
-              </CardTitle>
+              <ToolViewIconTitle icon={HeaderIcon} title={displayTitle} />
               <TabsList className="h-8 bg-muted/50 border border-border/50 p-0.5 gap-0.5 flex-shrink-0">
                 {hasDiffData && (
                   <TabsTrigger
@@ -1107,13 +1182,8 @@ export function FileOperationToolView({
                   subtitle="Please wait while the file is being processed"
                   showProgress={false}
                 />
-              ) : !fileContent && isStreaming ? (
-                <div className="flex items-center justify-center h-full p-12 bg-white dark:bg-zinc-900">
-                  <div className="text-center">
-                    <KortixLoader customSize={32} className="mx-auto mb-4" />
-                    <p className="text-sm text-zinc-500 dark:text-zinc-400">Waiting for content...</p>
-                  </div>
-                </div>
+              ) : !fileContent && !hasRawContent && isStreaming ? (
+                <StreamingLoader />
               ) : operation === 'delete' ? (
                 <div className="flex flex-col items-center justify-center h-full py-12 px-6 bg-white dark:bg-zinc-900">
                   <div className={cn("w-20 h-20 rounded-full flex items-center justify-center mb-6", config.bgColor)}>
@@ -1160,12 +1230,7 @@ export function FileOperationToolView({
                     showProgress={false}
                   />
                 ) : !fileContent && isStreaming ? (
-                  <div className="flex items-center justify-center h-full p-12 bg-white dark:bg-zinc-900">
-                    <div className="text-center">
-                      <KortixLoader customSize={32} className="mx-auto mb-4" />
-                      <p className="text-sm text-zinc-500 dark:text-zinc-400">Waiting for content...</p>
-                    </div>
-                  </div>
+                  <StreamingLoader />
                 ) : operation === 'delete' ? (
                   renderDeleteOperation()
                 ) : (
@@ -1180,8 +1245,8 @@ export function FileOperationToolView({
               {isStreaming && (!oldStr || !newStr) ? (
                 <div className="flex-1 flex items-center justify-center">
                   <div className="text-center">
-                    <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4 mx-auto bg-gradient-to-b from-violet-100 to-violet-50 dark:from-violet-800/40 dark:to-violet-900/60">
-                      <FileDiff className="h-8 w-8 text-violet-500 dark:text-violet-400" />
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4 mx-auto bg-gradient-to-b from-zinc-100 to-zinc-50 dark:from-zinc-800/40 dark:to-zinc-900/60">
+                      <FileDiff className="h-8 w-8 text-zinc-500 dark:text-zinc-400" />
                     </div>
                     <p className="text-sm text-zinc-500 dark:text-zinc-400">Processing changes...</p>
                   </div>
@@ -1191,7 +1256,7 @@ export function FileOperationToolView({
                   <div className="flex items-center justify-between px-4 py-2 bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800">
                     <div className="flex items-center gap-3">
                       <div className="flex items-center gap-2 text-xs font-medium">
-                        <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                        <span className="flex items-center gap-1 text-zinc-600 dark:text-zinc-400">
                           <Plus className="h-3.5 w-3.5" />
                           {diffStats.additions} added
                         </span>
@@ -1237,9 +1302,9 @@ export function FileOperationToolView({
                     </div>
                   </ScrollArea>
                   {isStreaming && oldStr && newStr && (
-                    <div className="px-4 py-2 bg-violet-50 dark:bg-violet-950/30 border-t border-violet-200 dark:border-violet-800 flex items-center gap-2">
-                      <KortixLoader customSize={14} />
-                      <span className="text-xs text-violet-600 dark:text-violet-400">Streaming changes...</span>
+                    <div className="px-4 py-2 bg-zinc-50 dark:bg-zinc-950/30 border-t border-zinc-200 dark:border-zinc-700 flex items-center gap-2">
+                      <ReluLoader customSize={14} />
+                      <span className="text-xs text-zinc-600 dark:text-zinc-400">Streaming changes...</span>
                     </div>
                   )}
                 </>
@@ -1248,27 +1313,22 @@ export function FileOperationToolView({
           )}
         </CardContent>
 
-        <div className="px-4 py-2 h-10 bg-gradient-to-r from-zinc-50/90 to-zinc-100/90 dark:from-zinc-900/90 dark:to-zinc-800/90 backdrop-blur-sm border-t border-zinc-200 dark:border-zinc-800 flex justify-between items-center gap-4">
-          <div className="h-full flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
-            <Badge variant="outline" className="py-0.5 h-6">
-              <FileIcon className="h-3 w-3 mr-1" />
-              {hasHighlighting ? language.toUpperCase() : fileExtension.toUpperCase() || 'TEXT'}
-            </Badge>
-            {hasDiffData && diffStats.additions + diffStats.deletions > 0 && (
-              <div className="flex items-center gap-2 text-xs">
-                <span className="text-emerald-600 dark:text-emerald-400">+{diffStats.additions}</span>
-                <span className="text-red-600 dark:text-red-400">-{diffStats.deletions}</span>
-              </div>
-            )}
-          </div>
-          <div className="text-xs text-zinc-500 dark:text-zinc-400">
-            {toolTimestamp && !isStreaming
-              ? formatTimestamp(toolTimestamp)
-              : assistantTimestamp
-                ? formatTimestamp(assistantTimestamp)
-                : ''}
-          </div>
-        </div>
+        <ToolViewFooter
+          assistantTimestamp={assistantTimestamp}
+          toolTimestamp={toolTimestamp}
+          isStreaming={isStreaming}
+        >
+          <Badge variant="outline" className="py-0.5 h-6">
+            <FileIcon className="h-3 w-3 mr-1" />
+            {hasHighlighting ? language.toUpperCase() : fileExtension.toUpperCase() || 'TEXT'}
+          </Badge>
+          {hasDiffData && diffStats.additions + diffStats.deletions > 0 && (
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-zinc-600 dark:text-zinc-400">+{diffStats.additions}</span>
+              <span className="text-zinc-600 dark:text-zinc-400">-{diffStats.deletions}</span>
+            </div>
+          )}
+        </ToolViewFooter>
       </Tabs>
     </Card>
   );

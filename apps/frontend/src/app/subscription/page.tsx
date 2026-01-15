@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Logo } from '@/components/sidebar/logo';
+import { ReluLogo } from '@/components/sidebar/relu-logo';
 import { createClient } from '@/lib/supabase/client';
 import { clearUserLocalStorage } from '@/lib/utils/clear-local-storage';
 import { useMaintenanceNoticeQuery } from '@/hooks/edge-flags';
@@ -104,7 +104,7 @@ export default function SubscriptionRequiredPage() {
           <div className="flex items-center justify-between">
             <div className="flex-1" />
             <div className="text-2xl font-medium flex items-center justify-center gap-2">
-              <Logo />
+              <Relu />
               <span>{isTrialExpired ? 'Your Trial Has Ended' : 'Subscription Required'}</span>
             </div>
             <div className="flex-1 flex justify-end">

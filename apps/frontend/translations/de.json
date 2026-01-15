@@ -415,7 +415,7 @@
     "running": "Läuft",
     "minimizeToFloatingPreview": "Auf schwebende Vorschau minimieren",
     "close": "Schließen",
-    "noActionsYet": "Kortix Computer",
+    "noActionsYet": "Relu Computer",
     "workerActionsDescription": "Wird gestartet",
     "emptyActionsDescription": "Worker-Aktionen werden hier angezeigt",
     "toolIsRunning": "Tool läuft",
@@ -830,7 +830,7 @@
     "title": "Relu: Dein autonomer KI-Worker",
     "subtitle": "Gebaut für komplexe Aufgaben, entwickelt für alles. Der ultimative KI-Assistent, der alles bewältigt—von einfachen Anfragen bis hin zu mega-komplexen Projekten.",
     "tryItOut": "Ausprobieren",
-    "kortixComputer": "Relu Computer",
+    "reluComputer": "Relu Computer",
     "running": "Läuft",
     "workers": {
       "images": {
@@ -934,7 +934,7 @@
     "disableAll": "Alle deaktivieren",
     "saveChanges": "Änderungen speichern"
   },
-  "suna": {
+  "relu": {
     "samplePrompts": "Beispiel-Prompts",
     "chooseStyle": "Wähle einen Stil",
     "chooseTemplate": "Wähle eine Vorlage",

@@ -2,7 +2,7 @@
 
 import { memo } from 'react';
 import { Cpu, HardDrive, MemoryStick, MapPin, Loader2 } from 'lucide-react';
-import { Logo } from '@/components/sidebar/logo';
+import { ReluLogo } from '@/components/sidebar/relu-logo';
 import { cn } from '@/lib/utils';
 import { SandboxDetails } from '@/hooks/files/use-sandbox-details';
 
@@ -68,7 +68,7 @@ export const SystemInfoContent = memo(function SystemInfoContent({
     <div className="h-full overflow-auto p-6">
       <div className="flex flex-col items-center justify-center gap-4 mb-8">
         <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-background to-muted flex items-center justify-center border shadow-lg">
-          <Logo size={40} />
+          <Relu size={40} />
         </div>
         <div className="flex flex-col items-center justify-center">
           <h3 className="text-foreground font-semibold text-xl text-center">Relu Computer</h3>

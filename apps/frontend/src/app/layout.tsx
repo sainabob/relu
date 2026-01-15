@@ -77,8 +77,8 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: siteMetadata.title,
     description: siteMetadata.description,
-    creator: '@kortix',
-    site: '@kortix',
+    creator: '@relu',
+    site: '@relu',
     images: ['/banner.png'],
   },
   icons: {
@@ -199,9 +199,9 @@ export default function RootLayout({
               description: siteMetadata.description,
               foundingDate: '2024',
               sameAs: [
-                'https://github.com/Relu-ai/Suna',
-                'https://x.com/kortix',
-                'https://linkedin.com/company/kortix',
+                'https://github.com/Relu-ai/Relu',
+                'https://x.com/relu',
+                'https://linkedin.com/company/relu',
               ],
               contactPoint: {
                 '@type': 'ContactPoint',

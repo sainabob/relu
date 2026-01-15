@@ -1,5 +1,5 @@
 [project]
-name = "kortix"
+name = "relu"
 version = "1.0"
 description = "platform to build, manage and train AI Agents"
 authors = [{ name = "marko-kraemer", email = "mail@markokraemer.com" }]
@@ -107,7 +107,7 @@ dependencies = [
 
 [project.urls]
 homepage = "https://www.relu.work"
-repository = "https://github.com/sainabob/suna"
+repository = "https://github.com/sainabob/relu"
 
 [tool.uv]
 package = false

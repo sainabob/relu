@@ -78,7 +78,7 @@ class ModelConfig:
 
 @dataclass
 class Model:
-    # Registry ID - internal identifier (e.g., "kortix/basic")
+    # Registry ID - internal identifier (e.g., "relu/basic")
     id: str
     
     # Display name - shown to users (e.g., "Relu Basic")

@@ -8,7 +8,7 @@ BEGIN;
 
 -- Option 1: Mark templates by specific names that are known Relu team templates
 UPDATE agent_templates
-SET is_kortix_team = true
+SET is_relu_team = true
 WHERE name IN (
     'Sheets Agent',
     'Slides Agent', 
@@ -23,16 +23,16 @@ WHERE name IN (
 -- Option 2: Mark templates by creator_id if you know the Relu team account IDs
 -- Uncomment and modify with actual Relu team account IDs
 -- UPDATE agent_templates
--- SET is_kortix_team = true
+-- SET is_relu_team = true
 -- WHERE creator_id IN (
---     'kortix-team-account-id-1',
---     'kortix-team-account-id-2'
+--     'relu-team-account-id-1',
+--     'relu-team-account-id-2'
 -- );
 
 -- Option 3: Mark templates that have specific metadata indicating they're official
 UPDATE agent_templates
-SET is_kortix_team = true
-WHERE metadata->>'is_suna_default' = 'true'
+SET is_relu_team = true
+WHERE metadata->>'is_relu_default' = 'true'
    OR metadata->>'is_official' = 'true';
 
 -- Log the update

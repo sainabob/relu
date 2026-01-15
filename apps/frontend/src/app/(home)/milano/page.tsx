@@ -9,13 +9,13 @@ import { useAuth } from '@/components/AuthProvider';
 import { useRouter } from 'next/navigation';
 import { useOptimisticAgentStart } from '@/hooks/threads';
 import { useAgentSelection } from '@/stores/agent-selection-store';
-import { useSunaModePersistence } from '@/stores/suna-modes-store';
+import { useReluModePersistence } from '@/stores/relu-modes-store';
 import { useQuery } from '@tanstack/react-query';
 import { agentKeys } from '@/hooks/agents/keys';
 import { getAgents } from '@/hooks/agents/utils';
 
-const SunaModesPanel = lazy(() => 
-  import('@/components/dashboard/suna-modes-panel').then(mod => ({ default: mod.SunaModesPanel }))
+const ReluModesPanel = lazy(() => 
+  import('@/components/dashboard/relu-modes-panel').then(mod => ({ default: mod.ReluModesPanel }))
 );
 
 // Mobile users are redirected at the edge by middleware (hyper-fast)
@@ -41,7 +41,7 @@ export default function MilanoPage() {
     setSelectedCharts,
     setSelectedOutputFormat,
     setSelectedTemplate,
-  } = useSunaModePersistence();
+  } = useReluModePersistence();
 
   const { data: agentsResponse } = useQuery({
     queryKey: agentKeys.list({
@@ -70,7 +70,7 @@ export default function MilanoPage() {
   const selectedAgent = selectedAgentId
     ? agents.find(agent => agent.agent_id === selectedAgentId)
     : null;
-  const isSunaAgent = !user || selectedAgent?.metadata?.is_suna_default || false;
+  const isReluAgent = !user || selectedAgent?.metadata?.is_relu_default || false;
 
   const handleChatInputSubmit = useLeadingDebouncedCallback(async (
     message: string,
@@ -163,10 +163,10 @@ export default function MilanoPage() {
                 </div>
               </div>
 
-              {isSunaAgent && (
+              {isReluAgent && (
                 <div className="w-full max-w-3xl mx-auto mt-4 px-4 sm:px-0">
                   <Suspense fallback={<div className="h-24 animate-pulse bg-muted/10 rounded-lg" />}>
-                    <SunaModesPanel
+                    <ReluModesPanel
                       selectedMode={selectedMode}
                       onModeSelect={setSelectedMode}
                       onSelectPrompt={setInputValue}

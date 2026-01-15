@@ -1,5 +1,5 @@
 import { Icon } from '@/components/ui/icon';
-import { Logo } from '@/components/ui/Logo';
+import { ReluLogo } from '@/components/ui/ReluLogo';
 import * as React from 'react';
 import { View, type ViewProps, Text } from 'react-native';
 import { useColorScheme } from 'nativewind';
@@ -31,7 +31,7 @@ interface AvatarProps extends ViewProps {
   /** Show border (default: true) */
   showBorder?: boolean;
   
-  /** Use Relu symbol instead of icon (for SUNA agent) */
+  /** Use Relu symbol instead of icon (for RELU agent) */
   useReluSymbol?: boolean;
   
   /** Fallback text (first letter shown if no icon) */
@@ -153,7 +153,7 @@ export function Avatar({
       {...props}
     >
       {useReluSymbol ? (
-        <Logo 
+        <ReluLogo 
           size={symbolSize}
           variant="symbol"
           color="dark"

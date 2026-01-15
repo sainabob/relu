@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Check, Search, AlertTriangle, Crown, Cpu, Plus, Edit, Trash, KeyRound, Lock } from 'lucide-react';
-import { Logo } from '@/components/sidebar/logo';
+import { ReluLogo } from '@/components/sidebar/relu-logo';
 import { ModelProviderIcon } from '@/lib/model-provider-icons';
 import { Button } from '@/components/ui/button';
 import {
@@ -32,7 +32,7 @@ const ModelLabel = ({ label, className }: { label: string; className?: string })
             <span className={cn("flex items-center gap-2", className)}>
                 <span className="font-medium">Relu</span>
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/10 dark:bg-primary/15 rounded-full">
-                    <Logo size={12} variant="symbol" />
+                    <Relu size={12} variant="symbol" />
                     <span className="text-[11px] font-semibold tracking-wide uppercase text-primary">
                         Advanced
                     </span>
@@ -220,7 +220,7 @@ export function AgentModelSelector({
       // If user doesn't have access, open pricing modal
       setIsOpen(false);
       const model = enhancedModelOptions.find(m => m.id === modelId);
-      const isPowerModel = modelId === 'kortix/power';
+      const isPowerModel = modelId === 'relu/power';
       openPricingModal({
         isAlert: true,
         alertTitle: isPowerModel ? 'Upgrade to access Relu Advanced mode' : 'Upgrade to access this model',
@@ -323,7 +323,7 @@ export function AgentModelSelector({
     const isPremium = model.requiresSubscription;
     const isLowQuality = false; // API models are quality controlled
     const isRecommended = false; // Remove recommended badges
-    const isPowerModel = model.id === 'kortix/power';
+    const isPowerModel = model.id === 'relu/power';
 
     // Format cost display
     const formatCost = (cost: number | null | undefined) => {

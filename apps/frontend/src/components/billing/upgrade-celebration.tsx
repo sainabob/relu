@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { TierBadge } from './tier-badge';
-import { Logo } from '@/components/sidebar/logo';
+import { ReluLogo } from '@/components/sidebar/relu-logo';
 
 interface UpgradeCelebrationProps {
   isOpen: boolean;
@@ -104,7 +104,7 @@ export function UpgradeCelebration({ isOpen, onClose, planName, isLoading = fals
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.05, duration: 0.3 }}
             >
-              <Logo size={36} variant="logomark" />
+              <Relu size={36} variant="logomark" />
             </motion.div>
 
             {/* Welcome text */}

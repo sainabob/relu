@@ -381,7 +381,7 @@ async def get_default_agent_id(account_id: str) -> Optional[str]:
     sql = """
     SELECT agent_id FROM agents 
     WHERE account_id = :account_id 
-      AND metadata->>'is_suna_default' = 'true'
+      AND metadata->>'is_relu_default' = 'true'
     LIMIT 1
     """
     result = await execute_one(sql, {"account_id": account_id})
@@ -394,12 +394,12 @@ async def get_any_agent_id(account_id: str) -> Optional[str]:
     return result["agent_id"] if result else None
 
 
-async def get_shared_suna_agent(admin_user_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
+async def get_shared_relu_agent(admin_user_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
     if admin_user_id:
         sql = """
         SELECT agent_id, account_id FROM agents 
         WHERE account_id = :admin_user_id 
-          AND metadata->>'is_suna_default' = 'true'
+          AND metadata->>'is_relu_default' = 'true'
         LIMIT 1
         """
         result = await execute_one(sql, {"admin_user_id": admin_user_id})
@@ -408,7 +408,7 @@ async def get_shared_suna_agent(admin_user_id: Optional[str] = None) -> Optional
     
     sql = """
     SELECT agent_id, account_id FROM agents 
-    WHERE metadata->>'is_suna_default' = 'true'
+    WHERE metadata->>'is_relu_default' = 'true'
     LIMIT 1
     """
     result = await execute_one(sql)

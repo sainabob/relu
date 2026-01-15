@@ -801,22 +801,22 @@
   animation: stream-word-pop 200ms ease-out forwards;
 }
 
-.kortix-markdown [data-streamdown-animating="true"] > * {
+.relu-markdown [data-streamdown-animating="true"] > * {
   animation: stream-fade-in 200ms ease-out forwards;
 }
 
-.kortix-markdown [data-streamdown-animating="true"] p,
-.kortix-markdown [data-streamdown-animating="true"] li,
-.kortix-markdown [data-streamdown-animating="true"] h1,
-.kortix-markdown [data-streamdown-animating="true"] h2,
-.kortix-markdown [data-streamdown-animating="true"] h3,
-.kortix-markdown [data-streamdown-animating="true"] h4,
-.kortix-markdown [data-streamdown-animating="true"] h5,
-.kortix-markdown [data-streamdown-animating="true"] h6 {
+.relu-markdown [data-streamdown-animating="true"] p,
+.relu-markdown [data-streamdown-animating="true"] li,
+.relu-markdown [data-streamdown-animating="true"] h1,
+.relu-markdown [data-streamdown-animating="true"] h2,
+.relu-markdown [data-streamdown-animating="true"] h3,
+.relu-markdown [data-streamdown-animating="true"] h4,
+.relu-markdown [data-streamdown-animating="true"] h5,
+.relu-markdown [data-streamdown-animating="true"] h6 {
   animation: stream-word-pop 180ms ease-out forwards;
 }
 
-.kortix-markdown [data-streamdown-animating="true"] code {
+.relu-markdown [data-streamdown-animating="true"] code {
   animation: stream-char-reveal 150ms ease-out forwards;
 }
 
@@ -839,17 +839,17 @@
 }
 
 
-.kortix-markdown.streaming-active {
+.relu-markdown.streaming-active {
   position: relative;
 }
 
-.kortix-markdown.streaming-active p:last-child,
-.kortix-markdown.streaming-active li:last-child,
-.kortix-markdown.streaming-active div:last-child {
+.relu-markdown.streaming-active p:last-child,
+.relu-markdown.streaming-active li:last-child,
+.relu-markdown.streaming-active div:last-child {
   display: inline;
 }
 
-.kortix-markdown[data-streaming="true"] > *:last-child {
+.relu-markdown[data-streaming="true"] > *:last-child {
   animation: stream-fade-in 180ms ease-out;
 }
 
@@ -879,7 +879,7 @@
   }
 }
 
-.kortix-markdown[data-streaming="true"] > *:last-child {
+.relu-markdown[data-streaming="true"] > *:last-child {
   animation: blur-fade-in 0.3s ease-out forwards;
 }
 

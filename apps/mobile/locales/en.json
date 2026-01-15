@@ -143,7 +143,7 @@
     "skip": "Skip",
     "next": "Next",
     "getStarted": "Get Started",
-    "kortixComputer": "Relu Computer",
+    "reluComputer": "Relu Computer",
     "ready": "Ready",
     "examples": {
       "presentations": {
@@ -550,8 +550,8 @@
   "billing": {
     "loadingPaywall": "Loading plans...",
     "checkoutUnavailable": "Mobile checkout not available",
-    "checkoutUnavailableMessage": "To subscribe to a plan, please visit kortix.com on the web.",
-    "goToWeb": "Go to kortix.com",
+    "checkoutUnavailableMessage": "To subscribe to a plan, please visit relu.com on the web.",
+    "goToWeb": "Go to relu.com",
     "billingStatus": "Billing Status",
     "loading": "Loading billing information...",
     "error": "Failed to load billing information",
@@ -999,13 +999,13 @@
       "title": "System Prompt",
       "description": "Define how your worker should behave and what it should do",
       "loading": "Loading instructions...",
-      "cannotEditSuna": "Suna's system prompt is managed centrally and cannot be edited.",
+      "cannotEditRelu": "Relu's system prompt is managed centrally and cannot be edited.",
       "cannotEdit": "This system prompt cannot be edited.",
       "placeholder": "Define how your worker should behave...",
       "saving": "Saving...",
       "saveChanges": "Save Changes",
       "cannotEditAlert": "Cannot Edit",
-      "sunaManaged": "Suna's system prompt is managed centrally.",
+      "reluManaged": "Relu's system prompt is managed centrally.",
       "errorUpdatePrompt": "Failed to update system prompt"
     },
     "loadingWorker": "Loading worker...",
@@ -1017,10 +1017,10 @@
     "loadingTools": "Loading tools...",
     "noToolsAvailable": "No tools available",
     "toolsWillAppear": "Tools will appear here once available",
-    "sunaToolsManaged": "Suna's tools are managed centrally and cannot be edited.",
+    "reluToolsManaged": "Relu's tools are managed centrally and cannot be edited.",
     "toolsNotEditable": "These tools cannot be edited.",
     "cannotEditTools": "Cannot Edit",
-    "sunaToolsManagedAlert": "Suna's tools are managed centrally.",
+    "reluToolsManagedAlert": "Relu's tools are managed centrally.",
     "savingChanges": "Saving...",
     "saveChanges": "Save Changes"
   },

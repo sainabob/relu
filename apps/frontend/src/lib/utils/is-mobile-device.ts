@@ -93,12 +93,12 @@ export function isAndroidTablet(): boolean {
  * Store links for mobile app downloads
  */
 export const MOBILE_APP_STORE_LINKS = {
-  ios: 'https://apps.apple.com/ie/app/kortix/id6754448524',
-  android: 'https://play.google.com/store/apps/details?id=com.kortix.app',
+  ios: 'https://apps.apple.com/ie/app/relu/id6754448524',
+  android: 'https://play.google.com/store/apps/details?id=com.relu.app',
 } as const;
 
 /**
  * Deep link scheme for opening the Relu app
  */
-export const KORTIX_DEEP_LINK = 'relu://';
+export const RELU_DEEP_LINK = 'relu://';
 

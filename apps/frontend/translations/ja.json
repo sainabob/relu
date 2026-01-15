@@ -414,7 +414,7 @@
     "running": "実行中",
     "minimizeToFloatingPreview": "フローティングプレビューに最小化",
     "close": "閉じる",
-    "noActionsYet": "Kortix Computer",
+    "noActionsYet": "Relu Computer",
     "workerActionsDescription": "起動中",
     "emptyActionsDescription": "ワーカーのアクションがここに表示されます",
     "toolIsRunning": "ツールが実行中です",
@@ -450,7 +450,7 @@
     "title": "Relu: あなたの自律型AIワーカー",
     "subtitle": "複雑なタスクのために構築され、すべてのために設計されました。シンプルなリクエストからメガ複雑なプロジェクトまで、すべてを処理する究極のAIアシスタント。",
     "tryItOut": "試してみる",
-    "kortixComputer": "Relu Computer",
+    "reluComputer": "Relu Computer",
     "running": "実行中",
     "workers": {
       "images": {
@@ -933,7 +933,7 @@
     "disableAll": "すべて無効化",
     "saveChanges": "変更を保存"
   },
-  "suna": {
+  "relu": {
     "samplePrompts": "サンプルプロンプト",
     "chooseStyle": "スタイルを選択",
     "chooseTemplate": "テンプレートを選択",

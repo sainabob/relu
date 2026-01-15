@@ -611,7 +611,7 @@ export function FileViewerView({
                       className={`h-9 w-9 items-center justify-center rounded-xl bg-card border border-border active:opacity-70 ${!hasUnsavedChanges ? 'opacity-50' : ''}`}
                     >
                       {saveStatus === 'saving' ? (
-                        <KortixLoader size="small" customSize={17} />
+                        <ReluLoader size="small" customSize={17} />
                       ) : (
                         <Icon
                           as={saveStatus === 'saved' ? Check : saveStatus === 'error' ? AlertCircle : Save}
@@ -666,7 +666,7 @@ export function FileViewerView({
                 className={`h-9 w-9 items-center justify-center rounded-xl bg-card border border-border active:opacity-70 ${isDownloading ? 'opacity-60' : ''}`}
               >
                 {isDownloading ? (
-                  <KortixLoader size="small" customSize={17} />
+                  <ReluLoader size="small" customSize={17} />
                 ) : (
                   <Icon
                     as={Download}
@@ -927,7 +927,7 @@ export function FileViewerView({
               >
                 {isReverting ? (
                   <View className="flex-row items-center gap-2">
-                    <KortixLoader size="small" customSize={14} forceTheme="dark" />
+                    <ReluLoader size="small" customSize={14} forceTheme="dark" />
                     <Text className="text-sm font-roobert-medium text-background">Restoring...</Text>
                   </View>
                 ) : (

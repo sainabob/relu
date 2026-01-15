@@ -19,7 +19,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { X, Image as ImageIcon, Presentation, BarChart3, FileText, Search, Palette, Video, Code2, Sparkles, Brain as BrainIcon, MessageSquare, CornerDownLeft, Plug, Lock } from 'lucide-react';
-import { ReluLoader } from '@/components/ui/kortix-loader';
+import { ReluLoader } from '@/components/ui/relu-loader';
 import { VoiceRecorder } from './voice-recorder';
 import { useTheme } from 'next-themes';
 import { AttachmentGroup } from '../file-attachment';
@@ -466,20 +466,20 @@ const ModeButton = memo(function ModeButton({
 });
 
 // Relu agent modes switcher - isolated from typing state
-interface SunaAgentModeSwitcherProps {
+interface ReluAgentModeSwitcherProps {
   enabled: boolean;
-  isSunaAgent: boolean;
-  sunaAgentModes: 'adaptive' | 'autonomous' | 'chat';
+  isReluAgent: boolean;
+  reluAgentModes: 'adaptive' | 'autonomous' | 'chat';
   onModeChange: (mode: 'adaptive' | 'autonomous' | 'chat') => void;
 }
 
-const SunaAgentModeSwitcher = memo(function SunaAgentModeSwitcher({
+const ReluAgentModeSwitcher = memo(function ReluAgentModeSwitcher({
   enabled,
-  isSunaAgent,
-  sunaAgentModes,
+  isReluAgent,
+  reluAgentModes,
   onModeChange,
-}: SunaAgentModeSwitcherProps) {
-  if (!enabled || !(isStagingMode() || isLocalMode()) || !isSunaAgent) return null;
+}: ReluAgentModeSwitcherProps) {
+  if (!enabled || !(isStagingMode() || isLocalMode()) || !isReluAgent) return null;
 
   return (
     <div className="flex items-center gap-1 p-0.5 bg-muted/50 rounded-lg">
@@ -489,7 +489,7 @@ const SunaAgentModeSwitcher = memo(function SunaAgentModeSwitcher({
             onClick={() => onModeChange('adaptive')}
             className={cn(
               "p-1.5 rounded-md transition-all duration-200 cursor-pointer",
-              sunaAgentModes === 'adaptive'
+              reluAgentModes === 'adaptive'
                 ? "bg-background text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground hover:bg-background/50"
             )}
@@ -511,7 +511,7 @@ const SunaAgentModeSwitcher = memo(function SunaAgentModeSwitcher({
             onClick={() => onModeChange('autonomous')}
             className={cn(
               "p-1.5 rounded-md transition-all duration-200 cursor-pointer",
-              sunaAgentModes === 'autonomous'
+              reluAgentModes === 'autonomous'
                 ? "bg-background text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground hover:bg-background/50"
             )}
@@ -533,7 +533,7 @@ const SunaAgentModeSwitcher = memo(function SunaAgentModeSwitcher({
             onClick={() => onModeChange('chat')}
             className={cn(
               "p-1.5 rounded-md transition-all duration-200 cursor-pointer",
-              sunaAgentModes === 'chat'
+              reluAgentModes === 'chat'
                 ? "bg-background text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground hover:bg-background/50"
             )}
@@ -783,8 +783,8 @@ export const ChatInput = memo(forwardRef<ChatInputHandles, ChatInputProps>(
     const [mounted, setMounted] = useState(false);
     const [animatedPlaceholder, setAnimatedPlaceholder] = useState('');
     const [isModeDismissing, setIsModeDismissing] = useState(false);    // Relu Agent Modes feature flag
-    const ENABLE_SUNA_AGENT_MODES = false;
-    const [sunaAgentModes, setSunaAgentModes] = useState<'adaptive' | 'autonomous' | 'chat'>('adaptive');
+    const ENABLE_RELU_AGENT_MODES = false;
+    const [reluAgentModes, setReluAgentModes] = useState<'adaptive' | 'autonomous' | 'chat'>('adaptive');
 
     const {
       selectedModel,
@@ -912,10 +912,10 @@ export const ChatInput = memo(forwardRef<ChatInputHandles, ChatInputProps>(
     // Check if selected agent is Relu based on agent data
     // While loading, default to Relu (assume Relu is the default agent)
     const selectedAgent = agents.find(agent => agent.agent_id === selectedAgentId);
-    const sunaAgent = agents.find(agent => agent.metadata?.is_suna_default === true);
-    const isSunaAgent = isLoadingAgents 
+    const reluAgent = agents.find(agent => agent.metadata?.is_relu_default === true);
+    const isReluAgent = isLoadingAgents 
         ? true // Show Relu modes while loading
-        : (selectedAgent?.metadata?.is_suna_default || (!selectedAgentId && sunaAgent !== undefined) || false);
+        : (selectedAgent?.metadata?.is_relu_default || (!selectedAgentId && reluAgent !== undefined) || false);
 
     const { initializeFromAgents } = useAgentSelection();
     useImperativeHandle(ref, () => ({
@@ -1271,11 +1271,11 @@ export const ChatInput = memo(forwardRef<ChatInputHandles, ChatInputProps>(
         />
 
         <div className="hidden sm:block">
-          <SunaAgentModeSwitcher
-            enabled={ENABLE_SUNA_AGENT_MODES}
-            isSunaAgent={isSunaAgent}
-            sunaAgentModes={sunaAgentModes}
-            onModeChange={setSunaAgentModes}
+          <ReluAgentModeSwitcher
+            enabled={ENABLE_RELU_AGENT_MODES}
+            isReluAgent={isReluAgent}
+            reluAgentModes={reluAgentModes}
+            onModeChange={setReluAgentModes}
           />
         </div>
 
@@ -1289,7 +1289,7 @@ export const ChatInput = memo(forwardRef<ChatInputHandles, ChatInputProps>(
           </div>
         )}
       </div>
-    ), [hideAttachments, loading, disabled, isAgentRunning, isUploading, sandboxId, projectId, messages, isLoggedIn, isFreeTier, quickIntegrations, integrationIcons, handleOpenRegistry, handleOpenPlanModal, threadId, isSunaAgent, sunaAgentModes, onModeDeselect, selectedMode, isModeDismissing, handleModeDeselect]);
+    ), [hideAttachments, loading, disabled, isAgentRunning, isUploading, sandboxId, projectId, messages, isLoggedIn, isFreeTier, quickIntegrations, integrationIcons, handleOpenRegistry, handleOpenPlanModal, threadId, isReluAgent, reluAgentModes, onModeDeselect, selectedMode, isModeDismissing, handleModeDeselect]);
 
     const rightControls = useMemo(() => (
       <div className='flex items-center gap-2 flex-shrink-0'>

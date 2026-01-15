@@ -21,13 +21,13 @@ export function WorkflowsScreen({ agentId }: WorkflowsScreenProps) {
         }
     }, [agent?.agentpress_tools]);
 
-    const isSunaAgent = agent?.metadata?.is_suna_default || false;
+    const isReluAgent = agent?.metadata?.is_relu_default || false;
     const restrictions = agent?.metadata?.restrictions || {};
-    const areToolsEditable = (restrictions.tools_editable !== false) && !isSunaAgent;
+    const areToolsEditable = (restrictions.tools_editable !== false) && !isReluAgent;
 
     const handleToolsChange = async (newTools: Record<string, boolean | { enabled: boolean; description: string }>) => {
         if (!areToolsEditable) {
-            if (isSunaAgent) {
+            if (isReluAgent) {
                 toast.error("Tools cannot be edited", {
                     description: "Relu's tools are managed centrally.",
                 });
@@ -68,7 +68,7 @@ export function WorkflowsScreen({ agentId }: WorkflowsScreenProps) {
                     tools={tools}
                     onToolsChange={handleToolsChange}
                     disabled={!areToolsEditable}
-                    isSunaAgent={isSunaAgent}
+                    isReluAgent={isReluAgent}
                     isLoading={updateAgentMutation.isPending}
                 />
             </div>

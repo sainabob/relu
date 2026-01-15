@@ -10,12 +10,12 @@ import { useState, useEffect, Suspense, lazy } from 'react';
 import { signUp, resendMagicLink } from './actions';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { MailCheck, Clock, ExternalLink } from 'lucide-react';
-import { KortixLoader } from '@/components/ui/kortix-loader';
+import { ReluLoader } from '@/components/ui/relu-loader';
 import { useAuth } from '@/components/AuthProvider';
 import { useAuthMethodTracking } from '@/stores/auth-tracking';
 import { toast } from '@/lib/toast';
 import { useTranslations } from 'next-intl';
-import { Logo } from '@/components/sidebar/logo';
+import { ReluLogo } from '@/components/sidebar/relu-logo';
 import { ReferralCodeDialog } from '@/components/referrals/referral-code-dialog';
 import { isElectron, getAuthOrigin } from '@/lib/utils/is-electron';
 import { ExampleShowcase } from '@/components/auth/example-showcase';
@@ -388,7 +388,7 @@ function LoginContent() {
     <div className="min-h-screen bg-background relative">
       <div className="absolute top-6 left-6 z-10">
         <Link href="/" className="flex items-center space-x-2">
-          <Logo size={28} />
+          <Relu size={28} />
         </Link>
       </div>
       <div className="flex min-h-screen">
@@ -556,7 +556,7 @@ export default function Login() {
     <Suspense
       fallback={
         <div className="min-h-screen bg-background flex items-center justify-center">
-          <KortixLoader size="medium" />
+          <ReluLoader size="medium" />
         </div>
       }
     >

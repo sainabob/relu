@@ -23,7 +23,7 @@ export interface PricingTier {
   buttonText: string;
   hidden?: boolean;
   icon?: any; // React component type for icon
-  revenueCatId?: string; // RevenueCat product identifier (e.g., 'kortix_plus_monthly')
+  revenueCatId?: string; // RevenueCat product identifier (e.g., 'relu_plus_monthly')
 }
 
 /**
@@ -89,7 +89,7 @@ export const PRICING_TIERS: PricingTier[] = [
     buttonText: 'Get started',
     hidden: false,
     icon: Zap,
-    revenueCatId: 'kortix_plus',
+    revenueCatId: 'relu_plus',
   },
   {
     id: 'tier_6_50',
@@ -114,7 +114,7 @@ export const PRICING_TIERS: PricingTier[] = [
     buttonText: 'Get started',
     hidden: false,
     icon: Rocket,
-    revenueCatId: 'kortix_pro',
+    revenueCatId: 'relu_pro',
   },
   {
     id: 'tier_25_200',
@@ -139,7 +139,7 @@ export const PRICING_TIERS: PricingTier[] = [
     buttonText: 'Get started',
     hidden: false,
     icon: Crown,
-    revenueCatId: 'kortix_ultra',
+    revenueCatId: 'relu_ultra',
   },
 ];
 

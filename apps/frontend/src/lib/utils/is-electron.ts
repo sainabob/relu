@@ -1,5 +1,5 @@
 // Custom protocol scheme for Electron deep linking
-const ELECTRON_PROTOCOL = 'kortix';
+const ELECTRON_PROTOCOL = 'relu';
 
 /**
  * Detects if the app is running in Electron (desktop app) vs web browser

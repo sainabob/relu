@@ -5,7 +5,7 @@ import Image from 'next/image';
 
 export const metadata: Metadata = {
   title: 'Relu - AI Worker',
-  description: 'Relu has rebranded to Relu. Relu (formerly Suna) is the same powerful open source AI assistant and generalist AI worker you know and love, now with a new name and bigger vision.',
+  description: 'Relu has rebranded to Relu. Relu (formerly Relu) is the same powerful open source AI assistant and generalist AI worker you know and love, now with a new name and bigger vision.',
   keywords: [
     'Relu',
     'Relu AI',
@@ -19,17 +19,17 @@ export const metadata: Metadata = {
     'autonomous AI',
   ],
   openGraph: {
-    title: 'Suna is now Relu',
+    title: 'Relu is now Relu',
     description: 'Relu - Same powerful open source AI worker.',
     type: 'website',
-    url: 'https://www.relu.work/suna',
+    url: 'https://www.relu.work/relu',
     siteName: 'Relu',
     images: [
       {
         url: '/banner.png',
         width: 1200,
         height: 630,
-        alt: 'Relu - Formerly Suna',
+        alt: 'Relu - Formerly Relu',
       },
     ],
   },
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     images: ['/banner.png'],
   },
   alternates: {
-    canonical: 'https://www.relu.work/suna',
+    canonical: 'https://www.relu.work/relu',
   },
   robots: {
     index: true,
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function SunaPage() {
+export default function ReluPage() {
   return (
     <>
       {/* Structured Data for SEO */}
@@ -143,7 +143,7 @@ export default function SunaPage() {
                 <ArrowRight className="ml-2 size-4" />
               </Link>
               <a
-                href="https://github.com/sainabob/suna"
+                href="https://github.com/sainabob/relu"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex h-12 items-center justify-center w-full sm:w-auto px-8 text-center rounded-full border border-border bg-background hover:bg-accent/50 transition-all font-medium"
@@ -163,7 +163,7 @@ export default function SunaPage() {
                   What changed?
                 </h2>
                 <div className="space-y-3 text-base md:text-lg text-muted-foreground font-medium">
-                  <p>Our name changed from Suna to Relu</p>
+                  <p>Our name changed from Relu to Relu</p>
                   <p>Our domain is now relu.work</p>
                 </div>
               </div>
@@ -191,7 +191,7 @@ export default function SunaPage() {
                   Where to find us?
                 </h2>
                 <p className="text-base md:text-lg text-muted-foreground font-medium">
-                  Our GitHub repository remains at github.com/sainabob/suna
+                  Our GitHub repository remains at github.com/sainabob/relu
                 </p>
               </div>
             </div>
@@ -235,10 +235,10 @@ export default function SunaPage() {
           {/* SEO Footer Text */}
           <div className="relative z-10 text-center max-w-2xl mx-auto pb-20 pt-12 border-t border-border/50">
             <p className="text-sm text-muted-foreground/60 leading-relaxed font-medium">
-              Looking for Suna? You've found us. Relu is the evolution of Suna — the same open
+              Looking for Relu? You've found us. Relu is the evolution of Relu — the same open
               source AI assistant and generalist AI worker, now with a name that better represents
-              our vision. For users searching for "Suna AI", "Suna assistant", "Suna.so", "where is
-              Suna", or "Relu Suna" — this is the official continuation of the Suna project under
+              our vision. For users searching for "Relu AI", "Relu assistant", "Relu.so", "where is
+              Relu", or "Relu" — this is the official continuation of the Relu project under
               the Relu brand.
             </p>
           </div>

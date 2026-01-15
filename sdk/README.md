@@ -14,30 +14,30 @@ A Python SDK that enables you to create, manage, and interact with AI Workers on
 Install directly from the GitHub repository:
 
 ```bash
-pip install "kortix @ git+https://github.com/sainabob/suna.git@main#subdirectory=sdk"
+pip install "relu @ git+https://github.com/sainabob/relu.git@main#subdirectory=sdk"
 ```
 
 Or using uv:
 
 ```bash
-uv add "kortix @ git+https://github.com/sainabob/suna.git@main#subdirectory=sdk"
+uv add "relu @ git+https://github.com/sainabob/relu.git@main#subdirectory=sdk"
 ```
 
 ## 🔧 Quick Start
 
 ```python
 import asyncio
-from kortix import kortix
+from relu import relu
 
 async def main():
-    mcp_tools = kortix.MCPTools(
+    mcp_tools = relu.MCPTools(
         "http://localhost:4000/mcp/",  # Point to any HTTP MCP server
         "Relu",
     )
     await mcp_tools.initialize()
 
     # Initialize the client
-    client = kortix.Relu(api_key="your-api-key")
+    client = relu.Relu(api_key="your-api-key")
 
     # Create an agent
     agent = await client.Agent.create(

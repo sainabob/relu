@@ -7,7 +7,7 @@ from .presence_service import presence_service
 from .models import UserNotificationSettings
 from core.services.email import email_service
 
-KORTIX_HELLO_EMAIL = 'hello@relu.work'
+RELU_HELLO_EMAIL = 'hello@relu.work'
 
 class NotificationService:
     def __init__(self):

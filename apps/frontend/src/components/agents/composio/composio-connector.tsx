@@ -58,7 +58,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { backendApi } from '@/lib/api-client';
 import { composioApi } from '@/hooks/composio/utils';
 import { ComposioToolsSelector } from './composio-tools-selector';
-import { ReluLoader } from '@/components/ui/kortix-loader';
+import { ReluLoader } from '@/components/ui/relu-loader';
 
 interface ComposioConnectorProps {
   app: ComposioToolkit;

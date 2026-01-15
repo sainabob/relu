@@ -56,7 +56,7 @@ import {
   useSetSelectedAgent, 
   useInitializeFromAgents, 
   useGetCurrentAgent, 
-  useIsSunaAgentFn 
+  useIsReluAgentFn 
 } from '@/stores/agent-selection-store';
 import { useQueryClient } from '@tanstack/react-query';
 import { threadKeys } from '@/hooks/threads/keys';
@@ -69,6 +69,7 @@ import { useToolStreamStore } from '@/stores/tool-stream-store';
 import { useOptimisticFilesStore } from '@/stores/optimistic-files-store';
 import { useProcessStreamOperation } from '@/stores/spreadsheet-store';
 import { uploadPendingFilesToProject } from '@/components/thread/chat-input/file-upload-handler';
+import { useClearNavigation } from '@/stores/thread-navigation-store';
 
 interface ThreadComponentProps {
   projectId: string;
@@ -83,9 +84,16 @@ export function ThreadComponent({ projectId, threadId, compact = false, configur
   const isMobile = useIsMobile();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
+  const clearNavigation = useClearNavigation();
 
   const { user } = useAuth();
   const isAuthenticated = !!user;
+  
+  // Clear optimistic navigation state immediately when thread component mounts
+  // This makes the navigation feel instant - skeleton shows immediately, then real content
+  useEffect(() => {
+    clearNavigation();
+  }, [threadId, clearNavigation]);
   
   const isNewThread = searchParams?.get('new') === 'true';
 
@@ -96,7 +104,7 @@ export function ThreadComponent({ projectId, threadId, compact = false, configur
   const storeSetSelectedAgent = useSetSelectedAgent();
   const storeInitializeFromAgents = useInitializeFromAgents();
   const storeGetCurrentAgent = useGetCurrentAgent();
-  const storeIsSunaAgentFn = useIsSunaAgentFn();
+  const storeIsReluAgentFn = useIsReluAgentFn();
   
   const agentsQuery = useAgents({}, { enabled: isAuthenticated && !isShared });
 
@@ -104,12 +112,12 @@ export function ThreadComponent({ projectId, threadId, compact = false, configur
   const setSelectedAgent = isShared ? (() => { }) : storeSetSelectedAgent;
   const initializeFromAgents = isShared ? (() => { }) : storeInitializeFromAgents;
   const getCurrentAgent = isShared ? (() => undefined) : storeGetCurrentAgent;
-  const isSunaAgent = isShared ? false : storeIsSunaAgentFn;
+  const isReluAgent = isShared ? false : storeIsReluAgentFn;
 
   // Memoize agents array to prevent unnecessary recalculations
   const agents = useMemo(() => {
     if (isShared) return [];
-    return agentsQuery?.data?.agents || [];
+    return Array.isArray(agentsQuery?.data?.agents) ? agentsQuery.data.agents : [];
   }, [isShared, agentsQuery?.data?.agents]);
   const [isSidePanelAnimating, setIsSidePanelAnimating] = useState(false);
   const [userInitiatedRun, setUserInitiatedRun] = useState(false);
@@ -240,13 +248,25 @@ export function ThreadComponent({ projectId, threadId, compact = false, configur
     ? (agentRunId && initialLoadCompleted)
     : ((agentRunId || messages.length > 0 || threadStatus === 'ready') && initialLoadCompleted);
   
+  // Track if we've already handled the optimistic -> real transition to prevent flicker
+  const optimisticTransitionHandledRef = useRef(false);
+  
   useEffect(() => {
-    if (shouldHideOptimisticUI && showOptimisticUI) {
+    if (shouldHideOptimisticUI && showOptimisticUI && !optimisticTransitionHandledRef.current) {
+      optimisticTransitionHandledRef.current = true;
+      // IMPORTANT: Ensure isSidePanelOpen is true BEFORE clearing showOptimisticUI
+      // This prevents a flicker where effectivePanelOpen briefly becomes false
+      // during the transition from optimistic UI to real data
+      if (!isMobile && !compact) {
+        setIsSidePanelOpen(true);
+      }
       setShowOptimisticUI(false);
     }
   }, [shouldHideOptimisticUI, showOptimisticUI]);
   
-  const effectivePanelOpen = isSidePanelOpen || (isNewThread && showOptimisticUI);
+  // Use showOptimisticUI directly (not isNewThread && showOptimisticUI) because
+  // isNewThread becomes false when URL is updated before showOptimisticUI becomes false
+  const effectivePanelOpen = isSidePanelOpen || showOptimisticUI;
 
   const handleSidePanelClose = useCallback(() => {
     setIsSidePanelOpen(false);
@@ -350,11 +370,38 @@ export function ThreadComponent({ projectId, threadId, compact = false, configur
     agentName: derivedAgentName,
   }), [derivedAgentId, derivedAgentName]);
 
+  // Track the previous thread ID to detect thread switches
+  const prevThreadIdRef = useRef<string | null>(null);
+  
+  // Track the thread ID that was opened via optimistic start
+  const optimisticThreadIdRef = useRef<string | null>(null);
+  
+  // Mark this thread as optimistic when we enter optimistic mode
+  useEffect(() => {
+    if (showOptimisticUI && isNewThread) {
+      optimisticThreadIdRef.current = threadId;
+    }
+  }, [showOptimisticUI, isNewThread, threadId]);
+  
+  // Reset Relu Computer state when switching threads
   useEffect(() => {
     if (!isShared) {
       queryClient.invalidateQueries({ queryKey: threadKeys.agentRuns(threadId) });
       queryClient.invalidateQueries({ queryKey: threadKeys.messages(threadId) });
-      resetReluComputerStore();
+      
+      // Always reset when switching between different threads
+      // Only skip reset on the very first mount if it's the optimistic thread
+      const isThreadSwitch = prevThreadIdRef.current !== null && prevThreadIdRef.current !== threadId;
+      const isFirstMount = prevThreadIdRef.current === null;
+      const isOptimisticThread = optimisticThreadIdRef.current === threadId;
+      
+      if (isThreadSwitch || (isFirstMount && !isOptimisticThread)) {
+        console.log('[ThreadComponent] Resetting Relu Computer state for thread:', threadId);
+        resetReluComputerStore();
+      }
+      
+      // Update the previous thread ID
+      prevThreadIdRef.current = threadId;
     }
   }, [threadId, queryClient, isShared, resetReluComputerStore]);
 
@@ -752,6 +799,7 @@ export function ThreadComponent({ projectId, threadId, compact = false, configur
   const {
     status: streamHookStatus,
     textContent: streamingTextContent,
+    reasoningContent: streamingReasoningContent,
     toolCall: streamingToolCall,
     error: streamError,
     agentRunId: currentHookRunId,
@@ -1129,7 +1177,7 @@ export function ThreadComponent({ projectId, threadId, compact = false, configur
     ) {
       hasCheckedUpgradeDialog.current = true;
       const hasSeenUpgradeDialog = localStorage.getItem(
-        'suna_upgrade_dialog_displayed',
+        'relu_upgrade_dialog_displayed',
       );
       const isFreeTier = subscriptionStatus === 'no_subscription';
       if (!hasSeenUpgradeDialog && isFreeTier && !isLocalMode()) {
@@ -1532,6 +1580,7 @@ export function ThreadComponent({ projectId, threadId, compact = false, configur
         <ThreadContent
           messages={isShared ? playback.playbackState.visibleMessages : displayMessages}
           streamingTextContent={isShared ? '' : displayStreamingText}
+          streamingReasoningContent={isShared ? '' : streamingReasoningContent}
           streamingToolCall={isShared ? playback.playbackState.currentToolCall : (showOptimisticUI ? undefined : streamingToolCall)}
           agentStatus={displayAgentStatus}
           handleToolClick={showOptimisticUI ? () => {} : handleToolClick}

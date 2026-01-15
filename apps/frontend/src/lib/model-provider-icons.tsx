@@ -11,15 +11,15 @@ export type ModelProvider =
   | 'moonshotai'
   | 'bedrock'
   | 'openrouter'
-  | 'kortix';
+  | 'relu';
 
 /**
  * Check if a model ID corresponds to a Relu mode (Basic, Advanced, or Test)
  */
 export function isReluMode(modelId: string): boolean {
   // New Relu registry IDs
-  if (modelId === 'kortix/basic' || modelId === 'kortix/power' || modelId === 'kortix/test' ||
-      modelId === 'kortix-basic' || modelId === 'kortix-power' || modelId === 'kortix-test') {
+  if (modelId === 'relu/basic' || modelId === 'relu/power' || modelId === 'relu/test' ||
+      modelId === 'relu-basic' || modelId === 'relu-power' || modelId === 'relu-test') {
     return true;
   }
   // Legacy: Relu Basic (Haiku 4.5)
@@ -39,7 +39,7 @@ export function isReluMode(modelId: string): boolean {
 export function getModelProvider(modelId: string): ModelProvider {
   // Check for Relu modes first
   if (isReluMode(modelId)) {
-    return 'kortix';
+    return 'relu';
   }
   if (modelId.includes('anthropic') || modelId.includes('claude')) {
     return 'anthropic';
@@ -94,7 +94,7 @@ export function ModelProviderIcon({
   const provider = getModelProvider(modelId);
 
   const iconMap: Record<ModelProvider, string> = {
-    kortix: '/relu-symbol.svg', // Relu modes use the Relu symbol
+    relu: '/relu-symbol.svg', // Relu modes use the Relu symbol
     anthropic: '/images/models/Anthropic.svg',
     openai: '/images/models/OAI.svg',
     google: '/images/models/Gemini.svg',
@@ -105,7 +105,7 @@ export function ModelProviderIcon({
   };
 
   // Special handling for Relu symbol - needs different invert behavior
-  const isRelu = provider === 'kortix';
+  const isRelu = provider === 'relu';
 
   const iconSrc = iconMap[provider];
 
@@ -160,7 +160,7 @@ export function getModelProviderName(modelId: string): string {
   const provider = getModelProvider(modelId);
 
   const nameMap: Record<ModelProvider, string> = {
-    kortix: 'Relu',
+    relu: 'Relu',
     anthropic: 'Anthropic',
     openai: 'OpenAI',
     google: 'Google',

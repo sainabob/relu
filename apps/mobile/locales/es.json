@@ -128,7 +128,7 @@
     "skip": "Saltar",
     "next": "Siguiente",
     "getStarted": "Comenzar",
-    "kortixComputer": "Relu Computer",
+    "reluComputer": "Relu Computer",
     "ready": "Listo",
     "examples": {
       "presentations": {
@@ -484,8 +484,8 @@
   "billing": {
     "loadingPaywall": "Cargando planes...",
     "checkoutUnavailable": "Checkout móvil no disponible",
-    "checkoutUnavailableMessage": "Para suscribirte a un plan, visita kortix.com en la web.",
-    "goToWeb": "Ir a kortix.com",
+    "checkoutUnavailableMessage": "Para suscribirte a un plan, visita relu.com en la web.",
+    "goToWeb": "Ir a relu.com",
     "billingStatus": "Estado de Facturación",
     "loading": "Cargando información de facturación...",
     "error": "Error al cargar información de facturación",
@@ -831,10 +831,10 @@
     "loadingTools": "Cargando herramientas...",
     "noToolsAvailable": "No hay herramientas disponibles",
     "toolsWillAppear": "Las herramientas aparecerán aquí cuando estén disponibles",
-    "sunaToolsManaged": "Las herramientas de Suna se gestionan centralmente y no se pueden editar.",
+    "reluToolsManaged": "Las herramientas de Relu se gestionan centralmente y no se pueden editar.",
     "toolsNotEditable": "Estas herramientas no se pueden editar.",
     "cannotEditTools": "No se puede editar",
-    "sunaToolsManagedAlert": "Las herramientas de Suna se gestionan centralmente.",
+    "reluToolsManagedAlert": "Las herramientas de Relu se gestionan centralmente.",
     "savingChanges": "Guardando...",
     "saveChanges": "Guardar cambios"
   },

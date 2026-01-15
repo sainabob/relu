@@ -24,11 +24,11 @@ const isPaidTier = (tierKey: string | undefined): boolean => {
 
 const getDefaultModel = (accessibleModels: ModelOption[]): string => {
   // Pick the first accessible model (sorted by priority)
-  // kortix/basic should be first for free users since power is not accessible
-  const basicModel = accessibleModels.find(m => m.id === 'kortix/basic');
+  // relu/basic should be first for free users since power is not accessible
+  const basicModel = accessibleModels.find(m => m.id === 'relu/basic');
   if (basicModel) return basicModel.id;
 
-  const powerModel = accessibleModels.find(m => m.id === 'kortix/power');
+  const powerModel = accessibleModels.find(m => m.id === 'relu/power');
   if (powerModel) return powerModel.id;
 
   // Fallback: pick from accessible models sorted by priority
@@ -110,10 +110,10 @@ export const useModelSelection = () => {
     const isNowPaid = isPaidTier(currentTier);
 
     if (wasFree && isNowPaid && prevTierKey.current !== null) {
-      const powerModel = availableModels.find(m => m.id === 'kortix/power' && !m.requiresSubscription);
+      const powerModel = availableModels.find(m => m.id === 'relu/power' && !m.requiresSubscription);
       if (powerModel) {
-        console.log('🚀 useModelSelection: Upgraded to paid tier! Switching to kortix/power');
-        setSelectedModel('kortix/power');
+        console.log('🚀 useModelSelection: Upgraded to paid tier! Switching to relu/power');
+        setSelectedModel('relu/power');
       }
     }
 

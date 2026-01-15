@@ -23,12 +23,12 @@ from core.billing.credits.manager import credit_manager
 REVENUECAT_API_BASE = "https://api.revenuecat.com/v1"
 
 ANDROID_TO_IOS_PRODUCT_MAP = {
-    'plus': 'kortix_plus_monthly',
-    'plus_yearly': 'kortix_plus_yearly',
-    'pro': 'kortix_pro_monthly',
-    'pro_yearly': 'kortix_pro_yearly',
-    'ultra': 'kortix_ultra_monthly',
-    'ultra_yearly': 'kortix_ultra_yearly',
+    'plus': 'relu_plus_monthly',
+    'plus_yearly': 'relu_plus_yearly',
+    'pro': 'relu_pro_monthly',
+    'pro_yearly': 'relu_pro_yearly',
+    'ultra': 'relu_ultra_monthly',
+    'ultra_yearly': 'relu_ultra_yearly',
 }
 
 def normalize_product_id(product_id: str) -> str:

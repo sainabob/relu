@@ -7,21 +7,21 @@
 Build, manage, and train sophisticated AI agents for any use case. Create powerful agents that act autonomously on your behalf.
 
 [![Discord Follow](https://dcbadge.limes.pink/api/server/Py6pCBUUPw?style=flat)](https://discord.gg/RvFhXUdZ9H)
-[![Twitter Follow](https://img.shields.io/twitter/follow/kortix)](https://x.com/korti)
-[![GitHub Repo stars](https://img.shields.io/github/stars/sainabob/suna)](https://github.com/sainabob/suna)
-[![Issues](https://img.shields.io/github/issues/sainabob/suna)](https://github.com/sainabob/suna/labels/bug)
+[![Twitter Follow](https://img.shields.io/twitter/follow/relu)](https://x.com/korti)
+[![GitHub Repo stars](https://img.shields.io/github/stars/sainabob/relu)](https://github.com/sainabob/relu)
+[![Issues](https://img.shields.io/github/issues/sainabob/relu)](https://github.com/sainabob/relu/labels/bug)
 
 <!-- Keep these links. Translations will automatically update with the README. -->
-[Deutsch](https://www.readme-i18n.com/sainabob/suna?lang=de) | 
-[Español](https://www.readme-i18n.com/sainabob/suna?lang=es) | 
-[français](https://www.readme-i18n.com/sainabob/suna?lang=fr) | 
-[日本語](https://www.readme-i18n.com/sainabob/suna?lang=ja) | 
-[한국어](https://www.readme-i18n.com/sainabob/suna?lang=ko) | 
-[Português](https://www.readme-i18n.com/sainabob/suna?lang=pt) | 
-[Русский](https://www.readme-i18n.com/sainabob/suna?lang=ru) | 
-[中文](https://www.readme-i18n.com/sainabob/suna?lang=zh)
+[Deutsch](https://www.readme-i18n.com/sainabob/relu?lang=de) | 
+[Español](https://www.readme-i18n.com/sainabob/relu?lang=es) | 
+[français](https://www.readme-i18n.com/sainabob/relu?lang=fr) | 
+[日本語](https://www.readme-i18n.com/sainabob/relu?lang=ja) | 
+[한국어](https://www.readme-i18n.com/sainabob/relu?lang=ko) | 
+[Português](https://www.readme-i18n.com/sainabob/relu?lang=pt) | 
+[Русский](https://www.readme-i18n.com/sainabob/relu?lang=ru) | 
+[中文](https://www.readme-i18n.com/sainabob/relu?lang=zh)
 
-![Relu Screenshot](frontend/public/banner.png)
+![Relu Screenshot](apps/frontend/public/banner.png)
 </div>
 
 
@@ -45,7 +45,7 @@ Create your own specialized agents tailored to specific domains, workflows, or b
 
 ## 📋 Table of Contents
 
-- [🌟 What Makes Relu Special](#-what-makes-kortix-special)
+- [🌟 What Makes Relu Special](#-what-makes-relu-special)
 - [🎯 Agent Examples & Use Cases](#-agent-examples--use-cases)
 - [🏗️ Platform Architecture](#️-platform-architecture)
 - [🚀 Quick Start](#-quick-start)
@@ -149,8 +149,8 @@ Get your Relu platform running in minutes with our automated setup wizard:
 
 ### 1️⃣ Clone the Repository
 ```bash
-git clone https://github.com/sainabob/suna.git
-cd suna
+git clone https://github.com/sainabob/relu.git
+cd relu
 ```
 
 ### 2️⃣ Run the Setup Wizard
@@ -177,7 +177,7 @@ Just use "setup.py". Ty mate.
 
 **Ready to build your first AI agent?** 
 
-[Get Started](./docs/SELF-HOSTING.md) • [Join Discord](https://discord.gg/RvFhXUdZ9H) • [Follow on Twitter](https://x.com/kortix)
+[Get Started](./docs/SELF-HOSTING.md) • [Join Discord](https://discord.gg/RvFhXUdZ9H) • [Follow on Twitter](https://x.com/relu)
 
 </div>
 

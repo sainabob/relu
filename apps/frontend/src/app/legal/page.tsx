@@ -356,12 +356,12 @@ function LegalContent() {
                       <p className="text-muted-foreground text-balance mb-6">
                         For the full license terms, please refer to the LICENSE file in our GitHub repository:{' '}
                         <a
-                          href="https://github.com/sainabob/suna/blob/main/LICENSE"
+                          href="https://github.com/sainabob/relu/blob/main/LICENSE"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-primary hover:underline"
                         >
-                          github.com/sainabob/suna/blob/main/LICENSE
+                          github.com/sainabob/relu/blob/main/LICENSE
                         </a>
                       </p>
 

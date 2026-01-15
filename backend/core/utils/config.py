@@ -285,7 +285,7 @@ class Configuration:
     ENABLE_USER_CONTEXT: bool = True
     MEMORY_EMBEDDING_PROVIDER: Optional[str] = "openai"
     MEMORY_EMBEDDING_MODEL: Optional[str] = "text-embedding-3-small"
-    MEMORY_EXTRACTION_MODEL: Optional[str] = "kortix/basic"
+    MEMORY_EXTRACTION_MODEL: Optional[str] = "relu/basic"
     VOYAGE_API_KEY: Optional[str] = None
     GROQ_API_KEY: Optional[str] = None
     OPENROUTER_API_KEY: Optional[str] = None
@@ -363,8 +363,8 @@ class Configuration:
     STRIPE_PRODUCT_ID_STAGING: Optional[str] = 'prod_SCgIj3G7yPOAWY'
     
     # Sandbox configuration
-    SANDBOX_IMAGE_NAME = "kortix/suna:0.1.3.28"
-    SANDBOX_SNAPSHOT_NAME = "kortix/suna:0.1.3.28"
+    SANDBOX_IMAGE_NAME = "relu/relu:0.1.3.28"
+    SANDBOX_SNAPSHOT_NAME = "relu/relu:0.1.3.28"
     SANDBOX_ENTRYPOINT = "/usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.conf"
     
     # Debug configuration
@@ -388,7 +388,7 @@ class Configuration:
     LANGFUSE_HOST: Optional[str] = "https://cloud.langfuse.com"
 
     # Admin API key for server-side operations
-    KORTIX_ADMIN_API_KEY: Optional[str] = None
+    RELU_ADMIN_API_KEY: Optional[str] = None
 
     # API Keys system configuration
     API_KEY_SECRET: Optional[str] = "default-secret-key-change-in-production"
@@ -538,9 +538,9 @@ class Configuration:
         self._load_from_env()
         
         # Auto-generate admin API key if not present
-        if not self.KORTIX_ADMIN_API_KEY:
-            self.KORTIX_ADMIN_API_KEY = self._generate_admin_api_key()
-            logger.info("Auto-generated KORTIX_ADMIN_API_KEY for administrative functions")
+        if not self.RELU_ADMIN_API_KEY:
+            self.RELU_ADMIN_API_KEY = self._generate_admin_api_key()
+            logger.info("Auto-generated RELU_ADMIN_API_KEY for administrative functions")
         
         # Perform validation
         self._validate()

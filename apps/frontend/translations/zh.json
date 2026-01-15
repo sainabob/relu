@@ -414,7 +414,7 @@
     "running": "运行中",
     "minimizeToFloatingPreview": "最小化到浮动预览",
     "close": "关闭",
-    "noActionsYet": "Kortix Computer",
+    "noActionsYet": "Relu Computer",
     "workerActionsDescription": "正在启动",
     "emptyActionsDescription": "Worker 操作将显示在此处",
     "toolIsRunning": "工具正在运行",
@@ -450,7 +450,7 @@
     "title": "Relu：您的自主AI工作器",
     "subtitle": "为复杂任务而构建，为一切而设计。终极AI助手，处理一切——从简单请求到超级复杂的项目。",
     "tryItOut": "试试看",
-    "kortixComputer": "Relu Computer",
+    "reluComputer": "Relu Computer",
     "running": "运行中",
     "workers": {
       "images": {
@@ -933,7 +933,7 @@
     "disableAll": "全部禁用",
     "saveChanges": "保存更改"
   },
-  "suna": {
+  "relu": {
     "samplePrompts": "示例提示",
     "chooseStyle": "选择风格",
     "chooseTemplate": "选择模板",

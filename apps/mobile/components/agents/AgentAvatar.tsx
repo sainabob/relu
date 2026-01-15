@@ -15,27 +15,27 @@ interface AgentAvatarProps extends ViewProps {
  * Automatically handles:
  * - Agent icon from backend (icon_name)
  * - Agent colors (icon_color, icon_background)
- * - SUNA/KORTIX SUPER WORKER special case (Relu symbol)
+ * - RELU SUPER WORKER special case (Relu symbol)
  * - Fallback to agent name initial
  * 
  * @example
  * <AgentAvatar agent={agent} size={48} />
  */
 export function AgentAvatar({ agent, size = 48, style, ...props }: AgentAvatarProps) {
-  // Check if this is the SUNA/KORTIX SUPER WORKER
-  const isSunaAgent = agent?.metadata?.is_suna_default || 
-                      agent?.name?.toLowerCase() === 'suna' ||
+  // Check if this is the RELU SUPER WORKER
+  const isReluAgent = agent?.metadata?.is_relu_default || 
+                      agent?.name?.toLowerCase() === 'relu' ||
                       agent?.name?.toLowerCase() === 'superworker' ||
-                      agent?.name?.toLowerCase() === 'kortix super worker';
+                      agent?.name?.toLowerCase() === 'relu super worker';
 
   return (
     <Avatar
       variant="agent"
       size={size}
       icon={agent?.icon_name || undefined}
-      iconColor={isSunaAgent ? undefined : agent?.icon_color}
-      backgroundColor={isSunaAgent ? undefined : agent?.icon_background}
-      useReluSymbol={isSunaAgent}
+      iconColor={isReluAgent ? undefined : agent?.icon_color}
+      backgroundColor={isReluAgent ? undefined : agent?.icon_background}
+      useReluSymbol={isReluAgent}
       fallbackText={agent?.name}
       style={style}
       {...props}

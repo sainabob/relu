@@ -375,7 +375,7 @@ export function FileBrowserView({
               className={`h-9 w-9 items-center justify-center rounded-xl bg-card border border-border active:opacity-70 ${selectedVersion ? 'opacity-50' : ''}`}
             >
               {isUploading ? (
-                <KortixLoader size="small" customSize={17} />
+                <ReluLoader size="small" customSize={17} />
               ) : (
                 <Icon
                   as={Upload}
@@ -659,7 +659,7 @@ export function FileBrowserView({
               >
                 {isReverting ? (
                   <View className="flex-row items-center gap-2">
-                    <KortixLoader size="small" customSize={14} forceTheme="dark" />
+                    <ReluLoader size="small" customSize={14} forceTheme="dark" />
                     <Text className="text-sm font-roobert-medium" style={{ color: '#ffffff' }}>Restoring...</Text>
                   </View>
                 ) : (

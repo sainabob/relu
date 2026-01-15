@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { Dimensions, Animated } from 'react-native';
 import { useColorScheme } from 'nativewind';
-import ReluSymbolBlack from '@/assets/brand/kortix-symbol-scale-effect-black.svg';
-import ReluSymbolWhite from '@/assets/brand/kortix-symbol-scale-effect-white.svg';
+import ReluSymbolBlack from '@/assets/brand/relu-symbol-scale-effect-black.svg';
+import ReluSymbolWhite from '@/assets/brand/relu-symbol-scale-effect-white.svg';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 

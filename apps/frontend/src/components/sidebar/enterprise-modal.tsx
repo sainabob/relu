@@ -10,7 +10,7 @@ import Image from 'next/image';
 import Cal, { getCalApi } from '@calcom/embed-react';
 import { useTheme } from 'next-themes';
 import { Check, Calendar } from 'lucide-react';
-import { Logo } from './logo';
+import { ReluLogo } from './relu-logo';
 
 interface EnterpriseModalProps {
   children: React.ReactNode;
@@ -64,7 +64,7 @@ export function ReluEnterpriseModal({
           <div className="p-6 lg:p-8 flex flex-col bg-white dark:bg-black relative h-full overflow-y-auto border-r border-gray-200 dark:border-gray-800">
             <div className="relative z-10 flex flex-col h-full">
               <div className="mb-6 flex-shrink-0">
-                <Logo size={30} variant="logomark" />
+                <Relu size={30} variant="logomark" />
               </div>
 
               <div className="mb-6 flex-shrink-0">
@@ -114,7 +114,7 @@ export function ReluEnterpriseModal({
             <div className="h-full overflow-auto">
               <Cal
                 namespace="enterprise-demo"
-                calLink="team/kortix/enterprise-demo"
+                calLink="team/relu/enterprise-demo"
                 style={{ width: '100%', height: '100%' }}
                 config={{
                   layout: 'month_view',

@@ -39,14 +39,14 @@ jobs:
       
       - name: Run E2E Benchmark
         env:
-          API_URL: ${{ inputs.environment == 'production' && 'https://api.relu.work' || 'https://staging-api.suna.so' }}
-          ADMIN_API_KEY: ${{ secrets.KORTIX_ADMIN_API_KEY }}
+          API_URL: ${{ inputs.environment == 'production' && 'https://api.relu.work' || 'https://staging-api.relu.work' }}
+          ADMIN_API_KEY: ${{ secrets.RELU_ADMIN_API_KEY }}
         run: |
           set -e
           
           # Validate admin API key is configured
           if [ -z "$ADMIN_API_KEY" ]; then
-            echo "❌ Error: KORTIX_ADMIN_API_KEY is not set"
+            echo "❌ Error: RELU_ADMIN_API_KEY is not set"
             echo "Please add it at: https://github.com/${{ github.repository }}/settings/secrets/actions"
             exit 1
           fi
@@ -128,7 +128,7 @@ jobs:
             echo ""
             echo "🔍 Troubleshooting:"
             echo "  1. Verify API URL is correct: $API_URL"
-            echo "  2. Check that KORTIX_ADMIN_API_KEY is valid"
+            echo "  2. Check that RELU_ADMIN_API_KEY is valid"
             echo "  3. Ensure the API server is running and accessible"
             echo "  4. Check API server logs for more details"
             exit 1

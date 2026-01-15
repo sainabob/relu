@@ -11,7 +11,7 @@ type ParagraphItem =
   | { text: string; linkText: string; linkHref: string };
 
 const paragraphs: ParagraphItem[] = [
-  "We're Kortix. Eight people, no office.",
+  "We're Relu. Eight people, no office.",
   "We're building AI that does real work, not chatbots, not demos. The kind of thing that takes tasks off your plate so you can focus on what matters.",
   "Our team is spread across the US, Europe, and Asia. We ship code, debate ideas, and keep things moving.",
   "We travel a lot. Belgrade, Lisbon, San Francisco. New places keep things fresh and sometimes spark new ideas.",
@@ -183,7 +183,7 @@ export default function AboutPage() {
           <div className="relative aspect-[16/9] w-full overflow-hidden">
             <Image
               src="/images/team.webp"
-              alt="The Kortix team"
+              alt="The Relu team"
               fill
               className="object-cover object-top"
               priority
@@ -247,9 +247,9 @@ export default function AboutPage() {
               </div>
             </div>
 
-            {/* Kortix logo */}
+            {/* Relu logo */}
             <div className="text-center mt-6">
-              <Image src="/kortix-symbol.svg" alt="Kortix" width={16} height={13} className="inline-block opacity-20 dark:invert" />
+              <Image src="/relu-symbol.svg" alt="Relu" width={16} height={13} className="inline-block opacity-20 dark:invert" />
             </div>
           </div>
 
@@ -282,9 +282,9 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              {/* Kortix logo */}
+              {/* Relu logo */}
               <div className="text-center mt-4">
-                <Image src="/kortix-symbol.svg" alt="Kortix" width={16} height={13} className="inline-block opacity-20 dark:invert" />
+                <Image src="/relu-symbol.svg" alt="Relu" width={16} height={13} className="inline-block opacity-20 dark:invert" />
               </div>
             </div>
 
@@ -311,9 +311,9 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              {/* Kortix logo */}
+              {/* Relu logo */}
               <div className="text-center mt-4">
-                <Image src="/kortix-symbol.svg" alt="Kortix" width={16} height={13} className="inline-block opacity-20 dark:invert" />
+                <Image src="/relu-symbol.svg" alt="Relu" width={16} height={13} className="inline-block opacity-20 dark:invert" />
               </div>
             </div>
           </div>

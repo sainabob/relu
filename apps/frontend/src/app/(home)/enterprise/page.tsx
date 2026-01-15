@@ -20,7 +20,7 @@ import {
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ReluEnterpriseModal } from '@/components/sidebar/enterprise-modal';
-import { Logo } from '@/components/sidebar/logo';
+import { ReluLogo } from '@/components/sidebar/relu-logo';
 
 // Section Header Component
 const SectionHeader = ({ children }: { children: React.ReactNode }) => {
@@ -40,7 +40,7 @@ const CustomHeroSection = () => {
           <div className="flex flex-col items-center justify-center gap-6 pt-12 max-w-4xl mx-auto">
             {/* Relu Logo */}
             <div className="mb-8">
-              <Logo size={48} />
+              <Relu size={48} />
             </div>
             
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20">

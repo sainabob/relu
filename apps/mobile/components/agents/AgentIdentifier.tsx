@@ -15,7 +15,7 @@ import { AgentAvatar } from './AgentAvatar';
 import { useAgent } from '@/contexts/AgentContext';
 import { useColorScheme } from 'nativewind';
 import type { Agent } from '@/api/types';
-import { Logo } from '@/components/ui/Logo';
+import { ReluLogo } from '@/components/ui/ReluLogo';
 
 interface AgentIdentifierProps extends ViewProps {
   agentId?: string | null;

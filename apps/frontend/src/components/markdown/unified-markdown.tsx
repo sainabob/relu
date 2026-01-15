@@ -148,7 +148,7 @@ export const UnifiedMarkdown = React.memo<UnifiedMarkdownProps>(({
 
   return (
     <div 
-      className={cn('kortix-markdown', isStreaming && 'streaming-active', className)}
+      className={cn('relu-markdown', isStreaming && 'streaming-active', className)}
       data-streaming={isStreaming ? 'true' : 'false'}
     >
       <Streamdown

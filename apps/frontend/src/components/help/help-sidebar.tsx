@@ -23,7 +23,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 import { ThemeToggle } from "../home/theme-toggle"
-import { Logo } from "../sidebar/logo"
+import { ReluLogo } from "../sidebar/relu-logo"
 
 const helpData = {
   navMain: [
@@ -41,7 +41,7 @@ const helpData = {
       items: [
         {
           title: "GitHub Repository",
-          url: "https://github.com/sainabob/suna",
+          url: "https://github.com/sainabob/relu",
           external: true,
         },
         {
@@ -68,7 +68,7 @@ export function HelpSidebar({ onSearchClick, ...props }: HelpSidebarProps) {
   return (
     <Sidebar className="w-72 [&_[data-sidebar=sidebar]]:bg-background dark:[&_[data-sidebar=sidebar]]:bg-background border-none" {...props}>
       <SidebarHeader className="bg-transparent p-6 px-6 space-y-3">
-        <Logo size={24} />
+        <Relu size={24} />
         {onSearchClick && (
           <Button
             variant="outline"

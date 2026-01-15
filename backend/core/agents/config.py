@@ -28,8 +28,8 @@ async def load_agent_config(
             logger.debug(f"[AGENT LOAD] Loading default agent")
             
             if is_new_thread:
-                from core.utils.ensure_suna import ensure_suna_installed
-                await ensure_suna_installed(account_id)
+                from backend.core.utils.ensure_relu import ensure_relu_installed
+                await ensure_relu_installed(account_id)
             
             from core.agents.agent_loader import get_agent_loader
             loader = await get_agent_loader()
@@ -42,8 +42,8 @@ async def load_agent_config(
                 logger.debug(f"Using default agent: {agent_data.name} ({agent_data.agent_id}) version {agent_data.version_name}")
                 return agent_data.to_dict()
             else:
-                logger.warning(f"[AGENT LOAD] No default agent found for account {account_id}, searching for shared Suna")
-                agent_data = await _find_shared_suna_agent()
+                logger.warning(f"[AGENT LOAD] No default agent found for account {account_id}, searching for shared Relu")
+                agent_data = await _find_shared_relu_agent()
                 
                 if not agent_data:
                     # Fallback to any agent
@@ -61,12 +61,12 @@ async def load_agent_config(
         
         # Handle specific agent loading
         from core.cache.runtime_cache import (
-            get_static_suna_config, 
+            get_static_relu_config, 
             get_cached_user_mcps,
             get_cached_agent_config
         )
         
-        static_config = get_static_suna_config()
+        static_config = get_static_relu_config()
         cached_mcps = await get_cached_user_mcps(agent_id)
         
         if static_config and cached_mcps is not None:
@@ -76,7 +76,7 @@ async def load_agent_config(
                 'model': static_config['model'],
                 'agentpress_tools': static_config['agentpress_tools'],
                 'centrally_managed': static_config['centrally_managed'],
-                'is_suna_default': static_config['is_suna_default'],
+                'is_relu_default': static_config['is_relu_default'],
                 'restrictions': static_config['restrictions'],
                 'configured_mcps': cached_mcps.get('configured_mcps', []),
                 'custom_mcps': cached_mcps.get('custom_mcps', []),
@@ -115,8 +115,8 @@ async def load_agent_config(
         return None
 
 
-async def _find_shared_suna_agent():
-    """Find shared Suna agent (helper for default agent loading)."""
+async def _find_shared_relu_agent():
+    """Find shared Relu agent (helper for default agent loading)."""
     from core.agents.agent_loader import get_agent_loader
     from core.utils.config import config
     from core.agents import repo as agents_repo
@@ -124,7 +124,7 @@ async def _find_shared_suna_agent():
     admin_user_id = config.SYSTEM_ADMIN_USER_ID
     
     # Use repo for direct SQL query
-    shared_agent = await agents_repo.get_shared_suna_agent(admin_user_id)
+    shared_agent = await agents_repo.get_shared_relu_agent(admin_user_id)
     
     if shared_agent:
         loader = await get_agent_loader()
@@ -134,13 +134,13 @@ async def _find_shared_suna_agent():
             load_config=True
         )
         if admin_user_id and shared_agent['account_id'] == admin_user_id:
-            logger.info(f"✅ Using system Suna agent from admin user: {agent_data.name} ({agent_data.agent_id})")
+            logger.info(f"✅ Using system Relu agent from admin user: {agent_data.name} ({agent_data.agent_id})")
         else:
-            logger.info(f"Using shared Suna agent: {agent_data.name} ({agent_data.agent_id})")
+            logger.info(f"Using shared Relu agent: {agent_data.name} ({agent_data.agent_id})")
         return agent_data
     
     if admin_user_id:
-        logger.warning(f"⚠️ SYSTEM_ADMIN_USER_ID configured but no Suna agent found for user {admin_user_id}")
+        logger.warning(f"⚠️ SYSTEM_ADMIN_USER_ID configured but no Relu agent found for user {admin_user_id}")
     
-    logger.error("❌ No Suna agent found! Set SYSTEM_ADMIN_USER_ID in .env")
+    logger.error("❌ No Relu agent found! Set SYSTEM_ADMIN_USER_ID in .env")
     return None
