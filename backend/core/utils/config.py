@@ -363,8 +363,8 @@ class Configuration:
     STRIPE_PRODUCT_ID_STAGING: Optional[str] = 'prod_SCgIj3G7yPOAWY'
     
     # Sandbox configuration
-    SANDBOX_IMAGE_NAME = "relu:0.1.3.28"
-    SANDBOX_SNAPSHOT_NAME = "relu:0.1.3.28"
+    SANDBOX_IMAGE_NAME = "sainabob/relu:0.1.3.28"
+    SANDBOX_SNAPSHOT_NAME = "sainabob/relu:0.1.3.28"
     SANDBOX_ENTRYPOINT = "/usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.conf"
     
     # Debug configuration

@@ -20,7 +20,7 @@ You can modify the sandbox environment for development or to add new capabilitie
    ```
    cd backend/code/sandbox/docker
    docker compose build
-   docker push relu:0.1.3.28
+   docker push sainabob/relu:0.1.3.28
    ```
 3. Test your changes locally using docker-compose
 
