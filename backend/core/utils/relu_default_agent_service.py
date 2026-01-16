@@ -13,7 +13,7 @@ class ReluDefaultAgentService:
     
     async def get_relu_default_config(self) -> Dict[str, Any]:
         """Get the current Relu configuration."""
-        from backend.core.config.relu_config import RELU_CONFIG
+        from core.config.relu_config import RELU_CONFIG
         return RELU_CONFIG.copy()
     
     async def install_for_all_users(self) -> Dict[str, Any]:
@@ -130,7 +130,7 @@ class ReluDefaultAgentService:
     
     async def _create_relu_agent_for_user(self, account_id: str) -> str:
         """Create a Relu agent for a user."""
-        from backend.core.config.relu_config import RELU_CONFIG
+        from core.config.relu_config import RELU_CONFIG
         
         client = await self._db.client
         
@@ -172,7 +172,7 @@ class ReluDefaultAgentService:
         """
         try:
             from core.versioning.version_service import get_version_service
-            from backend.core.config.relu_config import RELU_CONFIG
+            from core.config.relu_config import RELU_CONFIG
             
             version_service = await get_version_service()
             # For Relu agents, only save MCPs (user customizations)

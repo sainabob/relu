@@ -28,7 +28,7 @@ async def load_agent_config(
             logger.debug(f"[AGENT LOAD] Loading default agent")
             
             if is_new_thread:
-                from backend.core.utils.ensure_relu import ensure_relu_installed
+                from core.utils.ensure_relu import ensure_relu_installed
                 await ensure_relu_installed(account_id)
             
             from core.agents.agent_loader import get_agent_loader

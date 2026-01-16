@@ -373,7 +373,7 @@ class AgentLoader:
         
         # For Relu agents, always use name from RELU_CONFIG (never DB value)
         if is_relu_default:
-            from backend.core.config.relu_config import RELU_CONFIG
+            from core.config.relu_config import RELU_CONFIG
             name = RELU_CONFIG['name']
             description = RELU_CONFIG.get('description')
         else:
@@ -422,7 +422,7 @@ class AgentLoader:
         
         # 1. Load static config from memory (instant, no DB)
         from core.cache.runtime_cache import get_static_relu_config, load_static_relu_config
-        from backend.core.config.relu_config import RELU_CONFIG
+        from core.config.relu_config import RELU_CONFIG
         
         static_config = get_static_relu_config()
         if not static_config:

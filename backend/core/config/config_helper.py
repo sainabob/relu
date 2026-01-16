@@ -29,7 +29,7 @@ def _extract_relu_agent_config(agent_data: Dict[str, Any], version_data: Optiona
     Always overrides name from RELU_CONFIG regardless of what's in the database.
     """
     from core.cache.runtime_cache import get_static_relu_config, load_static_relu_config
-    from backend.core.config.relu_config import RELU_CONFIG
+    from core.config.relu_config import RELU_CONFIG
     
     agent_id = agent_data.get('agent_id', 'Unknown')
     logger.debug(f"Using Relu central config for agent {agent_id}")

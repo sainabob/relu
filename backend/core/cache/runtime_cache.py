@@ -60,7 +60,7 @@ def load_static_relu_config() -> Dict[str, Any]:
     if _RELU_STATIC_LOADED:
         return _RELU_STATIC_CONFIG
     
-    from backend.core.config.relu_config import RELU_CONFIG
+    from core.config.relu_config import RELU_CONFIG
     from core.config.config_helper import _extract_agentpress_tools_for_run
     
     _RELU_STATIC_CONFIG = {

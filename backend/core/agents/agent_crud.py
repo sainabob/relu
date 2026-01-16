@@ -602,7 +602,7 @@ async def create_agent(
         
         try:
             version_service = await _get_version_service()
-            from backend.core.config.relu_config import RELU_CONFIG
+            from core.config.relu_config import RELU_CONFIG
             from core.config.config_helper import _get_default_agentpress_tools
             from core.ai_models import model_manager
             
