@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { ReluProcessModal } from '@/components/sidebar/enterprise-modal';
+import { ReluProcessModal } from '@/components/sidebar/relu-enterprise-modal';
 
 export function CTACard() {
   return (

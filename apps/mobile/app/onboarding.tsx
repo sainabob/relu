@@ -329,7 +329,7 @@ export default function OnboardingScreen() {
       <View className="flex-1 bg-background">
         {/* Header */}
         <View className="pt-14 px-6 pb-2 flex-row justify-between items-center">
-          <Relu variant="logomark" size={14} color={isDark ? 'dark' : 'light'} />
+          <ReluLogo variant="logomark" size={14} color={isDark ? 'dark' : 'light'} />
           <TouchableOpacity
             onPress={handleLogout}
             disabled={isSigningOut}
@@ -827,7 +827,7 @@ function ExampleCard({ example, index, scrollX, isActive, isDark, t }: ExampleCa
           {/* AI Response */}
           <View className="flex-1">
             <View className="flex-row items-center gap-1.5 mb-2">
-              <Relu variant="symbol" size={14} color={isDark ? 'dark' : 'light'} />
+              <ReluLogo variant="symbol" size={14} color={isDark ? 'dark' : 'light'} />
               <Text className="text-[13px] font-roobert-medium text-foreground opacity-50">
                 Relu
               </Text>
@@ -897,7 +897,7 @@ function ExampleCard({ example, index, scrollX, isActive, isDark, t }: ExampleCa
 
             <View className="px-4 py-2 flex-row items-center justify-between">
               <View className="flex-row items-center gap-2">
-                <Relu variant="symbol" size={14} color={isDark ? 'dark' : 'light'} />
+                <ReluLogo variant="symbol" size={14} color={isDark ? 'dark' : 'light'} />
                 <Text className="text-[14px] font-roobert-medium text-foreground">
                   {t('onboarding.reluComputer')}
                 </Text>

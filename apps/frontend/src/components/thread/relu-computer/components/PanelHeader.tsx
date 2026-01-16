@@ -5,7 +5,6 @@ import { Minimize2, Wifi, BatteryLow, BatteryMedium, BatteryFull, BatteryChargin
 import { Button } from '@/components/ui/button';
 import { DrawerTitle } from '@/components/ui/drawer';
 import { ViewType } from '@/stores/relu-computer-store';
-import { ReluLogo } from '@/components/sidebar/relu-logo';
 import { cn } from '@/lib/utils';
 import { ViewToggle } from './ViewToggle';
 import { ToolbarButtons } from './ToolbarButtons';
@@ -194,18 +193,27 @@ export const PanelHeader = memo(function PanelHeader({
   onToggleSuiteMode,
   hideViewToggle = false,
 }: PanelHeaderProps) {
-  const title = "Relu Computer";
-
   if (variant === 'drawer') {
     return (
       <div className="h-14 flex-shrink-0 px-4 flex items-center justify-between border-b border-border">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 flex items-center justify-center">
-            <Relu size={18}/>
-          </div>
-          <DrawerTitle className="text-sm font-semibold text-foreground">
-            {title}
-          </DrawerTitle>
+        <div className="flex items-center">
+          <Image
+            src="/kortix-computer-white.svg"
+            alt="Kortix Computer"
+            width={140}
+            height={16}
+            className="hidden dark:block"
+            priority
+          />
+          <Image
+            src="/kortix-computer-black.svg"
+            alt="Kortix Computer"
+            width={140}
+            height={16}
+            className="block dark:hidden"
+            priority
+          />
+          <DrawerTitle className="sr-only">Kortix Computer</DrawerTitle>
         </div>
         <div className="flex items-center gap-2">
           <ActionFilesSwitcher 
@@ -240,16 +248,26 @@ export const PanelHeader = memo(function PanelHeader({
           isMaximized={isMaximized}
         />
       </div>
-      <div
-        onClick={() => onMaximize?.()}
+      <div 
+        onClick={() => onMaximize?.()} 
         className="flex items-center justify-center cursor-pointer select-none hover:opacity-80 transition-opacity"
       >
-        <div className="w-5 h-5 flex items-center justify-center">
-          <Relu size={14}/>
-        </div>
-        <h2 className="text-sm font-semibold text-foreground">
-          {title}
-        </h2>
+        <Image
+          src="/kortix-computer-white.svg"
+          alt="Kortix Computer"
+          width={140}
+          height={16}
+          className="hidden dark:block"
+          priority
+        />
+        <Image
+          src="/kortix-computer-black.svg"
+          alt="Kortix Computer"
+          width={140}
+          height={16}
+          className="block dark:hidden"
+          priority
+        />
       </div>
       
       <div className="flex items-center justify-end gap-2">

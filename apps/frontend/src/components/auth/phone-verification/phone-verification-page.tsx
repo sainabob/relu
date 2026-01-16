@@ -249,7 +249,7 @@ export function PhoneVerificationPage({
 
       <div className="absolute top-6 left-6 z-10">
         <Link href="/" className="flex items-center space-x-2">
-          <Relu size={28} />
+          <ReluLogo size={28} />
         </Link>
       </div>
 

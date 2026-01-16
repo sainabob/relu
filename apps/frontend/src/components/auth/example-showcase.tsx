@@ -445,7 +445,7 @@ export function ExampleShowcase() {
               {/* Computer Header */}
               <div className="border-b px-3 py-2 flex items-center justify-between bg-card shrink-0">
                 <div className="flex items-center gap-1.5">
-                  <Relu size={12} />
+                  <ReluLogo size={12} />
                   <span className="text-xs font-medium">Relu Computer</span>
                 </div>
                 <div className="flex items-center gap-0.5 border rounded-full bg-card p-1 relative">

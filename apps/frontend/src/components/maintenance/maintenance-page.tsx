@@ -40,7 +40,7 @@ export function MaintenancePage() {
 
         <div className="relative z-10 w-full max-w-[456px] flex flex-col items-center gap-8">
           {/* Logo - 32px height */}
-          <Relu size={32} />
+          <ReluLogo size={32} />
 
           {/* Title - 43px */}
           <h1 className="text-[43px] font-normal tracking-tight textforeground leading-none">

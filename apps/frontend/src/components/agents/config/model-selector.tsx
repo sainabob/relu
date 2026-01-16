@@ -32,7 +32,7 @@ const ModelLabel = ({ label, className }: { label: string; className?: string })
             <span className={cn("flex items-center gap-2", className)}>
                 <span className="font-medium">Relu</span>
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/10 dark:bg-primary/15 rounded-full">
-                    <Relu size={12} variant="symbol" />
+                    <ReluLogo size={12} variant="symbol" />
                     <span className="text-[11px] font-semibold tracking-wide uppercase text-primary">
                         Advanced
                     </span>

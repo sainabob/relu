@@ -78,7 +78,7 @@ function PasswordAuthContent() {
             <div className="relative z-10 pt-24 pb-8 max-w-md mx-auto h-full w-full flex flex-col gap-2 items-center justify-center">
               <div className="absolute top-6 left-6 z-10">
                 <Link href="/" className="flex items-center space-x-2">
-                  <Relu size={28} />
+                  <ReluLogo size={28} />
                 </Link>
               </div>
 

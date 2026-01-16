@@ -89,7 +89,7 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = ({
         )}
         style={{ width: size, height: size, ...borderRadiusStyle }}
       >
-        <Relu size={size * 0.5} />
+        <ReluLogo size={size * 0.5} />
       </div>
     );
   }

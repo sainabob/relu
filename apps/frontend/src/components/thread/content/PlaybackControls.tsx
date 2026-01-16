@@ -525,7 +525,7 @@ export const PlaybackControls = ({
             <div className="flex items-center gap-2">
               <div className="flex items-center justify-center w-6 h-6 rounded-md overflow-hidden bg-primary/10">
                 <Link href="/">
-                  <Relu size={14} />
+                  <ReluLogo size={14} />
                 </Link>
               </div>
               <h1>

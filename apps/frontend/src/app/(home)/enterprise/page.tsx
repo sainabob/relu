@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ReluEnterpriseModal } from '@/components/sidebar/enterprise-modal';
+import { ReluEnterpriseModal } from '@/components/sidebar/relu-enterprise-modal';
 import { ReluLogo } from '@/components/sidebar/relu-logo';
 
 // Section Header Component
@@ -40,7 +40,7 @@ const CustomHeroSection = () => {
           <div className="flex flex-col items-center justify-center gap-6 pt-12 max-w-4xl mx-auto">
             {/* Relu Logo */}
             <div className="mb-8">
-              <Relu size={48} />
+              <ReluLogo size={48} />
             </div>
             
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20">

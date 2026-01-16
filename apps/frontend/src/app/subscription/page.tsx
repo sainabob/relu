@@ -104,7 +104,7 @@ export default function SubscriptionRequiredPage() {
           <div className="flex items-center justify-between">
             <div className="flex-1" />
             <div className="text-2xl font-medium flex items-center justify-center gap-2">
-              <Relu />
+              <ReluLogo />
               <span>{isTrialExpired ? 'Your Trial Has Ended' : 'Subscription Required'}</span>
             </div>
             <div className="flex-1 flex justify-end">

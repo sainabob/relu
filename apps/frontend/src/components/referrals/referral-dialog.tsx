@@ -36,7 +36,7 @@ export function ReferralDialog({ open: controlledOpen, onOpenChange: controlledO
           {/* Logo & Header */}
           <div className="flex flex-col items-center text-center mb-3 sm:mb-5">
             <div className="mb-6">
-              <Relu size={24} variant="symbol" />
+              <ReluLogo size={24} variant="symbol" />
             </div>
             <DialogTitle className="text-base sm:text-xl font-semibold text-foreground">
               {t('title')}

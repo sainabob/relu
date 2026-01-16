@@ -64,7 +64,7 @@ export function ReluEnterpriseModal({
           <div className="p-6 lg:p-8 flex flex-col bg-white dark:bg-black relative h-full overflow-y-auto border-r border-gray-200 dark:border-gray-800">
             <div className="relative z-10 flex flex-col h-full">
               <div className="mb-6 flex-shrink-0">
-                <Relu size={30} variant="logomark" />
+                <ReluLogo size={30} variant="logomark" />
               </div>
 
               <div className="mb-6 flex-shrink-0">

@@ -198,8 +198,8 @@ export function AgentCreationModal({ open, onOpenChange, onSuccess }: AgentCreat
               {/* Logo & Header */}
               <div className="flex flex-col items-center text-center mb-6 sm:mb-8">
                 <div className="mb-3 sm:mb-4 p-2.5 sm:p-3 rounded-xl sm:rounded-2xl bg-muted/50">
-                  <Relu size={28} variant="symbol" className="sm:hidden" />
-                  <Relu size={36} variant="symbol" className="hidden sm:block" />
+                  <ReluLogo size={28} variant="symbol" className="sm:hidden" />
+                  <ReluLogo size={36} variant="symbol" className="hidden sm:block" />
                 </div>
                 <DialogTitle className="text-xl sm:text-2xl font-semibold text-foreground">
                   Create a new Worker
@@ -276,8 +276,8 @@ export function AgentCreationModal({ open, onOpenChange, onSuccess }: AgentCreat
               {/* Logo & Header */}
               <div className="flex flex-col items-center text-center mb-5 sm:mb-6">
                 <div className="mb-3 sm:mb-4 p-2.5 sm:p-3 rounded-xl sm:rounded-2xl bg-muted/50">
-                  <Relu size={28} variant="symbol" className="sm:hidden" />
-                  <Relu size={36} variant="symbol" className="hidden sm:block" />
+                  <ReluLogo size={28} variant="symbol" className="sm:hidden" />
+                  <ReluLogo size={36} variant="symbol" className="hidden sm:block" />
                 </div>
                 <DialogTitle className="text-xl sm:text-2xl font-semibold text-foreground">
                   Describe your Worker

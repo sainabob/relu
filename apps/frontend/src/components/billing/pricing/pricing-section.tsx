@@ -820,7 +820,7 @@ function PricingTier({
                       <div className="flex-1">
                         <div className="flex items-center gap-1 sm:gap-1.5">
                           <span className="text-xs sm:text-sm font-medium">{match[1]} custom</span>
-                          <Relu size={12} variant="symbol" className="hidden sm:block" />
+                          <ReluLogo size={12} variant="symbol" className="hidden sm:block" />
                           <span className="text-xs sm:text-sm font-medium">AI Workers</span>
                         </div>
                         {description && (
@@ -845,8 +845,8 @@ function PricingTier({
                         <span className="text-[10px] sm:text-xs text-muted-foreground/60 line-through">Basic</span>
                         <span className="text-muted-foreground/40 text-xs">→</span>
                         <span className="inline-flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 py-0.5 bg-primary/10 dark:bg-primary/15 rounded-md">
-                          <Relu size={10} variant="symbol" className="sm:hidden" />
-                          <Relu size={12} variant="symbol" className="hidden sm:block" />
+                          <ReluLogo size={10} variant="symbol" className="sm:hidden" />
+                          <ReluLogo size={12} variant="symbol" className="hidden sm:block" />
                           <span className="text-[10px] sm:text-xs font-semibold text-primary">Advanced</span>
                         </span>
                       </div>

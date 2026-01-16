@@ -40,7 +40,7 @@ export function SimplePlaybackControls({
           rel="noopener noreferrer"
           className="flex items-center gap-2 text-sm font-medium hover:opacity-80 transition-opacity"
         >
-          <Relu className="h-5 w-5" />
+          <ReluLogo className="h-5 w-5" />
           <span className="hidden sm:inline">Relu</span>
         </Link>
 

@@ -41,7 +41,7 @@ export function ReferralCodeDialog({ open, onOpenChange, referralCode = '', onCo
           {/* Logo & Header */}
           <div className="flex flex-col items-center text-center mb-4">
             <div className="mb-2 p-2 rounded-xl bg-muted/50">
-              <Relu size={24} variant="symbol" />
+              <ReluLogo size={24} variant="symbol" />
             </div>
             <DialogTitle className="text-base sm:text-lg font-semibold">
               {t('yourReferralCode')}

@@ -18,7 +18,7 @@ You can modify the sandbox environment for development or to add new capabilitie
 1. Edit files in the `docker/` directory
 2. Build a custom image:
    ```
-   cd backend/code/sandbox/docker
+   cd backend/core/sandbox/docker
    docker compose build
    docker push sainabob/relu:0.1.3.28
    ```

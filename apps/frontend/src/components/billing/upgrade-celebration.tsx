@@ -104,7 +104,7 @@ export function UpgradeCelebration({ isOpen, onClose, planName, isLoading = fals
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.05, duration: 0.3 }}
             >
-              <Relu size={36} variant="logomark" />
+              <ReluLogo size={36} variant="logomark" />
             </motion.div>
 
             {/* Welcome text */}

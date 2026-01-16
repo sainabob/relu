@@ -110,8 +110,8 @@ export function DowngradeConfirmationDialog({
             {/* Logo & Header - compact on mobile */}
             <div className="flex flex-col items-center text-center mb-4 sm:mb-6">
               <div className="mb-2 sm:mb-4 p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-muted/50">
-                <Relu size={24} variant="symbol" className="sm:hidden" />
-                <Relu size={32} variant="symbol" className="hidden sm:block" />
+                <ReluLogo size={24} variant="symbol" className="sm:hidden" />
+                <ReluLogo size={32} variant="symbol" className="hidden sm:block" />
               </div>
               <DialogTitle className="text-lg sm:text-xl font-semibold text-foreground">
                 {t('confirmTitle')}
@@ -143,8 +143,8 @@ export function DowngradeConfirmationDialog({
             {/* Logo & Header - compact on mobile */}
             <div className="flex flex-col items-center text-center mb-3 sm:mb-6">
               <div className="mb-2 sm:mb-4 p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-muted/50">
-                <Relu size={24} variant="symbol" className="sm:hidden" />
-                <Relu size={32} variant="symbol" className="hidden sm:block" />
+                <ReluLogo size={24} variant="symbol" className="sm:hidden" />
+                <ReluLogo size={32} variant="symbol" className="hidden sm:block" />
               </div>
               <DialogTitle className="text-lg sm:text-xl font-semibold text-foreground">
                 {t('feedbackTitle')}

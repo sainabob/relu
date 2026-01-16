@@ -405,7 +405,7 @@ export default function TemplateSharePage() {
             <div className="flex h-14 items-center">
               <div className="flex items-center">
                 <Link href="/" className="flex items-center">
-                  <Relu size={24} />
+                  <ReluLogo size={24} />
                 </Link>
               </div>
               <div className="flex items-center space-x-3 ml-auto">
