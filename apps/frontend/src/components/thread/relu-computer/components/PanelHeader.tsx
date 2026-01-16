@@ -198,22 +198,22 @@ export const PanelHeader = memo(function PanelHeader({
       <div className="h-14 flex-shrink-0 px-4 flex items-center justify-between border-b border-border">
         <div className="flex items-center">
           <Image
-            src="/kortix-computer-white.svg"
-            alt="Kortix Computer"
+            src="/relu-computer-white.svg"
+            alt="Relu Computer"
             width={140}
             height={16}
             className="hidden dark:block"
             priority
           />
           <Image
-            src="/kortix-computer-black.svg"
-            alt="Kortix Computer"
+            src="/relu-computer-black.svg"
+            alt="Relu Computer"
             width={140}
             height={16}
             className="block dark:hidden"
             priority
           />
-          <DrawerTitle className="sr-only">Kortix Computer</DrawerTitle>
+          <DrawerTitle className="sr-only">Relu Computer</DrawerTitle>
         </div>
         <div className="flex items-center gap-2">
           <ActionFilesSwitcher 
@@ -253,16 +253,16 @@ export const PanelHeader = memo(function PanelHeader({
         className="flex items-center justify-center cursor-pointer select-none hover:opacity-80 transition-opacity"
       >
         <Image
-          src="/kortix-computer-white.svg"
-          alt="Kortix Computer"
+          src="/relu-computer-white.svg"
+          alt="Relu Computer"
           width={140}
           height={16}
           className="hidden dark:block"
           priority
         />
         <Image
-          src="/kortix-computer-black.svg"
-          alt="Kortix Computer"
+          src="/relu-computer-black.svg"
+          alt="Relu Computer"
           width={140}
           height={16}
           className="block dark:hidden"

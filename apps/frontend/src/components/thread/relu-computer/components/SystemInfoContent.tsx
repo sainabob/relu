@@ -2,7 +2,7 @@
 
 import { memo } from 'react';
 import { Cpu, HardDrive, MemoryStick, MapPin } from 'lucide-react';
-import { KortixLoader } from '@/components/ui/kortix-loader';
+import { ReluLoader } from '@/components/ui/relu-loader';
 import { ReluLogo } from '@/components/sidebar/relu-logo';
 import { cn } from '@/lib/utils';
 import { SandboxDetails } from '@/hooks/files/use-sandbox-details';
@@ -52,7 +52,7 @@ export const SystemInfoContent = memo(function SystemInfoContent({
   if (isLoading) {
     return (
       <div className="h-full flex items-center justify-center">
-        <KortixLoader size="medium" />
+        <ReluLoader size="medium" />
       </div>
     );
   }

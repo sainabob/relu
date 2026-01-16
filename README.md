@@ -159,7 +159,7 @@ python setup.py
 ```
 The wizard will guide you through 14 steps with progress saving, so you can resume if interrupted.
 
-**💡 Automatic Startup:** At the end of setup, you can choose to automatically start Kortix Super Worker. The setup wizard supports both:
+**💡 Automatic Startup:** At the end of setup, you can choose to automatically start Relu Super Worker. The setup wizard supports both:
 - **Docker mode**: Automatically starts all services via Docker Compose
 - **Manual mode**: Automatically starts services using `start.py` helper script
 

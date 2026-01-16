@@ -3,7 +3,7 @@
 import { memo } from 'react';
 import { motion } from 'framer-motion';
 import { Cpu, HardDrive, MemoryStick, MapPin } from 'lucide-react';
-import { KortixLoader } from '@/components/ui/kortix-loader';
+import { ReluLoader } from '@/components/ui/relu-loader';
 import { ReluLogo } from '@/components/sidebar/relu-logo';
 import { cn } from '@/lib/utils';
 import { SandboxDetails } from '@/hooks/files/use-sandbox-details';
@@ -61,7 +61,7 @@ export const SandboxInfoCard = memo(function SandboxInfoCard({
         className="absolute inset-0 flex items-center justify-center pointer-events-none"
       >
         <Card variant="glass" className="p-8 rounded-3xl gap-0">
-          <KortixLoader size="medium" />
+          <ReluLoader size="medium" />
         </Card>
       </motion.div>
     );
@@ -80,7 +80,7 @@ export const SandboxInfoCard = memo(function SandboxInfoCard({
       <Card variant="glass" className="p-6 min-w-[320px] max-w-[380px] rounded-3xl gap-0">
         <div className="flex flex-col items-center justify-center gap-3 mb-5">
           <div className="w-16 h-16 rounded-3xl bg-background flex items-center justify-center border mx-auto">
-            <KortixLogo size={32} />
+            <ReluLogo size={32} />
           </div>
           <div className="flex flex-col items-center justify-center">
             <h3 className="text-foreground font-semibold text-lg text-center">Relu Computer</h3>
