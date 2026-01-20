@@ -820,7 +820,7 @@ class SetupWizard:
                 print_info("Starting Relu Super Worker with Docker Compose...")
                 # User explicitly chose Docker Compose start from the completion menu,
                 # so don't ask again how to start – just use automatic Docker mode.
-                self.start_suna(ask_start_method=False)
+                self.start_relu(ask_start_method=False)
                 return
             elif choice == "2":
                 self.final_instructions()
@@ -1710,7 +1710,7 @@ class SetupWizard:
         if configured_providers:
             print_success(f"LLM providers configured: {', '.join(configured_providers)}")
         else:
-            print_warning("No LLM providers configured - add them before running Kortix.")
+            print_warning("No LLM providers configured - add them before running Relu.")
         
         print_success("LLM configuration saved.")
 
@@ -2408,7 +2408,7 @@ class SetupWizard:
         )
         return False
 
-    def start_suna(self, ask_start_method: bool = True):
+    def start_relu(self, ask_start_method: bool = True):
         """Starts Relu Super Worker using Docker Compose or shows instructions for manual startup.
 
         If ask_start_method is False and setup_method is 'docker', we skip the
@@ -2562,7 +2562,7 @@ class SetupWizard:
                     time.sleep(5)
 
                     print_success("Relu Super Worker services started!")
-                    print_info(f"{Colors.CYAN}🌐 Access Suna at: http://localhost:3000{Colors.ENDC}")
+                    print_info(f"{Colors.CYAN}🌐 Access Relu at: http://localhost:3000{Colors.ENDC}")
                     print_info(f"\nTo view logs:")
                     print_info(f"  Backend:  {Colors.CYAN}tail -f backend.log{Colors.ENDC}")
                     print_info(f"  Frontend: {Colors.CYAN}tail -f frontend.log{Colors.ENDC}")

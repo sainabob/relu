@@ -14,7 +14,7 @@ async def load_agent_config_fast(
     user_id: Optional[str] = None
 ) -> Optional[Dict[str, Any]]:
     from core.cache.runtime_cache import (
-        get_static_suna_config, 
+        get_static_relu_config, 
         get_cached_user_mcps,
         get_cached_agent_config
     )
@@ -31,7 +31,7 @@ async def load_agent_config_fast(
                 logger.warning(f"[AGENT CONFIG FAST] No default agent for {account_id}")
                 return await load_agent_config(None, account_id, user_id)
         
-        static_config = get_static_suna_config()
+        static_config = get_static_relu_config()
         if static_config:
             cached_mcps = await get_cached_user_mcps(agent_id)
             
@@ -41,7 +41,7 @@ async def load_agent_config_fast(
                 'model': static_config['model'],
                 'agentpress_tools': static_config['agentpress_tools'],
                 'centrally_managed': static_config['centrally_managed'],
-                'is_suna_default': static_config['is_suna_default'],
+                'is_relu_default': static_config['is_relu_default'],
                 'restrictions': static_config['restrictions'],
                 'configured_mcps': cached_mcps.get('configured_mcps', []) if cached_mcps else [],
                 'custom_mcps': cached_mcps.get('custom_mcps', []) if cached_mcps else [],
@@ -166,14 +166,14 @@ async def load_agent_config(
         return None
 
 
-async def _find_shared_suna_agent():
+async def _find_shared_relu_agent():
     from core.agents.agent_loader import get_agent_loader
     from core.utils.config import config
     from core.agents import repo as agents_repo
     
     admin_user_id = config.SYSTEM_ADMIN_USER_ID
     
-    shared_agent = await agents_repo.get_shared_suna_agent(admin_user_id)
+    shared_agent = await agents_repo.get_shared_relu_agent(admin_user_id)
     
     if shared_agent:
         loader = await get_agent_loader()

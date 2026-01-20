@@ -260,7 +260,7 @@ export function Navbar() {
             {/* Header - matches navbar positioning */}
             <div className="flex h-[56px] items-center justify-between px-6 py-2">
               <Link href="/" className="flex items-center gap-3" onClick={() => setIsDrawerOpen(false)}>
-                <KortixLogo size={18} variant='logomark' />
+                <ReluLogo size={18} variant='logomark' />
               </Link>
               <button
                 onClick={toggleDrawer}

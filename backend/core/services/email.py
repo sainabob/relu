@@ -310,7 +310,7 @@ Claim your invite: {referral_url}
             logger.error("Cannot send email: MAILTRAP_API_TOKEN not configured")
             return False
 
-        subject = "Your Kortix verification code"
+        subject = "Your Relu verification code"
         html_content = self._get_otp_email_template(otp_code)
         text_content = self._get_otp_email_text(otp_code)
 
@@ -345,7 +345,7 @@ Claim your invite: {referral_url}
     <tr>
       <td>
         <div style="text-align: center; margin-bottom: 40px;">
-          <img src="https://kortix.com/Logomark.svg" alt="Kortix" style="height: 24px; width: auto; display: inline-block;" />
+          <img src="https://relu.com/Logomark.svg" alt="Relu" style="height: 24px; width: auto; display: inline-block;" />
         </div>
         <div style="background-color: #ffffff; border-radius: 16px; padding: 40px 32px; text-align: center;">
           <h1 style="font-size: 24px; font-weight: 500; color: #000; margin: 0 0 16px 0; letter-spacing: -0.02em;">
@@ -365,7 +365,7 @@ Claim your invite: {referral_url}
         </div>
         <div style="text-align: center; margin-top: 32px;">
           <p style="font-size: 12px; color: #999; margin: 0;">
-            &copy; Kortix AI Corp. All rights reserved.
+            &copy; Relu AI Corp. All rights reserved.
           </p>
         </div>
       </td>
@@ -375,7 +375,7 @@ Claim your invite: {referral_url}
 </html>"""
 
     def _get_otp_email_text(self, otp_code: str) -> str:
-        return f"""Your Kortix verification code
+        return f"""Your Relu verification code
 
 Enter this code to sign in to your account:
 
@@ -384,7 +384,7 @@ Enter this code to sign in to your account:
 This code expires in 1 hour. If you didn't request this, you can safely ignore this email.
 
 ---
-© Kortix AI Corp. All rights reserved."""
+© Relu AI Corp. All rights reserved."""
 
 
 email_service = EmailService() 

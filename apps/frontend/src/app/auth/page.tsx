@@ -272,7 +272,7 @@ function LoginContent() {
   if (isLoading || user) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <KortixLoader size="medium" />
+        <ReluLoader size="medium" />
       </div>
     );
   }

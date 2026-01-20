@@ -193,7 +193,7 @@ def main():
 
             if not force:
                 if redis_up:
-                    response = input("🛑 Stop all Suna services? [y/N] ").strip().lower()
+                    response = input("🛑 Stop all Relu services? [y/N] ").strip().lower()
                     if response != "y":
                         print("Aborting.")
                         return
@@ -203,10 +203,10 @@ def main():
                     if not IS_WINDOWS:
                         subprocess.run(["pkill", "-f", "uv run api.py"], capture_output=True)
                         subprocess.run(["pkill", "-f", "pnpm run dev"], capture_output=True)
-                    print(f"\n{Colors.GREEN}✅ All Suna services stopped.{Colors.ENDC}")
+                    print(f"\n{Colors.GREEN}✅ All Relu services stopped.{Colors.ENDC}")
                     return
                 else:
-                    response = input("⚡ Start all Suna services? [Y/n] ").strip().lower()
+                    response = input("⚡ Start all Relu services? [Y/n] ").strip().lower()
                     if response == "n":
                         print("Aborting.")
                         return
@@ -260,8 +260,8 @@ def main():
                 print(f"  Frontend logs: {frontend_log}")
             print(f"{Colors.GREEN}✅ Frontend starting...{Colors.ENDC}")
 
-            print(f"\n{Colors.GREEN}✅ All Suna services started.{Colors.ENDC}")
-            print(f"{Colors.CYAN}🌐 Access Suna at: http://localhost:3000{Colors.ENDC}")
+            print(f"\n{Colors.GREEN}✅ All Relu services started.{Colors.ENDC}")
+            print(f"{Colors.CYAN}🌐 Access Relu at: http://localhost:3000{Colors.ENDC}")
             if not IS_WINDOWS:
                 print(f"\nTo view logs:")
                 print(f"  {Colors.CYAN}tail -f backend.log{Colors.ENDC}")
@@ -305,10 +305,10 @@ def main():
 
             if any_running:
                 action = "stop"
-                msg = "🛑 Stop all Suna services? [y/N] "
+                msg = "🛑 Stop all Relu services? [y/N] "
             else:
                 action = "start"
-                msg = "⚡ Start all Suna services? [Y/n] "
+                msg = "⚡ Start all Relu services? [Y/n] "
 
             if not force:
                 response = input(msg).strip().lower()
@@ -328,7 +328,7 @@ def main():
                 if not IS_WINDOWS:
                     subprocess.run(["pkill", "-f", "uv run api.py"], capture_output=True)
                     subprocess.run(["pkill", "-f", "pnpm run dev"], capture_output=True)
-                print(f"\n{Colors.GREEN}✅ All Suna services stopped.{Colors.ENDC}")
+                print(f"\n{Colors.GREEN}✅ All Relu services stopped.{Colors.ENDC}")
             else:
                 # Start Redis
                 print("Starting Redis...")
@@ -377,8 +377,8 @@ def main():
                         )
                 print(f"{Colors.GREEN}✅ Frontend starting...{Colors.ENDC}")
 
-                print(f"\n{Colors.GREEN}✅ All Suna services started.{Colors.ENDC}")
-                print(f"{Colors.CYAN}🌐 Access Suna at: http://localhost:3000{Colors.ENDC}")
+                print(f"\n{Colors.GREEN}✅ All Relu services started.{Colors.ENDC}")
+                print(f"{Colors.CYAN}🌐 Access Relu at: http://localhost:3000{Colors.ENDC}")
                 if not IS_WINDOWS:
                     print(f"\n{Colors.BOLD}View logs:{Colors.ENDC}")
                     print(f"  {Colors.CYAN}tail -f backend.log{Colors.ENDC}")

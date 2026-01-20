@@ -300,7 +300,7 @@ class Configuration:
     OPENAI_COMPATIBLE_API_KEY: Optional[str] = None
     OPENAI_COMPATIBLE_API_BASE: Optional[str] = None
     OR_SITE_URL: Optional[str] = "https://www.relu.work"
-    OR_APP_NAME: Optional[str] = "Relu AI"
+    OR_APP_NAME: Optional[str] = "Relu.work"
     
     # Frontend URL configuration
     FRONTEND_URL_ENV: Optional[str] = None

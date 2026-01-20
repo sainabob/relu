@@ -857,7 +857,7 @@ export function FileViewerView({
   if (presentationFolderInfo.isFolder && isFolderValidated === null) {
     return (
       <div className="h-full flex flex-col items-center justify-center bg-background">
-        <KortixLoader customSize={32} />
+        <ReluLoader customSize={32} />
         <p className="text-sm text-muted-foreground mt-4">Checking folder...</p>
       </div>
     );
