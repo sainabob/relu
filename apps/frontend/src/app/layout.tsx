@@ -199,7 +199,7 @@ export default function RootLayout({
               description: siteMetadata.description,
               foundingDate: '2024',
               sameAs: [
-                'https://github.com/Relu-ai/Relu',
+                'https://github.com/sainabob/Relu',
                 'https://x.com/relu',
                 'https://linkedin.com/company/relu',
               ],

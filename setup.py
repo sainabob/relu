@@ -921,7 +921,7 @@ class SetupWizard:
         print(f"  • {Colors.GREEN}Docker Compose{Colors.ENDC} → Only supports {Colors.CYAN}Cloud Supabase{Colors.ENDC} (Local Supabase not supported)")
         print(f"  • {Colors.GREEN}Manual Setup{Colors.ENDC} → Only supports {Colors.CYAN}Cloud Supabase{Colors.ENDC} (Local Supabase not supported)")
         print(f"\n  Why? Docker networking can't easily reach local Supabase containers.")
-        print(f"  Want to fix this? See: {Colors.CYAN}https://github.com/relu-ai/relu/issues/1920{Colors.ENDC}")
+        print(f"  Want to fix this? See: {Colors.CYAN}https://github.com/sainabob/relu/issues/1920{Colors.ENDC}")
         
         print(f"\n{Colors.CYAN}How would you like to set up Relu Super Worker?{Colors.ENDC}")
         print(
