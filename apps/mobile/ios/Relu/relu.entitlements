@@ -10,9 +10,9 @@
     </array>
     <key>com.apple.developer.associated-domains</key>
     <array>
-      <string>applinks:relu.com</string>
-      <string>applinks:www.relu.com</string>
-      <string>applinks:staging.relu.work</string>
+      <string>applinks:kortix.com</string>
+      <string>applinks:www.kortix.com</string>
+      <string>applinks:staging.kortix.com</string>
     </array>
   </dict>
 </plist>

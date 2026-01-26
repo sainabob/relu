@@ -53,6 +53,13 @@ class Configuration:
     # Model selection
     # Options: "bedrock", "anthropic", "minimax", "grok", "openai"
     MAIN_LLM: str = "bedrock"
+    # Optional: Override the default model for the selected provider
+    # If not set, uses the default model for the provider:
+    #   - anthropic: anthropic/claude-haiku-4-5-20251001
+    #   - grok: openrouter/x-ai/grok-4.1-fast
+    #   - openai: openrouter/openai/gpt-4o-mini
+    #   - minimax: openrouter/minimax/minimax-m2.1
+    MAIN_LLM_MODEL: Optional[str] = None
     # ============================================
     
     # ===== PRESENCE CONFIGURATION =====
@@ -81,7 +88,7 @@ class Configuration:
     STRIPE_TIER_200_1000_YEARLY_ID_PROD: Optional[str] = 'price_1ReH8qG6l1KZGqIrK1akY90q'
 
     # Yearly commitment prices - Production (15% discount, monthly payments with 12-month commitment via schedules)
-    STRIPE_TIER_2_17_YEARLY_COMMITMENT_ID_PROD: Optional[str] = 'price_0SQg9ebLunH2sYabYHlRh8aA'  # $17/month
+    STRIPE_TIER_2_17_YEARLY_COMMITMENT_ID_PROD: Optional[str] = 'price_1RqtqiG6l1KZGqIrhjVPtE1s'  # $17/month
     STRIPE_TIER_6_42_YEARLY_COMMITMENT_ID_PROD: Optional[str] = 'price_1Rqtr8G6l1KZGqIrQ0ql0qHi'  # $42.50/month
     STRIPE_TIER_25_170_YEARLY_COMMITMENT_ID_PROD: Optional[str] = 'price_1RqtrUG6l1KZGqIrEb8hLsk3'  # $170/month
 
@@ -105,7 +112,7 @@ class Configuration:
     STRIPE_TIER_200_1000_YEARLY_ID_STAGING: Optional[str] = 'price_1ReGlXG6l1KZGqIrlgurP5GU'
 
     # Yearly commitment prices - Staging (15% discount, monthly payments with 12-month commitment via schedules)
-    STRIPE_TIER_2_17_YEARLY_COMMITMENT_ID_STAGING: Optional[str] = 'price_0SQg9ebLunH2sYabYHlRh8aA'  # $17/month
+    STRIPE_TIER_2_17_YEARLY_COMMITMENT_ID_STAGING: Optional[str] = 'price_1RqYGaG6l1KZGqIrIzcdPzeQ'  # $17/month
     STRIPE_TIER_6_42_YEARLY_COMMITMENT_ID_STAGING: Optional[str] = 'price_1RqYH1G6l1KZGqIrWDKh8xIU'  # $42.50/month
     STRIPE_TIER_25_170_YEARLY_COMMITMENT_ID_STAGING: Optional[str] = 'price_1RqYHbG6l1KZGqIrAUVf8KpG'  # $170/month
     
@@ -289,7 +296,7 @@ class Configuration:
     ENABLE_USER_CONTEXT: bool = True
     MEMORY_EMBEDDING_PROVIDER: Optional[str] = "openai"
     MEMORY_EMBEDDING_MODEL: Optional[str] = "text-embedding-3-small"
-    MEMORY_EXTRACTION_MODEL: Optional[str] = "relu/basic"
+    MEMORY_EXTRACTION_MODEL: Optional[str] = "kortix/basic"
     VOYAGE_API_KEY: Optional[str] = None
     GROQ_API_KEY: Optional[str] = None
     OPENROUTER_API_KEY: Optional[str] = None
@@ -299,8 +306,8 @@ class Configuration:
     OPENROUTER_API_BASE: Optional[str] = "https://openrouter.ai/api/v1"
     OPENAI_COMPATIBLE_API_KEY: Optional[str] = None
     OPENAI_COMPATIBLE_API_BASE: Optional[str] = None
-    OR_SITE_URL: Optional[str] = "https://www.relu.work"
-    OR_APP_NAME: Optional[str] = "Relu.work"
+    OR_SITE_URL: Optional[str] = "https://www.kortix.com"
+    OR_APP_NAME: Optional[str] = "Kortix.com"
     
     # Frontend URL configuration
     FRONTEND_URL_ENV: Optional[str] = None
@@ -361,14 +368,15 @@ class Configuration:
     # RevenueCat configuration
     REVENUECAT_WEBHOOK_SECRET: Optional[str] = None
     REVENUECAT_API_KEY: Optional[str] = None
+    REVENUECAT_PROJECT_ID: Optional[str] = None
     
     # Stripe Product IDs
     STRIPE_PRODUCT_ID_PROD: Optional[str] = 'prod_SCl7AQ2C8kK1CD'
     STRIPE_PRODUCT_ID_STAGING: Optional[str] = 'prod_SCgIj3G7yPOAWY'
     
     # Sandbox configuration
-    SANDBOX_IMAGE_NAME = "sainabob/relu:0.1.3.28"
-    SANDBOX_SNAPSHOT_NAME = "sainabob/relu:0.1.3.28"
+    SANDBOX_IMAGE_NAME = "kortix/suna:0.1.3.30"
+    SANDBOX_SNAPSHOT_NAME = "kortix/suna:0.1.3.30"
     SANDBOX_ENTRYPOINT = "/usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.conf"
     
     # Debug configuration
@@ -392,7 +400,7 @@ class Configuration:
     LANGFUSE_HOST: Optional[str] = "https://cloud.langfuse.com"
 
     # Admin API key for server-side operations
-    RELU_ADMIN_API_KEY: Optional[str] = None
+    KORTIX_ADMIN_API_KEY: Optional[str] = None
 
     # API Keys system configuration
     API_KEY_SECRET: Optional[str] = "default-secret-key-change-in-production"
@@ -501,8 +509,8 @@ class Configuration:
         Get the frontend URL based on environment.
         
         Returns:
-        - Production: 'https://relu.work' (or FRONTEND_URL_ENV if set)
-        - Staging: 'https://staging.relu.work' (or FRONTEND_URL_ENV if set)
+        - Production: 'https://kortix.com' (or FRONTEND_URL_ENV if set)
+        - Staging: 'https://staging.kortix.com' (or FRONTEND_URL_ENV if set)
         - Local: FRONTEND_URL_ENV or 'http://localhost:3000'
         """
         # Check for environment variable override first
@@ -511,14 +519,14 @@ class Configuration:
         
         # Environment-based defaults
         if self.ENV_MODE == EnvMode.PRODUCTION:
-            return 'https://relu.work'
+            return 'https://kortix.com'
         elif self.ENV_MODE == EnvMode.STAGING:
             return 'http://localhost:3000'
         else:
             return 'http://localhost:3000'
     
     def _generate_admin_api_key(self) -> str:
-        """Generate a secure admin API key for Relu administrative functions."""
+        """Generate a secure admin API key for Kortix administrative functions."""
         # Generate 32 random bytes and encode as hex for a readable API key
         key_bytes = secrets.token_bytes(32)
         return key_bytes.hex()
@@ -542,9 +550,9 @@ class Configuration:
         self._load_from_env()
         
         # Auto-generate admin API key if not present
-        if not self.RELU_ADMIN_API_KEY:
-            self.RELU_ADMIN_API_KEY = self._generate_admin_api_key()
-            logger.info("Auto-generated RELU_ADMIN_API_KEY for administrative functions")
+        if not self.KORTIX_ADMIN_API_KEY:
+            self.KORTIX_ADMIN_API_KEY = self._generate_admin_api_key()
+            logger.info("Auto-generated KORTIX_ADMIN_API_KEY for administrative functions")
         
         # Perform validation
         self._validate()

@@ -42,8 +42,8 @@ import { SelectableMarkdownText } from '@/components/ui/selectable-markdown';
 import { autoLinkUrls } from '@agentpress/shared';
 import { FileAttachmentsGrid } from './FileAttachmentRenderer';
 import { CheckCircle2, AlertCircle, Info, CircleDashed } from 'lucide-react-native';
-import { ReluLoader } from '@/components/ui/relu-loader';
-import { ReluLogo } from '@/components/ui/ReluLogo';
+import { KortixLoader } from '@/components/ui/kortix-loader';
+import { KortixLogo } from '@/components/ui/KortixLogo';
 import { AgentLoader } from './AgentLoader';
 import { StreamingToolCard } from './StreamingToolCard';
 import { CompactToolCard, CompactStreamingToolCard } from './CompactToolCard';
@@ -52,8 +52,9 @@ import { MessageActions } from './MessageActions';
 import { TaskCompletedFeedback } from './tool-views/complete-tool/TaskCompletedFeedback';
 import { renderAssistantMessage } from './assistant-message-renderer';
 import { PromptExamples } from '@/components/shared';
-import { useReluComputerStore } from '@/stores/relu-computer-store';
-import { isReluDefaultAgentId } from '@/lib/agents';
+import { ReasoningSection } from './ReasoningSection';
+import { useKortixComputerStore } from '@/stores/kortix-computer-store';
+import { isKortixDefaultAgentId } from '@/lib/agents';
 import { log } from '@/lib/logger';
 
 export interface ToolMessagePair {
@@ -234,7 +235,7 @@ const MarkdownContent = React.memo(function MarkdownContent({
               <View className="flex-row items-start gap-2.5 rounded-xl border border-border bg-muted/40 px-3 py-2.5 dark:bg-muted/20">
                 <Icon as={Info} size={16} className="mt-0.5 flex-shrink-0 text-muted-foreground" />
                 <Text className="flex-1 font-roobert text-sm leading-relaxed text-muted-foreground">
-                  Relu will automatically continue working once you provide your response.
+                  Kortix will automatically continue working once you provide your response.
                 </Text>
               </View>
 
@@ -433,7 +434,7 @@ const ToolCard = React.memo(function ToolCard({
         disabled={!onPress}
         className="flex-row items-center gap-3 rounded-3xl border border-border bg-card p-3">
         <View className="h-8 w-8 items-center justify-center rounded-xl border border-border bg-background">
-          <ReluLoader size="small" />
+          <KortixLoader size="small" />
         </View>
         <View className="flex-1">
           <Text className="mb-0.5 font-roobert-medium text-sm text-foreground">{displayName}</Text>
@@ -577,7 +578,7 @@ const StreamingToolCallIndicator = React.memo(function StreamingToolCallIndicato
           {isCompleted ? (
             <Icon as={CheckCircle2} size={16} className="text-emerald-500" />
           ) : (
-            <ReluLoader size="small" />
+            <KortixLoader size="small" />
           )}
         </View>
         
@@ -628,7 +629,7 @@ const StreamingToolCallIndicator = React.memo(function StreamingToolCallIndicato
       {isCompleted ? (
         <Icon as={CheckCircle2} size={16} className="text-emerald-500" />
       ) : (
-        <ReluLoader size="small" />
+        <KortixLoader size="small" />
       )}
     </View>
   );
@@ -648,6 +649,8 @@ const StreamingToolCallIndicator = React.memo(function StreamingToolCallIndicato
 interface ThreadContentProps {
   messages: UnifiedMessage[];
   streamingTextContent?: string;
+  streamingReasoningContent?: string;
+  isReasoningComplete?: boolean;
   streamingToolCall?: UnifiedMessage | null;
   agentStatus: 'idle' | 'running' | 'connecting' | 'error';
   handleToolClick?: (assistantMessageId: string | null, toolName: string, toolCallId?: string) => void;
@@ -668,6 +671,8 @@ export const ThreadContent: React.FC<ThreadContentProps> = React.memo(
   ({
     messages,
     streamingTextContent = '',
+    streamingReasoningContent = '',
+    isReasoningComplete = false,
     streamingToolCall,
     agentStatus,
     handleToolClick,
@@ -676,7 +681,7 @@ export const ThreadContent: React.FC<ThreadContentProps> = React.memo(
     streamHookStatus = 'idle',
     sandboxId,
     sandboxUrl,
-    agentName = 'Relu',
+    agentName = 'Kortix',
     onPromptFill,
     isSendingMessage = false,
     onRequestScroll,
@@ -687,14 +692,89 @@ export const ThreadContent: React.FC<ThreadContentProps> = React.memo(
     const isDark = colorScheme === 'dark';
     const { agents } = useAgent();
 
+    // State for reasoning expanded (persists across streaming/persisted transitions)
+    const [reasoningExpanded, setReasoningExpanded] = React.useState(false);
+
+    // Ref for reasoning content freezing (prevents flash during transitions)
+    const lastReasoningContentRef = React.useRef<string>('');
+    const prevAgentActiveRef = React.useRef(agentStatus === 'running' || agentStatus === 'connecting');
+
+    // Determine if agent is currently active
+    const isAgentActive = agentStatus === 'running' || agentStatus === 'connecting';
+
+    // Update ref when reasoning content arrives
+    React.useEffect(() => {
+      if (streamingReasoningContent) {
+        lastReasoningContentRef.current = streamingReasoningContent;
+      }
+    }, [streamingReasoningContent]);
+
+    // Reasoning grace period: When agent starts, briefly delay showing text to allow reasoning to arrive first
+    // This prevents the jarring experience of text appearing before the reasoning section
+    const REASONING_GRACE_PERIOD_MS = 200;
+    const [isInReasoningGracePeriod, setIsInReasoningGracePeriod] = React.useState(false);
+    const gracePeriodTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Reset ref when agent starts a new turn
+    React.useEffect(() => {
+      const wasActive = prevAgentActiveRef.current;
+      const isNowActive = isAgentActive;
+      prevAgentActiveRef.current = isNowActive;
+
+      // Agent just started - clear ref for fresh content and start grace period
+      if (!wasActive && isNowActive) {
+        lastReasoningContentRef.current = '';
+        setReasoningExpanded(false);
+
+        // Start reasoning grace period
+        setIsInReasoningGracePeriod(true);
+        if (gracePeriodTimeoutRef.current) {
+          clearTimeout(gracePeriodTimeoutRef.current);
+        }
+        gracePeriodTimeoutRef.current = setTimeout(() => {
+          setIsInReasoningGracePeriod(false);
+          gracePeriodTimeoutRef.current = null;
+        }, REASONING_GRACE_PERIOD_MS);
+      }
+
+      // Agent stopped - end grace period
+      if (wasActive && !isNowActive) {
+        setIsInReasoningGracePeriod(false);
+        if (gracePeriodTimeoutRef.current) {
+          clearTimeout(gracePeriodTimeoutRef.current);
+          gracePeriodTimeoutRef.current = null;
+        }
+      }
+    }, [isAgentActive]);
+
+    // End grace period immediately when reasoning content arrives
+    React.useEffect(() => {
+      if (streamingReasoningContent && streamingReasoningContent.trim().length > 0 && isInReasoningGracePeriod) {
+        setIsInReasoningGracePeriod(false);
+        if (gracePeriodTimeoutRef.current) {
+          clearTimeout(gracePeriodTimeoutRef.current);
+          gracePeriodTimeoutRef.current = null;
+        }
+      }
+    }, [streamingReasoningContent, isInReasoningGracePeriod]);
+
+    // Cleanup timeout on unmount
+    React.useEffect(() => {
+      return () => {
+        if (gracePeriodTimeoutRef.current) {
+          clearTimeout(gracePeriodTimeoutRef.current);
+        }
+      };
+    }, []);
+
     // Helper to render agent indicator based on agent type
     const renderAgentIndicator = useCallback((agentId: string | null | undefined) => {
-      // Default Relu agent or no agent ID - show full logomark
-      const isReluDefault = isReluDefaultAgentId(agentId, agents);
+      // Default Kortix agent or no agent ID - show full logomark
+      const isKortixDefault = isKortixDefaultAgentId(agentId, agents);
       
-      if (isReluDefault) {
-        // Full Relu logomark (icon + text) - same height as symbol+text combo
-        return <ReluLogo size={14} variant="logomark" color={isDark ? 'dark' : 'light'} />;
+      if (isKortixDefault) {
+        // Full Kortix logomark (icon + text) - same height as symbol+text combo
+        return <KortixLogo size={14} variant="logomark" color={isDark ? 'dark' : 'light'} />;
       }
       
       // Custom agent - show symbol + name
@@ -703,7 +783,7 @@ export const ThreadContent: React.FC<ThreadContentProps> = React.memo(
       
       return (
         <View className="flex-row items-center gap-1.5">
-          <ReluLogo size={16} variant="symbol" color={isDark ? 'dark' : 'light'} />
+          <KortixLogo size={16} variant="symbol" color={isDark ? 'dark' : 'light'} />
           <Text className="text-sm font-medium text-muted-foreground">{displayName}</Text>
         </View>
       );
@@ -854,7 +934,7 @@ export const ThreadContent: React.FC<ThreadContentProps> = React.memo(
       return maps;
     }, [groupedMessages]);
 
-    const { navigateToToolCall } = useReluComputerStore();
+    const { navigateToToolCall } = useKortixComputerStore();
 
     const handleToolPressInternal = useCallback(
       (clickedToolMsg: UnifiedMessage) => {
@@ -1114,7 +1194,7 @@ export const ThreadContent: React.FC<ThreadContentProps> = React.memo(
             ].filter(Boolean);
 
             // Parse pending attachments from metadata (for optimistic messages)
-            let pendingAttachments: Array<{ uri: string; name: string; type: string; size?: number }> = [];
+            let pendingAttachments: Array<{ uri: string; name: string; type: string; size?: number; status?: string }> = [];
             try {
               const metadata = typeof message.metadata === 'string' 
                 ? JSON.parse(message.metadata) 
@@ -1137,39 +1217,44 @@ export const ThreadContent: React.FC<ThreadContentProps> = React.memo(
                 {/* Render pending attachments (local URIs from optimistic messages) */}
                 {pendingAttachments.length > 0 && (
                   <View className="flex-row flex-wrap justify-end gap-2 mb-2">
-                    {pendingAttachments.map((attachment, idx) => (
-                      <View
-                        key={`pending-${idx}`}
-                        className="rounded-2xl overflow-hidden border border-border"
-                        style={{ width: 120, height: 120 }}
-                      >
-                        {attachment.type === 'image' || attachment.type === 'video' ? (
-                          <>
-                            <Image
-                              source={{ uri: attachment.uri }}
-                              style={{ width: '100%', height: '100%' }}
-                              resizeMode="cover"
-                            />
-                            {/* Uploading overlay */}
-                            <View 
-                              className="absolute inset-0 bg-black/40 items-center justify-center"
-                              style={{ borderRadius: 16 }}
-                            >
-                              <View className="bg-white/20 rounded-full p-2">
-                                <ReluLoader size="small" />
-                              </View>
+                    {pendingAttachments.map((attachment, idx) => {
+                      const isUploading = attachment.status !== 'ready';
+                      return (
+                        <View
+                          key={`pending-${idx}`}
+                          className="rounded-2xl overflow-hidden border border-border"
+                          style={{ width: 120, height: 120 }}
+                        >
+                          {attachment.type === 'image' || attachment.type === 'video' ? (
+                            <>
+                              <Image
+                                source={{ uri: attachment.uri }}
+                                style={{ width: '100%', height: '100%' }}
+                                resizeMode="cover"
+                              />
+                              {/* Uploading overlay - only show if still uploading */}
+                              {isUploading && (
+                                <View 
+                                  className="absolute inset-0 bg-black/40 items-center justify-center"
+                                  style={{ borderRadius: 16 }}
+                                >
+                                  <View className="bg-white/20 rounded-full p-2">
+                                    <KortixLoader size="small" />
+                                  </View>
+                                </View>
+                              )}
+                            </>
+                          ) : (
+                            <View className="flex-1 items-center justify-center bg-card">
+                              {isUploading && <KortixLoader size="small" />}
+                              <Text className="text-xs text-muted-foreground text-center px-2 mt-2" numberOfLines={2}>
+                                {attachment.name}
+                              </Text>
                             </View>
-                          </>
-                        ) : (
-                          <View className="flex-1 items-center justify-center bg-card">
-                            <ReluLoader size="small" />
-                            <Text className="text-xs text-muted-foreground text-center px-2 mt-2" numberOfLines={2}>
-                              {attachment.name}
-                            </Text>
-                          </View>
-                        )}
-                      </View>
-                    ))}
+                          )}
+                        </View>
+                      );
+                    })}
                   </View>
                 )}
 
@@ -1293,12 +1378,90 @@ export const ThreadContent: React.FC<ThreadContentProps> = React.memo(
             // Check if we're currently streaming (don't show actions while streaming)
             const isCurrentlyStreaming = streamHookStatus === 'streaming' || streamHookStatus === 'connecting';
             const isLastGroup = groupIndex === groupedMessages.length - 1;
+            const isAgentRunning = agentStatus === 'running' || agentStatus === 'connecting';
+
+            // Extract persisted reasoning content from the first assistant message (like frontend)
+            const persistedReasoningContent = (() => {
+              const firstAssistant = group.messages.find((m) => m.type === 'assistant');
+              if (!firstAssistant) return null;
+              const meta = safeJsonParse<ParsedMetadata>(firstAssistant.metadata, {});
+              return (meta as any).reasoning_content || null;
+            })();
+
+            // Determine reasoning content to display for this group
+            const displayReasoningContent = isLastGroup
+              ? (streamingReasoningContent || lastReasoningContentRef.current || '')
+              : '';
+            const hasStreamingReasoningContent = displayReasoningContent.trim().length > 0;
+
+            // Calculate reasoning section to show (same pattern as frontend)
+            const reasoningSectionElement = (() => {
+              // For last group: prefer streaming content, fall back to persisted
+              if (isLastGroup && messages[messages.length - 1]?.type !== 'user') {
+                if (hasStreamingReasoningContent) {
+                  // If agent is idle and we have persisted reasoning, use persisted
+                  const usePersistedInstead = !isCurrentlyStreaming && !isAgentRunning && persistedReasoningContent;
+
+                  if (usePersistedInstead) {
+                    return (
+                      <ReasoningSection
+                        content={persistedReasoningContent}
+                        isStreaming={false}
+                        isReasoningActive={false}
+                        isReasoningComplete={true}
+                        isPersistedContent={true}
+                        isExpanded={reasoningExpanded}
+                        onExpandedChange={setReasoningExpanded}
+                      />
+                    );
+                  }
+
+                  return (
+                    <ReasoningSection
+                      content={displayReasoningContent}
+                      isStreaming={isCurrentlyStreaming}
+                      isReasoningActive={isAgentRunning}
+                      isReasoningComplete={isReasoningComplete}
+                      isPersistedContent={false}
+                      isExpanded={reasoningExpanded}
+                      onExpandedChange={setReasoningExpanded}
+                    />
+                  );
+                }
+              }
+
+              // For all groups: show persisted reasoning if it exists
+              if (persistedReasoningContent) {
+                return (
+                  <ReasoningSection
+                    content={persistedReasoningContent}
+                    isStreaming={false}
+                    isReasoningActive={false}
+                    isReasoningComplete={true}
+                    isPersistedContent={true}
+                    isExpanded={reasoningExpanded}
+                    onExpandedChange={setReasoningExpanded}
+                  />
+                );
+              }
+
+              return null;
+            })();
 
             return (
               <View key={group.key} className="mb-6">
-                <View className="mb-3 flex-row items-center">
-                  {renderAgentIndicator(groupAgentId)}
-                </View>
+                {/* Reasoning section with integrated Kortix icon (like frontend) */}
+                {reasoningSectionElement && (
+                  <View className="mb-2">
+                    {reasoningSectionElement}
+                  </View>
+                )}
+                {/* Show agent header only when reasoning section is NOT displayed */}
+                {!reasoningSectionElement && (
+                  <View className="mb-3 flex-row items-center">
+                    {renderAgentIndicator(groupAgentId)}
+                  </View>
+                )}
 
                 <View className="gap-3">
                   {assistantMessages.map((message, msgIndex) => {
@@ -1443,10 +1606,25 @@ export const ThreadContent: React.FC<ThreadContentProps> = React.memo(
                   {/* Render streaming native tool call (ask/complete) */}
                   {/* NOTE: Only render here if last message is NOT user - otherwise trailing indicator handles it */}
                   {groupIndex === groupedMessages.length - 1 &&
-                    (streamHookStatus === 'streaming' || streamHookStatus === 'connecting') &&
                     streamingToolCall &&
                     messages[messages.length - 1]?.type !== 'user' &&
                     (() => {
+                      // EARLY CHECK: If agent is idle and there's a persisted ask/complete,
+                      // let the persisted message handle rendering via renderAssistantMessage
+                      const hasPersistedAskComplete = group.messages.some(m => {
+                        if (m.type !== 'assistant') return false;
+                        const meta = safeJsonParse<ParsedMetadata>(m.metadata, {});
+                        const tcs = meta.tool_calls || [];
+                        return tcs.some((tc: any) => {
+                          const tn = tc.function_name?.replace(/_/g, '-').toLowerCase() || '';
+                          return tn === 'ask' || tn === 'complete';
+                        });
+                      });
+
+                      if (!isCurrentlyStreaming && !isAgentRunning && hasPersistedAskComplete) {
+                        return null;
+                      }
+
                       // Check if this is ask/complete - render as text instead of tool indicator
                       const parsedMetadata = safeJsonParse<ParsedMetadata>(
                         streamingToolCall.metadata,
@@ -1462,6 +1640,14 @@ export const ThreadContent: React.FC<ThreadContentProps> = React.memo(
                         const currentGroupAssistantMessages = group.messages.filter(
                           (m) => m.type === 'assistant'
                         );
+
+                        // CRITICAL: Check if the streaming message is already persisted
+                        if (streamingToolCall?.message_id && currentGroupAssistantMessages.some(
+                          (m) => m.message_id === streamingToolCall.message_id
+                        )) {
+                          return null;
+                        }
+
                         const lastAssistantMessage =
                           currentGroupAssistantMessages.length > 0
                             ? currentGroupAssistantMessages[
@@ -1476,6 +1662,17 @@ export const ThreadContent: React.FC<ThreadContentProps> = React.memo(
                           // If the last message already has ask/complete and is complete, skip
                           if (shouldSkipStreamingRender(lastMsgMetadata)) {
                             return null;
+                          }
+
+                          // Additional check: compare text lengths
+                          const persistedToolCalls = lastMsgMetadata.tool_calls || [];
+                          const persistedAskComplete = findAskOrCompleteTool(persistedToolCalls);
+                          if (persistedAskComplete) {
+                            const persistedText = extractTextFromArguments(persistedAskComplete.arguments);
+                            const streamingText = extractTextFromArguments(askOrCompleteTool.arguments);
+                            if (persistedText && persistedText.length >= streamingText.length) {
+                              return null;
+                            }
                           }
                         }
 
@@ -1633,9 +1830,10 @@ export const ThreadContent: React.FC<ThreadContentProps> = React.memo(
           if (lastMsg?.type !== 'user') return null;
           
           const isAgentActive = agentStatus === 'running' || agentStatus === 'connecting';
-          const hasStreamingContent = Boolean(streamingTextContent || streamingToolCall);
+          const hasStreamingContent = Boolean(streamingTextContent || streamingToolCall || streamingReasoningContent);
+          const hasVisibleReasoning = Boolean(streamingReasoningContent || lastReasoningContentRef.current);
           const isStreaming = streamHookStatus === 'streaming' || streamHookStatus === 'connecting';
-          
+
           // Show this indicator when:
           // 1. Sending message (contemplating)
           // 2. Agent active but no streaming yet (brewing ideas)
@@ -1648,10 +1846,13 @@ export const ThreadContent: React.FC<ThreadContentProps> = React.memo(
           // Check if we have ACTUAL visible streaming content to show
           // This prevents the shift from AgentLoader to empty streaming container
           const hasVisibleStreamingText = (() => {
+            // During reasoning grace period, don't show text yet - allow reasoning to arrive first
+            if (isInReasoningGracePeriod) return false;
+
             if (!streamingTextContent && !isSmoothAnimating) return false;
             const rawContent = streamingTextContent || '';
             const displayContent = smoothStreamingText || '';
-            
+
             // Check for XML tags
             let detectedTag: string | null = null;
             let tagStartIndex = -1;
@@ -1670,40 +1871,55 @@ export const ThreadContent: React.FC<ThreadContentProps> = React.memo(
                 }
               }
             }
-            
+
             // Has visible text before tag?
             const textBeforeTag = detectedTag && tagStartIndex >= 0
               ? displayContent.substring(0, Math.min(displayContent.length, tagStartIndex))
               : displayContent;
             const hasText = preprocessTextOnlyToolsLocal(textBeforeTag).trim().length > 0;
-            
+
             // Has visible tag (tool card)?
             const hasTag = detectedTag !== null;
-            
+
             return hasText || hasTag;
           })();
           
-          // Brewing = agent is active but no VISIBLE content yet
+          // Brewing = agent is active but no VISIBLE content yet (including reasoning)
           // Keep showing AgentLoader until we have actual visible streaming content
-          const isBrewing = isAgentActive && !hasVisibleStreamingText && !streamingToolCall;
-          
+          // During grace period, treat tool calls as not visible either
+          const hasVisibleToolCall = streamingToolCall && !isInReasoningGracePeriod;
+          const isBrewing = isAgentActive && !hasVisibleStreamingText && !hasVisibleToolCall && !hasVisibleReasoning;
+
+          // Determine if we should show reasoning section
+          const showReasoning = isStreaming && hasVisibleReasoning;
+
           return (
             <View className="mb-6">
-              <View className="mb-3 flex-row items-center">
-                {renderAgentIndicator(null)}
-              </View>
-              
-              {/* Unified loader container - consistent height prevents layout shift */}
-              {/* Both contemplating and brewing share same container to avoid jump */}
-              {/* overflow-hidden prevents bouncing animations from expanding the container */}
-              {(isContemplating || isBrewing) && (
-                <View className="h-6 justify-center overflow-hidden">
-                  {isContemplating ? (
-                    <Text className="text-xs text-muted-foreground italic">Contemplating response...</Text>
-                  ) : (
-                    <AgentLoader isReconnecting={isReconnecting} retryCount={retryCount} />
-                  )}
+              {/* Show agent header only when reasoning section is NOT displayed */}
+              {/* ReasoningSection has its own Kortix logo, so we hide the header when showing reasoning */}
+              {!showReasoning && (
+                <View className="mb-3 flex-row items-center">
+                  {renderAgentIndicator(null)}
                 </View>
+              )}
+
+              {/* AgentLoader - show when contemplating/brewing but NOT when reasoning is visible */}
+              {(isContemplating || isBrewing) && !hasVisibleReasoning && (
+                <View className="h-6 justify-center overflow-hidden">
+                  <AgentLoader isReconnecting={isReconnecting} retryCount={retryCount} />
+                </View>
+              )}
+
+              {/* ReasoningSection - show when we have reasoning content */}
+              {showReasoning && (
+                <ReasoningSection
+                  content={streamingReasoningContent || lastReasoningContentRef.current}
+                  isStreaming={isStreaming}
+                  isReasoningActive={isAgentActive}
+                  isReasoningComplete={isReasoningComplete}
+                  isExpanded={reasoningExpanded}
+                  onExpandedChange={setReasoningExpanded}
+                />
               )}
               
               {/* Streaming text content - only show when we have VISIBLE content */}
@@ -1762,7 +1978,8 @@ export const ThreadContent: React.FC<ThreadContentProps> = React.memo(
               )}
               
               {/* Streaming tool call - render HERE to prevent layout jump */}
-              {isStreaming && streamingToolCall && (() => {
+              {/* Hide during reasoning grace period to allow reasoning to appear first */}
+              {isStreaming && streamingToolCall && !isInReasoningGracePeriod && (() => {
                 const parsedMetadata = safeJsonParse<ParsedMetadata>(
                   streamingToolCall.metadata,
                   {}
@@ -1771,17 +1988,14 @@ export const ThreadContent: React.FC<ThreadContentProps> = React.memo(
                 const askOrCompleteTool = findAskOrCompleteTool(toolCalls);
 
                 if (askOrCompleteTool) {
-                  // Parse arguments if it's a string
-                  const args = typeof askOrCompleteTool.arguments === 'string'
-                    ? (() => { try { return JSON.parse(askOrCompleteTool.arguments); } catch { return {}; } })()
-                    : (askOrCompleteTool.arguments || {});
-                  const question = args.question || args.result || '';
-                  if (!question) return null;
+                  // Use extractTextFromArguments to correctly extract 'text' field for ask/complete
+                  const textToShow = extractTextFromArguments(askOrCompleteTool.arguments);
+                  if (!textToShow) return null;
 
                   return (
                     <View className="mt-2">
                       <SelectableMarkdownText isDark={isDark}>
-                        {autoLinkUrls(String(question)).replace(
+                        {autoLinkUrls(textToShow).replace(
                           /<((https?:\/\/|mailto:)[^>\s]+)>/g,
                           (_: string, url: string) => `[${url}](${url})`
                         )}

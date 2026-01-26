@@ -16,6 +16,7 @@ class RecoveryResponse(BaseModel):
 
 class StuckRunResponse(BaseModel):
     run_id: str
+    thread_id: Optional[str]
     owner: Optional[str]
     status: Optional[str]
     heartbeat: Optional[float]
@@ -127,14 +128,18 @@ async def get_run_info(
 async def get_dashboard(admin_user: Dict = Depends(require_admin)) -> Dict[str, Any]:
     from core.agents.pipeline.stateless import metrics, recovery, ownership, write_buffer
     from core.agents.pipeline.stateless.persistence import wal, dlq
+    from core.agents import repo as agents_repo
 
     stuck = await recovery.get_stuck(5)
     health = metrics.check_health()
     wal_stats = await wal.get_stats()
     dlq_stats = await dlq.get_stats()
 
+    active_threads_count = await agents_repo.get_active_thread_ids_count()
+
     return {
-        "active_runs": int(metrics.active_runs.get()),
+        "active_runs": active_threads_count,
+        "active_runs_metric": int(metrics.active_runs.get()),
         "owned_runs": ownership.owned_count,
         "pending_writes": int(metrics.pending_writes.get()),
         "stuck_count": len(stuck),
@@ -149,6 +154,18 @@ async def get_dashboard(admin_user: Dict = Depends(require_admin)) -> Dict[str, 
         "dlq": dlq_stats,
         "healthy": health["healthy"],
         "alerts": health["alerts"],
+    }
+
+
+@router.get("/active-threads")
+async def get_active_threads(admin_user: Dict = Depends(require_admin)) -> Dict[str, Any]:
+    from core.agents import repo as agents_repo
+
+    active_threads = await agents_repo.get_active_thread_ids_with_runs()
+    
+    return {
+        "count": len(active_threads),
+        "threads": active_threads,
     }
 
 
@@ -280,3 +297,60 @@ async def get_rate_limiters(admin_user: Dict = Depends(require_admin)) -> Dict[s
 async def get_backpressure(admin_user: Dict = Depends(require_admin)) -> Dict[str, Any]:
     from core.agents.pipeline.stateless.resilience.backpressure import backpressure
     return backpressure.to_dict()
+
+
+@router.get("/metrics/history")
+async def get_metrics_history(
+    minutes: int = Query(default=30, ge=5, le=120),
+    admin_user: Dict = Depends(require_admin)
+) -> Dict[str, Any]:
+    from core.services import redis
+    from core.agents.pipeline.stateless import metrics
+    import json
+    import time
+    
+    HISTORY_KEY = "stateless:metrics:history"
+    MAX_ENTRIES = 360
+    
+    now = time.time()
+    current = {
+        "timestamp": now,
+        "active_runs": int(metrics.active_runs.get()),
+        "pending_writes": int(metrics.pending_writes.get()),
+        "runs_started": metrics.runs_started.get(),
+        "runs_completed": metrics.runs_completed.get(),
+        "runs_failed": metrics.runs_failed.get(),
+        "flush_latency_avg": metrics.flush_latency.avg(),
+        "flush_latency_p99": metrics.flush_latency.percentile(99),
+        "writes_dropped": metrics.writes_dropped.get(),
+        "dlq_entries": metrics.dlq_entries.get(),
+    }
+    
+    try:
+        await redis.lpush(HISTORY_KEY, json.dumps(current))
+        await redis.ltrim(HISTORY_KEY, 0, MAX_ENTRIES - 1)
+        await redis.expire(HISTORY_KEY, 86400)
+    except Exception as e:
+        logger.warning(f"Failed to store metrics history: {e}")
+    
+    cutoff = now - (minutes * 60)
+    history = []
+    
+    try:
+        raw_entries = await redis.lrange(HISTORY_KEY, 0, MAX_ENTRIES)
+        for raw in raw_entries:
+            try:
+                entry = json.loads(raw)
+                if entry.get("timestamp", 0) >= cutoff:
+                    history.append(entry)
+            except:
+                continue
+        history.reverse()
+    except Exception as e:
+        logger.warning(f"Failed to retrieve metrics history: {e}")
+    
+    return {
+        "current": current,
+        "history": history,
+        "minutes": minutes,
+    }

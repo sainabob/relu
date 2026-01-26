@@ -10,6 +10,7 @@ __pycache__/
 
 # claude
 CLAUDE.md
+.claude
 
 # Distribution / packaging
 .Python
@@ -241,8 +242,5 @@ apps/mobile/.env*.local
 apps/mobile/app-example
 # Docker-specific env files
 *.env.docker
-
-# Infra (separate repository)
-infra/
 
 dump.rdb

@@ -51,10 +51,12 @@ from core.services import api_keys_api
 from core.notifications import api as notifications_api
 from core.services.orphan_cleanup import cleanup_orphaned_agent_runs
 from auth import api as auth_api
+from core.utils.auth_utils import verify_and_get_user_id_from_jwt
 
 
 if sys.platform == "win32":
-    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+    # Use SelectorEventLoop on Windows for psycopg async compatibility
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 db = DBConnection()
 # Use shared instance ID for distributed deployments
@@ -97,9 +99,9 @@ async def lifespan(app: FastAPI):
         from core.utils.tool_discovery import warm_up_tools_cache
         warm_up_tools_cache()
         
-        # Pre-load static Relu config for fast path in API requests
-        from core.cache.runtime_cache import load_static_relu_config
-        load_static_relu_config()
+        # Pre-load static Suna config for fast path in API requests
+        from core.cache.runtime_cache import load_static_suna_config
+        load_static_suna_config()
         
         sandbox_api.initialize(db)
         
@@ -148,16 +150,13 @@ async def lifespan(app: FastAPI):
         from core.sandbox.pool_background import start_pool_service
         asyncio.create_task(start_pool_service())
         
-        # Initialize stateless pipeline (if enabled)
-        from core.agents.runner.executor import USE_STATELESS_PIPELINE
-        if USE_STATELESS_PIPELINE:
-            from core.agents.pipeline.stateless import lifecycle
-            await lifecycle.initialize()
-            logger.info("[STARTUP] Stateless pipeline initialized")
+        # Initialize stateless pipeline
+        from core.agents.pipeline.stateless import lifecycle
+        await lifecycle.initialize()
+        logger.info("[STARTUP] Stateless pipeline initialized")
         
         yield
 
-        # Shutdown sequence: Set flag first so health checks fail
         _is_shutting_down = True
         logger.info(f"Starting graceful shutdown for instance {instance_id}")
         
@@ -207,12 +206,10 @@ async def lifespan(app: FastAPI):
         else:
             logger.info("No active agent runs to stop on shutdown")
         
-        # Shutdown stateless pipeline (if enabled)
-        from core.agents.runner.executor import USE_STATELESS_PIPELINE
-        if USE_STATELESS_PIPELINE:
-            from core.agents.pipeline.stateless import lifecycle
-            await lifecycle.shutdown()
-            logger.info("[SHUTDOWN] Stateless pipeline shutdown complete")
+        # Shutdown stateless pipeline
+        from core.agents.pipeline.stateless import lifecycle
+        await lifecycle.shutdown()
+        logger.info("[SHUTDOWN] Stateless pipeline shutdown complete")
         
         logger.debug("Cleaning up resources")
         
@@ -300,20 +297,25 @@ async def log_requests_middleware(request: Request, call_next):
         raise
 
 # Define allowed origins based on environment
-allowed_origins = ["https://www.relu.work", "https://relu.work"]
-allow_origin_regex = None
+allowed_origins = [
+    "https://www.kortix.com",
+    "https://kortix.com",
+    "https://dev.kortix.com",
+    "https://staging.kortix.com",
+    "https://prod-test.kortix.com",
+]
+# Allow all *.kortix.com subdomains and Vercel preview deployments
+allow_origin_regex = r"https://([a-z0-9-]+\.)?kortix\.com|https://.*-kortixai\.vercel\.app"
 
-# Add staging-specific origins
+# Add local origins for development
 if config.ENV_MODE == EnvMode.LOCAL:
     allowed_origins.append("http://localhost:3000")
     allowed_origins.append("http://127.0.0.1:3000")
 
 # Add staging-specific origins
 if config.ENV_MODE == EnvMode.STAGING:
-    allowed_origins.append("https://staging.relu.work")
+    allowed_origins.append("https://staging.kortix.com")
     allowed_origins.append("http://localhost:3000")
-    # Allow Vercel preview deployments
-    allow_origin_regex = r"https://.*-reluai\.vercel\.app"
 
 app.add_middleware(
     CORSMiddleware,
@@ -396,8 +398,6 @@ from core.test_harness.api import router as test_harness_router, e2e_router
 api_router.include_router(test_harness_router)
 api_router.include_router(e2e_router)
 
-from core.files import staged_files_router
-api_router.include_router(staged_files_router, prefix="/files")
 
 from core.sandbox.canvas_ai_api import router as canvas_ai_router
 api_router.include_router(canvas_ai_router)
@@ -429,6 +429,19 @@ async def health_check():
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "instance_id": instance_id,
     }
+
+@api_router.post("/prewarm", summary="Prewarm User Caches", operation_id="prewarm_user", tags=["system"])
+async def prewarm_user_caches(user_id: str = Depends(verify_and_get_user_id_from_jwt)):
+    async def _do_prewarm():
+        try:
+            from core.cache.runtime_cache import prewarm_user_agents
+            await prewarm_user_agents(user_id)
+        except Exception as e:
+            logger.warning(f"[PREWARM] Background prewarm failed for {user_id[:8]}...: {e}")
+    
+    asyncio.create_task(_do_prewarm())
+    
+    return {"status": "accepted", "message": "Prewarming started in background"}
 
 @api_router.get("/metrics", summary="System Metrics", operation_id="metrics", tags=["system"])
 async def metrics_endpoint():

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-interface ReluModesState {
+interface SunaModesState {
   selectedMode: string | null;
   selectedCharts: string[];
   selectedOutputFormat: string | null;
@@ -13,7 +13,7 @@ interface ReluModesState {
   setSelectedTemplate: (template: string | null) => void;
 }
 
-export const useReluModesStore = create<ReluModesState>()(
+export const useSunaModesStore = create<SunaModesState>()(
   persist(
     (set, get) => ({
       selectedMode: null,
@@ -46,9 +46,18 @@ export const useReluModesStore = create<ReluModesState>()(
       },
     }),
     {
-      name: 'relu-modes-storage',
+      name: 'suna-modes-storage',
+      // Version 2: Don't persist selectedMode - it should always start as null (no mode pre-selected)
+      version: 2,
+      migrate: (persistedState: any, version: number) => {
+        if (version < 2) {
+          // Remove selectedMode from old persisted state
+          const { selectedMode, ...rest } = persistedState;
+          return rest;
+        }
+        return persistedState;
+      },
       partialize: (state) => ({
-        selectedMode: state.selectedMode,
         selectedCharts: state.selectedCharts,
         selectedOutputFormat: state.selectedOutputFormat,
         selectedTemplate: state.selectedTemplate,
@@ -58,8 +67,8 @@ export const useReluModesStore = create<ReluModesState>()(
 );
 
 // Convenience hook for backward compatibility
-export function useReluModePersistence() {
-  const store = useReluModesStore();
+export function useSunaModePersistence() {
+  const store = useSunaModesStore();
   
   return {
     selectedMode: store.selectedMode,

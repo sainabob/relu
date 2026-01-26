@@ -44,19 +44,19 @@ export function getFrontendUrl(): string {
   }
 
   // Infer from backend URL - if backend is production, frontend should be too
-  if (BACKEND_URL.includes('api.relu.com') || BACKEND_URL.includes('api.relu.work')) {
-    return 'https://relu.com';
+  if (BACKEND_URL.includes('api.kortix.com') || BACKEND_URL.includes('api.suna.so')) {
+    return 'https://kortix.com';
   }
   if (BACKEND_URL.includes('staging.api') || BACKEND_URL.includes('staging-api')) {
-    return 'https://staging.relu.work';
+    return 'https://staging.kortix.com';
   }
 
   // Fall back to environment-based defaults
   switch (ENV_MODE) {
     case EnvMode.PRODUCTION:
-      return 'https://relu.work';
+      return 'https://kortix.com';
     case EnvMode.STAGING:
-      return 'https://staging.relu.work';
+      return 'https://staging.kortix.com';
     case EnvMode.LOCAL:
     default:
       return 'http://localhost:3000';

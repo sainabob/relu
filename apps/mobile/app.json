@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Relu",
-    "slug": "relu",
+    "name": "Kortix",
+    "slug": "kortix",
     "version": "1.1.1",
     "orientation": "portrait",
     "icon": "./assets/images/AppIcon-Light.png",
-    "scheme": "relu",
+    "scheme": "kortix",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
@@ -18,18 +18,18 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.relu.app",
+      "bundleIdentifier": "com.kortix.app",
       "usesAppleSignIn": true,
       "associatedDomains": [
-        "applinks:relu.com",
-        "applinks:www.relu.com",
-        "applinks:staging.relu.work"
+        "applinks:kortix.com",
+        "applinks:www.kortix.com",
+        "applinks:staging.kortix.com"
       ],
       "infoPlist": {
-        "NSCameraUsageDescription": "Relu needs camera access to let you capture photos and attach them to your saved conversations with the AI Worker. For example, you can photograph a document, whiteboard, or product for analysis and receive insights that are stored in your conversation history.",
-        "NSPhotoLibraryUsageDescription": "Relu needs access to your photo library so you can select and share images in your saved conversations with the AI Worker. For example, you can attach screenshots, documents, or images for review—all stored in your personalized conversation history.",
-        "NSMicrophoneUsageDescription": "Relu needs microphone access to enable voice input for your conversations. For example, you can speak your messages instead of typing, and the app will transcribe your speech to text for your AI Worker conversations.",
-        "NSUserTrackingUsageDescription": "Relu uses analytics to improve your experience and understand how features are used. For example, we track which AI features are most helpful so we can make the app better for everyone."
+        "NSCameraUsageDescription": "Kortix needs camera access to let you capture photos and attach them to your saved conversations with the AI Worker. For example, you can photograph a document, whiteboard, or product for analysis and receive insights that are stored in your conversation history.",
+        "NSPhotoLibraryUsageDescription": "Kortix needs access to your photo library so you can select and share images in your saved conversations with the AI Worker. For example, you can attach screenshots, documents, or images for review—all stored in your personalized conversation history.",
+        "NSMicrophoneUsageDescription": "Kortix needs microphone access to enable voice input for your conversations. For example, you can speak your messages instead of typing, and the app will transcribe your speech to text for your AI Worker conversations.",
+        "NSUserTrackingUsageDescription": "Kortix uses analytics to improve your experience and understand how features are used. For example, we track which AI features are most helpful so we can make the app better for everyone."
       }
     },
     "android": {
@@ -39,7 +39,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#F0F0E9"
       },
-      "package": "com.relu.app",
+      "package": "com.kortix.app",
       "intentFilters": [
         {
           "action": "VIEW",
@@ -47,17 +47,17 @@
           "data": [
             {
               "scheme": "https",
-              "host": "relu.work",
+              "host": "kortix.com",
               "pathPrefix": "/auth/callback"
             },
             {
               "scheme": "https",
-              "host": "www.relu.work",
+              "host": "www.kortix.com",
               "pathPrefix": "/auth/callback"
             },
             {
               "scheme": "https",
-              "host": "staging.relu.work",
+              "host": "staging.kortix.com",
               "pathPrefix": "/auth/callback"
             }
           ],
@@ -72,17 +72,17 @@
           "data": [
             {
               "scheme": "https",
-              "host": "relu.com",
+              "host": "kortix.com",
               "pathPrefix": "/share"
             },
             {
               "scheme": "https",
-              "host": "www.relu.com",
+              "host": "www.kortix.com",
               "pathPrefix": "/share"
             },
             {
               "scheme": "https",
-              "host": "staging.relu.work",
+              "host": "staging.kortix.com",
               "pathPrefix": "/share"
             }
           ],
@@ -119,21 +119,21 @@
       [
         "expo-image-picker",
         {
-          "cameraPermission": "Relu needs camera access to let you capture photos and attach them to your saved conversations with the AI Worker. For example, you can photograph a document, whiteboard, or product for analysis and receive insights that are stored in your conversation history.",
-          "photosPermission": "Relu needs access to your photo library so you can select and share images in your saved conversations with the AI Worker. For example, you can attach screenshots, documents, or images for review—all stored in your personalized conversation history.",
-          "microphonePermission": "Relu needs microphone access to record videos with audio. For example, you can record a video to share with the AI Worker for analysis and save it to your conversation history."
+          "cameraPermission": "Kortix needs camera access to let you capture photos and attach them to your saved conversations with the AI Worker. For example, you can photograph a document, whiteboard, or product for analysis and receive insights that are stored in your conversation history.",
+          "photosPermission": "Kortix needs access to your photo library so you can select and share images in your saved conversations with the AI Worker. For example, you can attach screenshots, documents, or images for review—all stored in your personalized conversation history.",
+          "microphonePermission": "Kortix needs microphone access to record videos with audio. For example, you can record a video to share with the AI Worker for analysis and save it to your conversation history."
         }
       ],
       [
         "expo-audio",
         {
-          "microphonePermission": "Relu needs microphone access to enable voice input for your conversations. For example, you can speak your messages instead of typing, and the app will transcribe your speech to text for your AI Worker conversations."
+          "microphonePermission": "Kortix needs microphone access to enable voice input for your conversations. For example, you can speak your messages instead of typing, and the app will transcribe your speech to text for your AI Worker conversations."
         }
       ],
       [
         "expo-tracking-transparency",
         {
-          "userTrackingPermission": "Relu uses analytics to improve your experience and understand how features are used. For example, we track which AI features are most helpful so we can make the app better for everyone."
+          "userTrackingPermission": "Kortix uses analytics to improve your experience and understand how features are used. For example, we track which AI features are most helpful so we can make the app better for everyone."
         }
       ],
       [
@@ -153,7 +153,7 @@
         "projectId": "9fca3cff-a291-41c9-88b9-feb8053b990f"
       }
     },
-    "owner": "relu",
+    "owner": "kortix",
     "runtimeVersion": "1.1.1",
     "updates": {
       "url": "https://u.expo.dev/9fca3cff-a291-41c9-88b9-feb8053b990f",

@@ -2,7 +2,7 @@
 Runtime caching layer for latency optimization.
 
 This module provides Redis-based caching for frequently accessed data:
-- Agent configs (Relu static + user MCPs, custom agent configs)
+- Agent configs (Suna static + user MCPs, custom agent configs)
 - Project metadata (sandbox info)
 - Running runs count (concurrent limit checks)
 - Thread count (thread limit checks)
@@ -38,37 +38,37 @@ def _json_loads(value: Union[str, bytes]) -> Any:
     return json.loads(value)
 
 # ============================================================================
-# STATIC RELU CONFIG - Loaded once at startup, never expires
+# STATIC SUNA CONFIG - Loaded once at startup, never expires
 # This is Python code that's identical across all workers - safe to keep in memory
 # ============================================================================
-_RELU_STATIC_CONFIG: Optional[Dict[str, Any]] = None
-_RELU_STATIC_LOADED = False
+_SUNA_STATIC_CONFIG: Optional[Dict[str, Any]] = None
+_SUNA_STATIC_LOADED = False
 
-def get_static_relu_config() -> Optional[Dict[str, Any]]:
-    """Get the static Relu config (loaded once at startup)."""
-    return _RELU_STATIC_CONFIG
+def get_static_suna_config() -> Optional[Dict[str, Any]]:
+    """Get the static Suna config (loaded once at startup)."""
+    return _SUNA_STATIC_CONFIG
 
-def load_static_relu_config() -> Dict[str, Any]:
+def load_static_suna_config() -> Dict[str, Any]:
     """
-    Load Relu's static config into memory ONCE.
+    Load Suna's static config into memory ONCE.
     This includes: system_prompt, model, agentpress_tools, restrictions.
     
     This is safe to cache in memory because it's Python code - identical across all workers.
     """
-    global _RELU_STATIC_CONFIG, _RELU_STATIC_LOADED
+    global _SUNA_STATIC_CONFIG, _SUNA_STATIC_LOADED
     
-    if _RELU_STATIC_LOADED:
-        return _RELU_STATIC_CONFIG
+    if _SUNA_STATIC_LOADED:
+        return _SUNA_STATIC_CONFIG
     
-    from core.config.relu_config import RELU_CONFIG
+    from core.config.suna_config import SUNA_CONFIG
     from core.config.config_helper import _extract_agentpress_tools_for_run
     
-    _RELU_STATIC_CONFIG = {
-        'system_prompt': RELU_CONFIG['system_prompt'],
-        'model': RELU_CONFIG['model'],
-        'agentpress_tools': _extract_agentpress_tools_for_run(RELU_CONFIG['agentpress_tools']),
+    _SUNA_STATIC_CONFIG = {
+        'system_prompt': SUNA_CONFIG['system_prompt'],
+        'model': SUNA_CONFIG['model'],
+        'agentpress_tools': _extract_agentpress_tools_for_run(SUNA_CONFIG['agentpress_tools']),
         'centrally_managed': True,
-        'is_relu_default': True,
+        'is_suna_default': True,
         'restrictions': {
             'system_prompt_editable': False,
             'tools_editable': False,
@@ -78,9 +78,9 @@ def load_static_relu_config() -> Dict[str, Any]:
         }
     }
     
-    _RELU_STATIC_LOADED = True
-    logger.info(f"✅ Loaded static Relu config into memory (prompt: {len(_RELU_STATIC_CONFIG['system_prompt'])} chars)")
-    return _RELU_STATIC_CONFIG
+    _SUNA_STATIC_LOADED = True
+    logger.info(f"✅ Loaded static Suna config into memory (prompt: {len(_SUNA_STATIC_CONFIG['system_prompt'])} chars)")
+    return _SUNA_STATIC_CONFIG
 
 # ============================================================================
 # AGENT CONFIG CACHE - Redis, invalidated on version changes
@@ -194,7 +194,7 @@ async def get_cached_agent_config(
     """
     Get agent config from Redis cache.
     
-    For custom agents only - Relu uses get_static_relu_config() + get_cached_user_mcps().
+    For custom agents only - Suna uses get_static_suna_config() + get_cached_user_mcps().
     """
     cache_key = _get_cache_key(agent_id, version_id)
     
@@ -216,11 +216,11 @@ async def set_cached_agent_config(
     agent_id: str,
     config: Dict[str, Any],
     version_id: Optional[str] = None,
-    is_relu_default: bool = False
+    is_suna_default: bool = False
 ) -> None:
-    """Cache full agent config in Redis."""
-    if is_relu_default:
-        # For Relu, only cache the MCPs (static config is in memory from Python code)
+    await set_cached_agent_type(agent_id, is_suna_default)
+    
+    if is_suna_default:
         await set_cached_user_mcps(
             agent_id,
             config.get('configured_mcps', []),
@@ -239,13 +239,37 @@ async def set_cached_agent_config(
         logger.warning(f"Failed to cache agent config: {e}")
 
 
+def _get_agent_type_key(agent_id: str) -> str:
+    return f"agent_type:{agent_id}"
+
+
+async def get_cached_agent_type(agent_id: str) -> Optional[str]:
+    cache_key = _get_agent_type_key(agent_id)
+    try:
+        from core.services import redis as redis_service
+        return await redis_service.get(cache_key)
+    except Exception as e:
+        logger.warning(f"Failed to get agent type from cache: {e}")
+    return None
+
+
+async def set_cached_agent_type(agent_id: str, is_suna: bool) -> None:
+    cache_key = _get_agent_type_key(agent_id)
+    try:
+        from core.services import redis as redis_service
+        await redis_service.set(cache_key, "suna" if is_suna else "custom", ex=AGENT_CONFIG_TTL)
+    except Exception as e:
+        logger.warning(f"Failed to cache agent type: {e}")
+
+
 async def invalidate_agent_config_cache(agent_id: str) -> None:
     """Invalidate cached configs for an agent in Redis using batch delete."""
     try:
         from core.services.redis import delete_multiple
         keys = [
             f"agent_config:{agent_id}:current",
-            f"agent_mcps:{agent_id}"
+            f"agent_mcps:{agent_id}",
+            f"agent_type:{agent_id}"
         ]
         deleted = await delete_multiple(keys, timeout=5.0)
         logger.info(f"🗑️ Invalidated Redis cache for agent: {agent_id} ({deleted} keys)")
@@ -253,20 +277,93 @@ async def invalidate_agent_config_cache(agent_id: str) -> None:
         logger.warning(f"Failed to invalidate cache: {e}")
 
 
-async def warm_up_relu_config_cache() -> None:
+async def warm_up_suna_config_cache() -> None:
     """
-    Load static Relu config into memory at worker startup.
+    Load static Suna config into memory at worker startup.
     
-    This is instant since it just reads from RELU_CONFIG (Python code).
+    This is instant since it just reads from SUNA_CONFIG (Python code).
     No DB calls needed for the static parts.
     """
     t_start = time.time()
     
-    # Load static Relu config (system prompt, model, tools) - instant
-    load_static_relu_config()
+    # Load static Suna config (system prompt, model, tools) - instant
+    load_static_suna_config()
     
     elapsed = (time.time() - t_start) * 1000
-    logger.info(f"✅ Relu static config loaded in {elapsed:.1f}ms (zero DB calls)")
+    logger.info(f"✅ Suna static config loaded in {elapsed:.1f}ms (zero DB calls)")
+
+
+async def prewarm_user_agents(user_id: str) -> dict:
+    import asyncio
+    t_start = time.time()
+    
+    try:
+        from core.agents import repo as agents_repo
+        from core.agents.agent_loader import get_agent_loader
+        
+        agent_ids = await agents_repo.get_user_agent_ids(user_id)
+        
+        if not agent_ids:
+            try:
+                from core.utils.ensure_suna import ensure_suna_installed
+                await ensure_suna_installed(user_id)
+                agent_ids = await agents_repo.get_user_agent_ids(user_id)
+                if agent_ids:
+                    logger.info(f"[PREWARM] Installed Suna for new user {user_id[:8]}...")
+            except Exception as e:
+                logger.debug(f"[PREWARM] Could not ensure Suna for {user_id[:8]}...: {e}")
+        
+        if not agent_ids:
+            logger.debug(f"[PREWARM] No agents for user {user_id[:8]}...")
+            return {"prewarmed": 0, "errors": 0, "skipped": 0}
+        
+        loader = await get_agent_loader()
+        prewarmed = 0
+        errors = 0
+        skipped = 0
+        
+        async def prewarm_single(agent_id: str) -> bool:
+            try:
+                agent_type = await get_cached_agent_type(agent_id)
+                if agent_type == "suna":
+                    mcps = await get_cached_user_mcps(agent_id)
+                    if mcps is not None:
+                        return None 
+                elif agent_type == "custom":
+                    cached = await get_cached_agent_config(agent_id)
+                    if cached:
+                        return None 
+                
+                agent_data = await loader.load_agent(agent_id, user_id, load_config=True)
+                if agent_data:
+                    return True
+                return False
+            except Exception as e:
+                logger.warning(f"[PREWARM] Failed for agent {agent_id}: {e}")
+                return False
+        
+        batch_size = 5
+        for i in range(0, len(agent_ids), batch_size):
+            batch = agent_ids[i:i + batch_size]
+            results = await asyncio.gather(*[prewarm_single(aid) for aid in batch], return_exceptions=True)
+            
+            for result in results:
+                if result is None:
+                    skipped += 1
+                elif result is True:
+                    prewarmed += 1
+                else:
+                    errors += 1
+        
+        elapsed = (time.time() - t_start) * 1000
+        logger.info(f"✅ [PREWARM] User {user_id[:8]}...: {prewarmed} loaded, {skipped} cached, {errors} errors ({elapsed:.0f}ms)")
+        
+        return {"prewarmed": prewarmed, "errors": errors, "skipped": skipped}
+        
+    except Exception as e:
+        elapsed = (time.time() - t_start) * 1000
+        logger.error(f"[PREWARM] User {user_id[:8]}... failed after {elapsed:.0f}ms: {e}")
+        return {"prewarmed": 0, "errors": 1, "skipped": 0, "error": str(e)}
 
 
 # ============================================================================

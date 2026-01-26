@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 
 const SectionHeader = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="p-8 space-y-4">
+    <div className="p-4 sm:p-8 space-y-2 sm:space-y-4">
       {children}
     </div>
   );
@@ -23,18 +23,18 @@ const FAQItem = ({ question, answer }: { question: string; answer: React.ReactNo
     <div className="border-b border-border last:border-0">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full text-left p-6 hover:bg-accent/20 transition-colors flex items-center justify-between gap-4"
+        className="w-full text-left p-4 sm:p-6 hover:bg-accent/20 transition-colors flex items-center justify-between gap-3 sm:gap-4 touch-manipulation"
       >
-        <span className="font-medium">{question}</span>
+        <span className="font-medium text-sm sm:text-base">{question}</span>
         <ChevronDown
-          className={`w-5 h-5 text-muted-foreground flex-shrink-0 transition-transform ${
+          className={`w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground flex-shrink-0 transition-transform ${
             isOpen ? 'rotate-180' : ''
           }`}
         />
       </button>
       {isOpen && (
-        <div className="px-6 pb-6">
-          <div className="text-muted-foreground leading-relaxed">{answer}</div>
+        <div className="px-4 sm:px-6 pb-4 sm:pb-6">
+          <div className="text-muted-foreground leading-relaxed text-sm sm:text-base">{answer}</div>
         </div>
       )}
     </div>
@@ -110,7 +110,7 @@ function SupportPageContent() {
 
                 <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
                   <Button asChild size="lg" className="text-base h-14 w-48 rounded-full px-8">
-                    <a href="mailto:support@relu.work">
+                    <a href="mailto:support@kortix.com">
                       <Mail className="w-5 h-5"/>
                       Email Support
                     </a>
@@ -123,7 +123,7 @@ function SupportPageContent() {
                 </div>
 
                 <p className="text-sm text-muted-foreground">
-                  Or email us directly at <a href="mailto:support@relu.work" className="text-primary hover:underline font-medium">support@relu.work</a>
+                  Or email us directly at <a href="mailto:support@kortix.com" className="text-primary hover:underline font-medium">support@kortix.com</a>
                 </p>
               </div>
             </div>
@@ -143,49 +143,49 @@ function SupportPageContent() {
               </SectionHeader>
 
               <div className="grid grid-cols-1 md:grid-cols-3 border-t border-border">
-                <div className="p-8 border-r border-border space-y-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Mail className="w-6 h-6 text-primary" />
+                <div className="p-4 sm:p-8 border-b md:border-b-0 md:border-r border-border space-y-3 sm:space-y-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Mail className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold mb-2">Email Support</h3>
-                    <p className="text-muted-foreground text-sm mb-4">
+                    <h3 className="text-base sm:text-lg font-semibold mb-1.5 sm:mb-2">Email Support</h3>
+                    <p className="text-muted-foreground text-xs sm:text-sm mb-3 sm:mb-4">
                       Send us a detailed message and we'll get back to you as soon as possible.
                     </p>
                     <a 
-                      href="mailto:support@relu.work" 
-                      className="text-primary hover:underline font-medium inline-flex items-center gap-2"
+                      href="mailto:support@kortix.com" 
+                      className="text-primary hover:underline font-medium inline-flex items-center gap-2 text-sm"
                     >
-                      support@relu.work
+                      support@kortix.com
                     </a>
                   </div>
                 </div>
 
-                <div className="p-8 border-r border-border space-y-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Clock className="w-6 h-6 text-primary" />
+                <div className="p-4 sm:p-8 border-b md:border-b-0 md:border-r border-border space-y-3 sm:space-y-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold mb-2">Response Time</h3>
-                    <p className="text-muted-foreground text-sm mb-4">
+                    <h3 className="text-base sm:text-lg font-semibold mb-1.5 sm:mb-2">Response Time</h3>
+                    <p className="text-muted-foreground text-xs sm:text-sm mb-3 sm:mb-4">
                       We aim to respond within 24 hours during business days (Monday-Friday).
                     </p>
-                    <p className="text-sm font-medium text-muted-foreground">
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                       Business Hours: 9 AM - 6 PM CST
                     </p>
                   </div>
                 </div>
 
-                <div className="p-8 space-y-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Shield className="w-6 h-6 text-primary" />
+                <div className="p-4 sm:p-8 space-y-3 sm:space-y-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold mb-2">Priority Support</h3>
-                    <p className="text-muted-foreground text-sm mb-4">
+                    <h3 className="text-base sm:text-lg font-semibold mb-1.5 sm:mb-2">Priority Support</h3>
+                    <p className="text-muted-foreground text-xs sm:text-sm mb-3 sm:mb-4">
                       Enterprise customers receive priority support with dedicated assistance.
                     </p>
-                    <Link href="/enterprise" className="text-primary hover:underline font-medium">
+                    <Link href="/enterprise" className="text-primary hover:underline font-medium text-sm">
                       Learn more
                     </Link>
                   </div>
@@ -209,26 +209,26 @@ function SupportPageContent() {
 
               <div className="border-t border-border">
                 <FAQItem
-                  question="What is Relu?"
-                  answer="Relu is a generalist AI worker that can perform real-world tasks on your behalf. Unlike traditional AI assistants, Relu can actually take action across your apps, automate workflows, and handle complex multi-step tasks autonomously."
+                  question="What is Kortix?"
+                  answer="Kortix is a generalist AI worker that can perform real-world tasks on your behalf. Unlike traditional AI assistants, Kortix can actually take action across your apps, automate workflows, and handle complex multi-step tasks autonomously."
                 />
                 <FAQItem
-                  question="How can Relu help me?"
-                  answer="Relu can automate repetitive tasks, manage your workflows, interact with web services, process data, create content, and coordinate complex operations across multiple platforms. Simply tell Relu what you need done, and it handles the execution from start to finish."
+                  question="How can Kortix help me?"
+                  answer="Kortix can automate repetitive tasks, manage your workflows, interact with web services, process data, create content, and coordinate complex operations across multiple platforms. Simply tell Kortix what you need done, and it handles the execution from start to finish."
                 />
                 <FAQItem
-                  question="How is Relu different from other AI platforms?"
-                  answer="While most AI platforms only provide information or suggestions, Relu actually performs real-world tasks. It can browse the web, interact with APIs, manage files, execute commands, and integrate with your existing tools to complete tasks autonomously—not just tell you how to do them."
+                  question="How is Kortix different from other AI platforms?"
+                  answer="While most AI platforms only provide information or suggestions, Kortix actually performs real-world tasks. It can browse the web, interact with APIs, manage files, execute commands, and integrate with your existing tools to complete tasks autonomously—not just tell you how to do them."
                 />
                 <FAQItem
-                  question="Can Relu connect to my apps?"
-                  answer="Yes! Relu can connect to thousands of apps and services through integrations. It can interact with your tools, APIs, databases, and workflows to automate tasks across your entire tech stack. You control which apps and services Relu can access."
+                  question="Can Kortix connect to my apps?"
+                  answer="Yes! Kortix can connect to thousands of apps and services through integrations. It can interact with your tools, APIs, databases, and workflows to automate tasks across your entire tech stack. You control which apps and services Kortix can access."
                 />
                 <FAQItem
                   question="How do I request a new feature?"
                   answer={
                     <>
-                      We love feature requests! Email us at <a href="mailto:support@relu.work" className="text-primary hover:underline font-medium">support@relu.work</a> with details about what you'd like to see and how it would help you. We carefully review all suggestions and prioritize features based on user feedback for our product roadmap.
+                      We love feature requests! Email us at <a href="mailto:support@kortix.com" className="text-primary hover:underline font-medium">support@kortix.com</a> with details about what you'd like to see and how it would help you. We carefully review all suggestions and prioritize features based on user feedback for our product roadmap.
                     </>
                   }
                 />
@@ -236,7 +236,7 @@ function SupportPageContent() {
                   question="How do I report a bug?"
                   answer={
                     <>
-                      If you encounter a bug, please email <a href="mailto:support@relu.work" className="text-primary hover:underline font-medium">support@relu.work</a> with a detailed description of the issue, steps to reproduce it, and any error messages you're seeing. Screenshots or screen recordings are extremely helpful. We'll investigate and work on a fix promptly.
+                      If you encounter a bug, please email <a href="mailto:support@kortix.com" className="text-primary hover:underline font-medium">support@kortix.com</a> with a detailed description of the issue, steps to reproduce it, and any error messages you're seeing. Screenshots or screen recordings are extremely helpful. We'll investigate and work on a fix promptly.
                     </>
                   }
                 />
@@ -244,7 +244,7 @@ function SupportPageContent() {
                   question="What if I don't get credits after paying?"
                   answer={
                     <>
-                      If your credits don't appear after payment, contact <a href="mailto:support@relu.work" className="text-primary hover:underline font-medium">support@relu.work</a> immediately. We prioritize billing and credit issues for all users regardless of tier and will resolve this as quickly as possible, typically within a few hours during business days.
+                      If your credits don't appear after payment, contact <a href="mailto:support@kortix.com" className="text-primary hover:underline font-medium">support@kortix.com</a> immediately. We prioritize billing and credit issues for all users regardless of tier and will resolve this as quickly as possible, typically within a few hours during business days.
                     </>
                   }
                 />
@@ -284,8 +284,8 @@ function SupportPageContent() {
                           <h4 className="font-medium mb-2 text-sm">Option 1: Contact Support</h4>
                           <p className="text-muted-foreground text-sm mb-3">
                             You can request account deletion by contacting our support team. Simply email us at{' '}
-                            <a href="mailto:support@relu.work" className="text-primary hover:underline font-medium">
-                              support@relu.work
+                            <a href="mailto:support@kortix.com" className="text-primary hover:underline font-medium">
+                              support@kortix.com
                             </a>
                             {' '}with your account deletion request, and we'll process it for you.
                           </p>
@@ -336,46 +336,46 @@ function SupportPageContent() {
               </SectionHeader>
 
               <div className="grid grid-cols-1 md:grid-cols-3 border-t border-border">
-                <div className="p-8 border-r border-border space-y-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Shield className="w-6 h-6 text-primary" />
+                <div className="p-4 sm:p-8 border-b md:border-b-0 md:border-r border-border space-y-3 sm:space-y-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold mb-2">Terms of Service</h3>
-                    <p className="text-muted-foreground text-sm mb-4">
-                      Our terms and conditions for using Relu services, including user responsibilities and service limitations.
+                    <h3 className="text-base sm:text-lg font-semibold mb-1.5 sm:mb-2">Terms of Service</h3>
+                    <p className="text-muted-foreground text-xs sm:text-sm mb-3 sm:mb-4">
+                      Our terms and conditions for using Kortix services, including user responsibilities and service limitations.
                     </p>
-                    <Link href="/legal?tab=terms" className="text-primary hover:underline font-medium text-sm">
+                    <Link href="/legal?tab=terms" className="text-primary hover:underline font-medium text-xs sm:text-sm">
                       Read Terms →
                     </Link>
                   </div>
                 </div>
 
-                <div className="p-8 border-r border-border space-y-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Shield className="w-6 h-6 text-primary" />
+                <div className="p-4 sm:p-8 border-b md:border-b-0 md:border-r border-border space-y-3 sm:space-y-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold mb-2">Privacy Policy</h3>
-                    <p className="text-muted-foreground text-sm mb-4">
+                    <h3 className="text-base sm:text-lg font-semibold mb-1.5 sm:mb-2">Privacy Policy</h3>
+                    <p className="text-muted-foreground text-xs sm:text-sm mb-3 sm:mb-4">
                       How we collect, use, and protect your personal information. We're committed to data privacy and security.
                     </p>
-                    <Link href="/legal?tab=privacy" className="text-primary hover:underline font-medium text-sm">
+                    <Link href="/legal?tab=privacy" className="text-primary hover:underline font-medium text-xs sm:text-sm">
                       Read Policy →
                     </Link>
                   </div>
                 </div>
 
-                <div className="p-8 space-y-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Shield className="w-6 h-6 text-primary" />
+                <div className="p-4 sm:p-8 space-y-3 sm:space-y-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold mb-2">Imprint</h3>
-                    <p className="text-muted-foreground text-sm mb-4">
-                      Company information and legal details about Relu AI Corp, including contact information and registration.
+                    <h3 className="text-base sm:text-lg font-semibold mb-1.5 sm:mb-2">Imprint</h3>
+                    <p className="text-muted-foreground text-xs sm:text-sm mb-3 sm:mb-4">
+                      Company information and legal details about Kortix AI Corp, including contact information and registration.
                     </p>
-                    <Link href="/legal?tab=imprint" className="text-primary hover:underline font-medium text-sm">
+                    <Link href="/legal?tab=imprint" className="text-primary hover:underline font-medium text-xs sm:text-sm">
                       View Imprint →
                     </Link>
                   </div>
@@ -396,7 +396,7 @@ function SupportPageContent() {
               </p>
               <div className="pt-4">
                 <Button asChild size="lg" className="text-base h-14 w-48 rounded-full px-8">
-                  <a href="mailto:support@relu.work">
+                  <a href="mailto:support@kortix.com">
                     <Mail className="w-5 h-5" />
                     Contact Support
                   </a>
@@ -404,10 +404,10 @@ function SupportPageContent() {
               </div>
               <div className="pt-6 space-y-2">
                 <p className="text-sm text-muted-foreground">
-                  General Inquiries: <a href="mailto:info@relu.work" className="text-primary hover:underline">info@relu.work</a>
+                  General Inquiries: <a href="mailto:info@kortix.com" className="text-primary hover:underline">info@kortix.com</a>
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Security Issues: <a href="mailto:security@relu.work" className="text-primary hover:underline">security@relu.work</a>
+                  Security Issues: <a href="mailto:security@kortix.com" className="text-primary hover:underline">security@kortix.com</a>
                 </p>
               </div>
             </div>

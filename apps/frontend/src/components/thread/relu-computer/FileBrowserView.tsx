@@ -25,7 +25,7 @@ import {
   Eye,
   ExternalLink,
 } from 'lucide-react';
-import { ReluLoader } from '@/components/ui/relu-loader';
+import { KortixLoader } from '@/components/ui/kortix-loader';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,17 +58,17 @@ import { useDownloadRestriction } from '@/hooks/billing';
 import JSZip from 'jszip';
 import { normalizeFilenameToNFC } from '@agentpress/shared';
 import { cn } from '@/lib/utils';
-import { useReluComputerStore } from '@/stores/relu-computer-store';
-import { useFileViewerStore } from '@/stores/file-viewer-store';
+import { useKortixComputerStore } from '@/stores/kortix-computer-store';
 import { usePresentationViewerStore } from '@/stores/presentation-viewer-store';
 import { Badge } from '@/components/ui/badge';
 import { VersionBanner } from './VersionBanner';
-import { ReluComputerHeader } from './ReluComputerHeader';
+import { KortixComputerHeader } from './KortixComputerHeader';
 import { useFileData } from '@/hooks/use-file-data';
 import { PresentationSlidePreview } from '../tool-views/presentation-tools/PresentationSlidePreview';
 import { PresentationSlideSkeleton } from '../tool-views/presentation-tools/PresentationSlideSkeleton';
 import { PdfRenderer } from '@/components/file-renderers/pdf-renderer';
 import { UnifiedMarkdown } from '@/components/markdown/unified-markdown';
+import { useSandboxStatusWithAutoStart, isSandboxUsable } from '@/hooks/files/use-sandbox-details';
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || '';
 
@@ -350,7 +350,7 @@ function VideoThumbnail({
   if (isLoading) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-muted/10">
-        <ReluLoader size="small" />
+        <KortixLoader size="small" />
       </div>
     );
   }
@@ -385,7 +385,7 @@ function SpreadsheetThumbnail({ data, isLoading }: { data: string[][]; isLoading
   if (isLoading) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-white dark:bg-zinc-900">
-        <ReluLoader size="small" />
+        <KortixLoader size="small" />
       </div>
     );
   }
@@ -538,7 +538,7 @@ function ThumbnailPreview({
   if (isLoading && (needsBlobContent || needsTextContent)) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-muted/10">
-        <ReluLoader size="small" />
+        <KortixLoader size="small" />
       </div>
     );
   }
@@ -638,13 +638,15 @@ interface FileBrowserViewProps {
   project?: Project;
   projectId?: string;
   /** 
-   * 'default' - Side panel view in Relu Computer (shows all files)
+   * 'default' - Side panel view in Kortix Computer (shows all files)
    * 'library' - Full page library view with larger cards and different layout
    * 'inline-library' - Side panel view with library filtering (main outputs only) and thumbnails
    */
   variant?: 'default' | 'library' | 'inline-library';
   /** Callback when user wants to navigate to thread (used in library view) */
   onNavigateToThread?: () => void;
+  /** Extra content to render in the header (e.g., project selector) */
+  headerExtra?: React.ReactNode;
 }
 
 export function FileBrowserView({
@@ -653,13 +655,14 @@ export function FileBrowserView({
   projectId,
   variant = 'default',
   onNavigateToThread,
+  headerExtra,
 }: FileBrowserViewProps) {
   const isLibraryView = variant === 'library';
   const isInlineLibrary = variant === 'inline-library';
   const shouldFilterFiles = isLibraryView || isInlineLibrary;
   const { session } = useAuth();
   
-  // Relu Computer Store
+  // Kortix Computer Store
   const { 
     currentPath, 
     navigateToPath,
@@ -668,11 +671,8 @@ export function FileBrowserView({
     selectedVersionDate,
     setSelectedVersion,
     clearSelectedVersion,
-  } = useReluComputerStore();
+  } = useKortixComputerStore();
 
-  // File viewer store (for library view - opens fullscreen modal)
-  const openFileViewer = useFileViewerStore((state) => state.openFile);
-  
   // Presentation viewer store (for library view - opens fullscreen presentation)
   const openPresentation = usePresentationViewerStore((state) => state.openPresentation);
   
@@ -681,7 +681,13 @@ export function FileBrowserView({
     featureName: 'files',
   });
 
-  // Use React Query for directory listing
+  // Get unified sandbox status with auto-start - this tells us if sandbox is actually ready
+  // Auto-starts OFFLINE sandboxes automatically
+  const { data: sandboxStatusData, isAutoStarting } = useSandboxStatusWithAutoStart(projectId);
+  const sandboxStatus = sandboxStatusData?.status;
+  const isSandboxReady = sandboxStatus ? isSandboxUsable(sandboxStatus) : false;
+
+  // Use React Query for directory listing - only fetch when sandbox is LIVE
   const {
     data: files = [],
     isLoading: isLoadingFiles,
@@ -689,7 +695,7 @@ export function FileBrowserView({
     refetch: refetchFiles,
     failureCount: dirRetryAttempt,
   } = useDirectoryQuery(sandboxId || '', currentPath, {
-    enabled: !!sandboxId && sandboxId.trim() !== '' && !!currentPath,
+    enabled: !!sandboxId && sandboxId.trim() !== '' && !!currentPath && isSandboxReady,
     staleTime: 0,
   });
 
@@ -715,9 +721,10 @@ export function FileBrowserView({
   const [revertLoadingInfo, setRevertLoadingInfo] = useState(false);
   const [revertInProgress, setRevertInProgress] = useState(false);
 
-  // Check computer status
+  // Check computer status - use unified status for accurate state
   const hasSandbox = !!(project?.sandbox?.id || sandboxId);
-  const isComputerStarted = project?.sandbox?.sandbox_url ? true : false;
+  // Use sandbox status for accurate "started" check instead of just URL existence
+  const isComputerStarted = isSandboxReady;
 
   // Function to ensure a path starts with /workspace
   const normalizePath = useCallback((path: unknown): string => {
@@ -821,7 +828,7 @@ export function FileBrowserView({
             const presentationName = file.path.split('/').pop() || 'presentation';
             openPresentation(presentationName, project.sandbox.sandbox_url, 1);
           } else {
-            // In side panel view, use relu computer store
+            // In side panel view, use kortix computer store
             openFile(file.path);
           }
         } else {
@@ -829,23 +836,12 @@ export function FileBrowserView({
           navigateToPath(file.path);
         }
       } else {
-        // In library view, open file in fullscreen viewer modal
-        if (isLibraryView && sandboxId && session?.access_token) {
-          const fileName = file.path.split('/').pop() || 'file';
-          openFileViewer({
-            sandboxId,
-            filePath: file.path,
-            fileName,
-            accessToken: session.access_token,
-          });
-        } else {
-          // In side panel view, use relu computer store
-          // FileViewerView will detect selectedVersion from store
-          openFile(file.path);
-        }
+        // Open file using kortix computer store
+        // FileViewerView will detect selectedVersion from store
+        openFile(file.path);
       }
     },
-    [navigateToPath, openFile, isDirectChildOfPresentations, selectedVersion, isLibraryView, sandboxId, session?.access_token, openFileViewer, openPresentation, project?.sandbox?.sandbox_url],
+    [navigateToPath, openFile, isDirectChildOfPresentations, selectedVersion, openPresentation, project?.sandbox?.sandbox_url],
   );
 
   // Recursive function to discover all files from the current path
@@ -1464,7 +1460,7 @@ export function FileBrowserView({
         className="text-muted-foreground"
       >
         {isDownloadingAll ? (
-          <ReluLoader size="small" />
+          <KortixLoader size="small" />
         ) : (
           <Download className="h-4 w-4" />
         )}
@@ -1478,7 +1474,7 @@ export function FileBrowserView({
         className="text-muted-foreground"
       >
         {isUploading ? (
-          <ReluLoader size="small" />
+          <KortixLoader size="small" />
         ) : (
           <Upload className="h-4 w-4" />
         )}
@@ -1494,7 +1490,7 @@ export function FileBrowserView({
             className="gap-1.5 text-muted-foreground"
           >
             {isLoadingVersions ? (
-              <ReluLoader size="small" />
+              <KortixLoader size="small" />
             ) : (
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1510,7 +1506,7 @@ export function FileBrowserView({
         <DropdownMenuContent align="end" className="max-h-[400px] overflow-y-auto w-[320px]">
           {isLoadingVersions ? (
             <div className="flex items-center justify-center py-8">
-              <ReluLoader size="small" />
+              <KortixLoader size="small" />
               <span className="ml-2 text-sm text-muted-foreground">Loading history...</span>
             </div>
           ) : workspaceVersions.length === 0 ? (
@@ -1561,7 +1557,7 @@ export function FileBrowserView({
       {/* Download progress */}
       {downloadProgress && (
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground px-2">
-          <ReluLoader size="small" />
+          <KortixLoader size="small" />
           <span>
             {downloadProgress.total > 0
               ? `${downloadProgress.current}/${downloadProgress.total}`
@@ -1580,7 +1576,7 @@ export function FileBrowserView({
         title="Download folder"
       >
         {isDownloadingAll ? (
-          <ReluLoader size="small" />
+          <KortixLoader size="small" />
         ) : (
           <Download className="h-4 w-4" />
         )}
@@ -1595,7 +1591,7 @@ export function FileBrowserView({
         title={selectedVersion ? 'Cannot upload while viewing historical version' : 'Upload file'}
       >
         {isUploading ? (
-          <ReluLoader size="small" />
+          <KortixLoader size="small" />
         ) : (
           <Upload className="h-4 w-4" />
         )}
@@ -1613,7 +1609,7 @@ export function FileBrowserView({
             className="h-8 px-3 gap-1.5 text-xs bg-transparent border border-border rounded-xl text-muted-foreground hover:text-foreground hover:bg-accent/50"
           >
             {isLoadingVersions ? (
-              <ReluLoader size="small" />
+              <KortixLoader size="small" />
             ) : (
               <svg className="h-3.5 w-3.5 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1635,7 +1631,7 @@ export function FileBrowserView({
         <DropdownMenuContent align="end" className="max-h-[400px] overflow-y-auto w-[320px]">
           {isLoadingVersions ? (
             <div className="flex items-center justify-center py-8">
-              <ReluLoader size="small" />
+              <KortixLoader size="small" />
               <span className="ml-2 text-sm text-muted-foreground">Loading history...</span>
             </div>
           ) : workspaceVersions.length === 0 ? (
@@ -1762,6 +1758,7 @@ export function FileBrowserView({
             <div className="flex-1" />
 
             <div className="flex items-center gap-2">
+              {headerExtra}
               {filesHeaderActions}
             </div>
           </div>
@@ -1802,7 +1799,7 @@ export function FileBrowserView({
         <div className="flex-1 flex flex-col overflow-hidden">
           {(isLoadingFiles || isLoadingVersionFiles) ? (
             <div className="flex-1 flex items-center justify-center">
-              <ReluLoader size="medium" />
+              <KortixLoader size="medium" />
             </div>
           ) : mainOutputFiles.length === 0 && otherFiles.length === 0 ? (
             <div className="flex-1 flex items-center justify-center">
@@ -1937,7 +1934,7 @@ export function FileBrowserView({
               <span className="text-xs text-zinc-700 dark:text-zinc-400">This will replace current files with the selected version snapshot.</span>
             </div>
             {revertLoadingInfo ? (
-              <div className="py-6 flex items-center justify-center"><ReluLoader size="medium" /></div>
+              <div className="py-6 flex items-center justify-center"><KortixLoader size="medium" /></div>
             ) : revertCommitInfo ? (
               <div className="mt-2">
                 <div className="text-sm font-medium mb-1">{revertCommitInfo.message}</div>
@@ -1958,7 +1955,7 @@ export function FileBrowserView({
             <DialogFooter>
               <Button variant="ghost" onClick={() => setRevertModalOpen(false)} disabled={revertInProgress}>Cancel</Button>
               <Button onClick={performRevert} disabled={revertInProgress}>
-                {revertInProgress ? (<><ReluLoader size="small" className="mr-2" />Restoring...</>) : 'Restore'}
+                {revertInProgress ? (<><KortixLoader size="small" className="mr-2" />Restoring...</>) : 'Restore'}
               </Button>
             </DialogFooter>
             <DialogClose />
@@ -1981,7 +1978,7 @@ export function FileBrowserView({
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Header with Breadcrumb Navigation */}
-      <ReluComputerHeader
+      <KortixComputerHeader
         icon={Home}
         onIconClick={navigateHome}
         iconTitle="Home"
@@ -2001,9 +1998,30 @@ export function FileBrowserView({
 
       {/* File Explorer */}
       <div className="flex-1 overflow-hidden max-w-full min-w-0">
-        {(isLoadingFiles || isLoadingVersionFiles) ? (
+        {/* Show sandbox status when not ready */}
+        {hasSandbox && !isSandboxReady && sandboxStatus ? (
+          <div className="h-full w-full flex flex-col items-center justify-center p-8 bg-zinc-50 dark:bg-zinc-900/50">
+            <div className="flex flex-col items-center space-y-4 max-w-sm text-center">
+              <KortixLoader size="medium" />
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                  {sandboxStatus === 'STARTING' && (isAutoStarting ? 'Waking up computer...' : 'Computer starting...')}
+                  {sandboxStatus === 'OFFLINE' && 'Computer offline'}
+                  {sandboxStatus === 'FAILED' && 'Computer unavailable'}
+                  {sandboxStatus === 'UNKNOWN' && 'Initializing...'}
+                </h3>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                  {sandboxStatus === 'STARTING' && 'Files will appear once the computer is ready.'}
+                  {sandboxStatus === 'OFFLINE' && 'The computer is currently stopped. Attempting to start...'}
+                  {sandboxStatus === 'FAILED' && 'There was an issue starting the computer.'}
+                  {sandboxStatus === 'UNKNOWN' && 'Setting up your workspace...'}
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : (isLoadingFiles || isLoadingVersionFiles) ? (
           <div className="h-full w-full max-w-full flex flex-col items-center justify-center gap-2 min-w-0">
-            <ReluLoader size="medium" />
+            <KortixLoader size="medium" />
             <p className="text-xs text-muted-foreground">
               {isLoadingVersionFiles ? 'Loading version...' : 'Loading files...'}
             </p>
@@ -2026,20 +2044,9 @@ export function FileBrowserView({
                       {isInlineLibrary ? 'Nothing here yet' : 'Files not available'}
                     </h3>
                     <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                      {isInlineLibrary 
+                      {isInlineLibrary
                         ? 'Your files will appear here once you start a conversation.'
                         : 'A computer will be created when you start working on this task. Files will appear here once ready.'}
-                    </p>
-                  </>
-                ) : !isComputerStarted ? (
-                  <>
-                    <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-                      {isInlineLibrary ? 'Waking up...' : 'Computer starting...'}
-                    </h3>
-                    <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                      {isInlineLibrary 
-                        ? 'Just a moment while things get ready.'
-                        : 'Files will appear once the computer is ready.'}
                     </p>
                   </>
                 ) : (
@@ -2048,7 +2055,7 @@ export function FileBrowserView({
                       {isInlineLibrary ? 'No files yet' : 'Directory is empty'}
                     </h3>
                     <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                      {isInlineLibrary 
+                      {isInlineLibrary
                         ? 'Start a conversation to create files.'
                         : 'This folder doesn\'t contain any files yet.'}
                     </p>
@@ -2241,7 +2248,7 @@ export function FileBrowserView({
 
           {revertLoadingInfo ? (
             <div className="py-6 flex items-center justify-center">
-              <ReluLoader size="medium" />
+              <KortixLoader size="medium" />
             </div>
           ) : revertCommitInfo ? (
             <div className="mt-2">
@@ -2290,7 +2297,7 @@ export function FileBrowserView({
           <DialogFooter>
             <Button variant="ghost" onClick={() => setRevertModalOpen(false)} disabled={revertInProgress}>Cancel</Button>
             <Button onClick={performRevert} disabled={revertInProgress}>
-              {revertInProgress ? (<><ReluLoader size="small" className="mr-2" />Restoring...</>) : 'Restore'}
+              {revertInProgress ? (<><KortixLoader size="small" className="mr-2" />Restoring...</>) : 'Restore'}
             </Button>
           </DialogFooter>
 

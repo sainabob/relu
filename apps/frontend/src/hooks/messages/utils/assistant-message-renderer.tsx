@@ -14,6 +14,7 @@ import { ToolCard } from '@/components/thread/content/ToolCard';
 import { ApifyApprovalInline } from '@/components/thread/content/ApifyApprovalInline';
 import { MediaGenerationInline } from '@/components/thread/content/MediaGenerationInline';
 import { constructHtmlPreviewUrl } from '@/lib/utils/url';
+import { UpgradeCTA, extractUpgradeCTA } from '@/components/thread/content/UpgradeCTA';
 
 export interface AssistantMessageRendererProps {
   message: UnifiedMessage;
@@ -49,12 +50,16 @@ function renderAskToolCall(
   const attachments = normalizeAttachments(toolCall.arguments?.attachments);
   const followUpAnswers = normalizeArrayValue(toolCall.arguments?.follow_up_answers);
 
+  // Extract upgrade CTA if present
+  const { cleanContent, hasCTA } = extractUpgradeCTA(askText);
+
   return (
     <div key={`ask-${index}`} className="space-y-3 my-1.5">
-      <ComposioUrlDetector 
-        content={askText} 
-        className="text-sm prose prose-sm dark:prose-invert chat-markdown max-w-none break-words [&>:first-child]:mt-0 prose-headings:mt-3" 
+      <ComposioUrlDetector
+        content={cleanContent}
+        className="text-sm prose prose-sm dark:prose-invert chat-markdown max-w-none break-words [&>:first-child]:mt-0 prose-headings:mt-3"
       />
+      {hasCTA && <UpgradeCTA />}
       {attachments.length > 0 && (
         <div className="mt-3">
           <FileAttachmentGrid
@@ -102,14 +107,18 @@ function renderCompleteToolCall(
   const attachments = normalizeAttachments(toolCall.arguments?.attachments);
   const followUpPrompts = normalizeArrayValue(toolCall.arguments?.follow_up_prompts);
 
+  // Extract upgrade CTA if present
+  const { cleanContent, hasCTA } = extractUpgradeCTA(completeText);
+
   return (
     <div key={`complete-${index}`} className="space-y-3 my-1.5">
       {/* Main content */}
-      <ComposioUrlDetector 
-        content={completeText} 
-        className="text-sm prose prose-sm dark:prose-invert chat-markdown max-w-none break-words [&>:first-child]:mt-0 prose-headings:mt-3" 
+      <ComposioUrlDetector
+        content={cleanContent}
+        className="text-sm prose prose-sm dark:prose-invert chat-markdown max-w-none break-words [&>:first-child]:mt-0 prose-headings:mt-3"
       />
-      
+      {hasCTA && <UpgradeCTA />}
+
       {/* Attachments underneath the text */}
       {attachments.length > 0 && (
         <div className="mt-4 space-y-3">
@@ -128,7 +137,7 @@ function renderCompleteToolCall(
           />
         </div>
       )}
-      
+
       {/* Task completed feedback */}
       <TaskCompletedFeedback
         taskSummary={completeText}
@@ -524,22 +533,49 @@ function renderRegularToolCall(
 export function renderAssistantMessage(props: AssistantMessageRendererProps): React.ReactNode {
   const { message, threadId, toolResults = [] } = props;
   const metadata = safeJsonParse<ParsedMetadata>(message.metadata, {});
-  
+
   const toolCalls = metadata.tool_calls || [];
   // Ensure textContent is a string to prevent React error #301
   const rawTextContent = metadata.text_content;
   const textContent = typeof rawTextContent === 'string' ? rawTextContent : (rawTextContent ? String(rawTextContent) : '');
-  
+
   const contentParts: React.ReactNode[] = [];
-  
-  // Render text content first (if any)
-  if (textContent.trim()) {
+
+  // Check if ask/complete tool has the same text as text_content - if so, skip text_content
+  // to avoid rendering the same content twice
+  const askOrCompleteTool = toolCalls.find((tc: any) => {
+    const name = (tc.function_name || '').replace(/_/g, '-');
+    return name === 'ask' || name === 'complete';
+  });
+
+  let askCompleteText = '';
+  if (askOrCompleteTool?.arguments) {
+    const args = askOrCompleteTool.arguments;
+    if (typeof args === 'string') {
+      try {
+        askCompleteText = JSON.parse(args)?.text || '';
+      } catch {
+        askCompleteText = '';
+      }
+    } else if (typeof args === 'object' && args !== null) {
+      askCompleteText = args.text || '';
+    }
+  }
+
+  // Only render text_content if it's different from ask/complete text
+  const shouldRenderTextContent = textContent.trim() && textContent.trim() !== askCompleteText.trim();
+
+  if (shouldRenderTextContent) {
+    // Extract upgrade CTA if present
+    const { cleanContent, hasCTA } = extractUpgradeCTA(textContent);
+
     contentParts.push(
       <div key="text-content" className="my-1.5">
-        <ComposioUrlDetector 
-          content={textContent} 
-          className="text-sm prose prose-sm dark:prose-invert chat-markdown max-w-none break-words" 
+        <ComposioUrlDetector
+          content={cleanContent}
+          className="text-sm prose prose-sm dark:prose-invert chat-markdown max-w-none break-words"
         />
+        {hasCTA && <UpgradeCTA />}
       </div>
     );
   }

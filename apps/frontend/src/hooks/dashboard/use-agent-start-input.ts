@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useLeadingDebouncedCallback } from '@/hooks/utils';
 import { useOptimisticAgentStart, AgentLimitInfo } from '@/hooks/threads';
 import { useAgentSelection } from '@/stores/agent-selection-store';
-import { useReluModePersistence } from '@/stores/relu-modes-store';
+import { useSunaModePersistence } from '@/stores/suna-modes-store';
 import { useAgents } from '@/hooks/agents/use-agents';
 import { useAuth } from '@/components/AuthProvider';
 import type { ChatInputHandles } from '@/components/thread/chat-input/chat-input';
@@ -46,9 +46,9 @@ export interface UseAgentStartInputReturn {
   agents: any[];
   isLoadingAgents: boolean;
   selectedAgent: any | null;
-  isReluAgent: boolean;
+  isSunaAgent: boolean;
   
-  // Relu modes
+  // Suna modes
   selectedMode: any;
   selectedCharts: any;
   selectedOutputFormat: any;
@@ -105,7 +105,7 @@ export function useAgentStartInput(options: UseAgentStartInputOptions = {}): Use
     initializeFromAgents,
   } = useAgentSelection();
   
-  // Relu modes persistence
+  // Suna modes persistence
   const {
     selectedMode,
     selectedCharts,
@@ -115,8 +115,14 @@ export function useAgentStartInput(options: UseAgentStartInputOptions = {}): Use
     setSelectedCharts,
     setSelectedOutputFormat,
     setSelectedTemplate,
-  } = useReluModePersistence();
+  } = useSunaModePersistence();
   
+  // Callback to reset loading states when a background error occurs
+  const handleBackgroundError = useCallback(() => {
+    setIsSubmitting(false);
+    setIsRedirecting(false);
+  }, []);
+
   // Optimistic agent start hook
   const {
     startAgent,
@@ -125,25 +131,33 @@ export function useAgentStartInput(options: UseAgentStartInputOptions = {}): Use
     showAgentLimitBanner,
     setShowAgentLimitBanner,
     clearAgentLimitData,
-  } = useOptimisticAgentStart(redirectOnError);
+  } = useOptimisticAgentStart({
+    redirectOnError,
+    onBackgroundError: handleBackgroundError,
+  });
   
-  // Fetch agents
+  // Fetch agents - only when user is authenticated
   const { data: agentsResponse, isLoading: isLoadingAgents } = useAgents({
     limit: agentLimit,
     sort_by: 'name',
     sort_order: 'asc'
+  }, {
+    enabled: !!user, // Only fetch agents when authenticated
   });
   
   const agents = Array.isArray(agentsResponse?.agents) ? agentsResponse.agents : [];
-  const reluAgent = agents.find(agent => agent.metadata?.is_relu_default === true);
+  const sunaAgent = agents.find(agent => agent.metadata?.is_suna_default === true);
   const selectedAgent = selectedAgentId
     ? agents.find(agent => agent.agent_id === selectedAgentId)
     : null;
   
-  // Determine if Relu agent is selected (for modes panel)
-  const isReluAgent = isLoadingAgents 
-    ? true // Show Relu modes while loading
-    : (selectedAgent?.metadata?.is_relu_default || (!selectedAgentId && reluAgent !== undefined) || false);
+  // Determine if Suna agent is selected (for modes panel)
+  // For unauthenticated users, always show as Suna agent (for landing page modes panel)
+  const isSunaAgent = !user 
+    ? true // Unauthenticated users always see Suna modes
+    : isLoadingAgents 
+      ? true // Show Kortix modes while loading
+      : (selectedAgent?.metadata?.is_suna_default || (!selectedAgentId && sunaAgent !== undefined) || false);
   
   // Initialize agent selection when agents are loaded
   useEffect(() => {
@@ -207,10 +221,10 @@ export function useAgentStartInput(options: UseAgentStartInputOptions = {}): Use
     message: string,
     options?: { model_name?: string; enable_thinking?: boolean; enable_context_manager?: boolean }
   ) => {
-    const fileIds = chatInputRef.current?.getUploadedFileIds() || [];
+    const pendingFiles = chatInputRef.current?.getPendingFiles() || [];
     const uploadedFiles = chatInputRef.current?.getUploadedFiles() || [];
 
-    if ((!message.trim() && !fileIds.length) || isSubmitting || isRedirecting || isOptimisticStarting) {
+    if ((!message.trim() && !pendingFiles.length) || isSubmitting || isRedirecting || isOptimisticStarting) {
       return;
     }
     
@@ -244,12 +258,12 @@ export function useAgentStartInput(options: UseAgentStartInputOptions = {}): Use
       promptLength: message.length,
       model_name: options?.model_name,
       agent_id: selectedAgentId,
-      fileIds: fileIds.length,
+      filesCount: pendingFiles.length,
     });
 
     const result = await startAgent({
       message,
-      fileIds: fileIds.length > 0 ? fileIds : undefined,
+      files: pendingFiles.length > 0 ? pendingFiles : undefined,
       modelName: options?.model_name,
       agentId: selectedAgentId || undefined,
     });
@@ -294,9 +308,9 @@ export function useAgentStartInput(options: UseAgentStartInputOptions = {}): Use
     agents,
     isLoadingAgents,
     selectedAgent,
-    isReluAgent,
+    isSunaAgent,
     
-    // Relu modes
+    // Suna modes
     selectedMode,
     selectedCharts,
     selectedOutputFormat,

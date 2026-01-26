@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, memo, useMemo } from 'react';
 import * as ResizablePrimitive from 'react-resizable-panels';
 import { SiteHeader } from '@/components/thread/thread-site-header';
-import { ReluComputer, ToolCallInput } from '@/components/thread/relu-computer';
+import { KortixComputer, ToolCallInput } from '@/components/thread/kortix-computer';
 import { Project } from '@/lib/api/threads';
 import { ApiMessageType } from '@/components/thread/types';
 import { useIsMobile } from '@/hooks/utils';
@@ -11,7 +11,7 @@ import {
   ResizablePanel,
   ResizableHandle,
 } from '@/components/ui/resizable';
-import { useReluComputerStore } from '@/stores/relu-computer-store';
+import { useKortixComputerStore } from '@/stores/kortix-computer-store';
 
 interface ThreadLayoutProps {
   children: React.ReactNode;
@@ -85,8 +85,8 @@ export const ThreadLayout = memo(function ThreadLayout({
 }: ThreadLayoutProps) {
   const isActuallyMobile = useIsMobile();
 
-  // Relu Computer Store - for handling file open requests
-  const { shouldOpenPanel, clearShouldOpenPanel, openFileInComputer, openFileBrowser } = useReluComputerStore();
+  // Kortix Computer Store - for handling file open requests
+  const { shouldOpenPanel, clearShouldOpenPanel, openFileInComputer, openFileBrowser } = useKortixComputerStore();
 
   // Track when panel should be visible
   const shouldShowPanel = isSidePanelOpen && initialLoadCompleted;
@@ -115,7 +115,7 @@ export const ThreadLayout = memo(function ThreadLayout({
   const mainPanelRef = useRef<ResizablePrimitive.ImperativePanelHandle>(null);
   const sidePanelRef = useRef<ResizablePrimitive.ImperativePanelHandle>(null);
 
-  // Handle file click - now opens in Relu Computer instead of modal
+  // Handle file click - now opens in Kortix Computer instead of modal
   const handleFileClick = React.useCallback((filePath?: string, filePathList?: string[]) => {
     if (filePath) {
       // If a specific file is provided, open it in the file viewer
@@ -145,7 +145,7 @@ export const ThreadLayout = memo(function ThreadLayout({
   }, [shouldOpenPanel, isSidePanelOpen, onToggleSidePanel, clearShouldOpenPanel]);
 
   // Get selected file path from store
-  const selectedFilePath = useReluComputerStore((state) => state.selectedFilePath);
+  const selectedFilePath = useKortixComputerStore((state) => state.selectedFilePath);
   
   const SUITE_MODE_FILE_EXTENSIONS = [
     'kanvax', 
@@ -194,7 +194,7 @@ export const ThreadLayout = memo(function ThreadLayout({
           </div>
           {isSidePanelOpen && initialLoadCompleted && (
             <div className="absolute inset-0 bg-background z-40">
-              <ReluComputer
+              <KortixComputer
                 isOpen={true}
                 onClose={onSidePanelClose}
                 toolCalls={toolCalls}
@@ -226,33 +226,32 @@ export const ThreadLayout = memo(function ThreadLayout({
   // Use ResizablePanelGroup for desktop, regular flex for mobile
   if (isActuallyMobile) {
     return (
-      <div className="flex h-screen">
-        <div className="flex flex-col flex-1 overflow-hidden relative">
-          <SiteHeader
-            threadId={threadId}
-            projectName={projectName}
-            projectId={projectId}
-            onViewFiles={handleFileClick}
-            onToggleSidePanel={onToggleSidePanel}
-            isSidePanelOpen={isSidePanelOpen}
-            onProjectRenamed={onProjectRenamed}
-            isMobileView={isMobile}
-            variant={variant}
-          />
+      <div className="flex flex-col h-[100dvh] w-full overflow-hidden">
+        <SiteHeader
+          threadId={threadId}
+          projectName={projectName}
+          projectId={projectId}
+          onViewFiles={handleFileClick}
+          onToggleSidePanel={onToggleSidePanel}
+          isSidePanelOpen={isSidePanelOpen}
+          onProjectRenamed={onProjectRenamed}
+          isMobileView={isMobile}
+          variant={variant}
+        />
 
-          <div className="flex-1 overflow-hidden min-h-0 flex flex-col">
-            {children}
-          </div>
-
-          {/* ChatInput - positioned at bottom for mobile */}
-          {chatInput && (
-            <div className="flex-shrink-0 relative bg-background px-4">
-              {chatInput}
-            </div>
-          )}
+        {/* Main content area - takes remaining space */}
+        <div className="flex-1 overflow-hidden min-h-0 flex flex-col">
+          {children}
         </div>
 
-        <ReluComputer
+        {/* ChatInput - fixed at bottom with safe area padding for iOS */}
+        {chatInput && (
+          <div className="flex-shrink-0 bg-background px-3 pb-[env(safe-area-inset-bottom,0px)]">
+            {chatInput}
+          </div>
+        )}
+
+        <KortixComputer
           isOpen={isSidePanelOpen && initialLoadCompleted}
           onClose={onSidePanelClose}
           toolCalls={toolCalls}
@@ -336,7 +335,7 @@ export const ThreadLayout = memo(function ThreadLayout({
             !shouldShowPanel ? "hidden" : ""
           )}
         >
-          <ReluComputer
+          <KortixComputer
             isOpen={isSidePanelOpen && initialLoadCompleted}
             onClose={onSidePanelClose}
             toolCalls={toolCalls}

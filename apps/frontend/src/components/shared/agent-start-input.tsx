@@ -12,8 +12,8 @@ import { ChevronRight } from 'lucide-react';
 import { DynamicGreeting } from '@/components/ui/dynamic-greeting';
 
 // Lazy load heavy components
-const ReluModesPanel = lazy(() => 
-  import('@/components/dashboard/relu-modes-panel').then(mod => ({ default: mod.ReluModesPanel }))
+const SunaModesPanel = lazy(() => 
+  import('@/components/dashboard/suna-modes-panel').then(mod => ({ default: mod.SunaModesPanel }))
 );
 const AgentRunLimitBanner = lazy(() => 
   import('@/components/thread/agent-run-limit-banner').then(mod => ({ default: mod.AgentRunLimitBanner }))
@@ -34,6 +34,12 @@ export interface AgentStartInputProps {
   showGreeting?: boolean;
   /** Custom greeting className */
   greetingClassName?: string;
+  /** Whether to show subtitle below greeting */
+  showSubtitle?: boolean;
+  /** Custom subtitle text */
+  subtitle?: string;
+  /** Custom subtitle className */
+  subtitleClassName?: string;
   /** Whether to enable advanced config in chat input */
   enableAdvancedConfig?: boolean;
   /** Callback when agent configuration is requested */
@@ -66,6 +72,9 @@ export function AgentStartInput({
   redirectOnError,
   showGreeting = true,
   greetingClassName,
+  showSubtitle = false,
+  subtitle,
+  subtitleClassName,
   enableAdvancedConfig = false,
   onConfigureAgent,
   animatePlaceholder = false,
@@ -79,7 +88,7 @@ export function AgentStartInput({
   modesPanelWrapperClassName,
 }: AgentStartInputProps) {
   const t = useTranslations('dashboard');
-  const tRelu = useTranslations('relu');
+  const tSuna = useTranslations('suna');
   const tCommon = useTranslations('common');
   const tBilling = useTranslations('billing');
   
@@ -124,7 +133,7 @@ export function AgentStartInput({
     chatInputRef,
     selectedAgentId,
     setSelectedAgent,
-    isReluAgent,
+    isSunaAgent,
     selectedMode,
     selectedCharts,
     selectedOutputFormat,
@@ -146,7 +155,7 @@ export function AgentStartInput({
     logPrefix: variant === 'hero' ? '[HeroSection]' : '[Dashboard]',
   });
   
-  const resolvedPlaceholder = placeholder || (variant === 'hero' ? tRelu('describeTask') : t('describeWhatYouNeed'));
+  const resolvedPlaceholder = placeholder || (variant === 'hero' ? tSuna('describeTask') : t('describeWhatYouNeed'));
   
   const defaultGreetingClass = variant === 'hero'
     ? "text-2xl sm:text-3xl md:text-3xl lg:text-4xl font-medium text-balance text-center px-4 sm:px-2"
@@ -158,6 +167,11 @@ export function AgentStartInput({
       {showGreeting && (
         <div className="flex flex-col items-center text-center w-full animate-in fade-in-0 slide-in-from-bottom-4 duration-500 fill-mode-both">
           <DynamicGreeting className={greetingClassName || defaultGreetingClass} />
+          {showSubtitle && (
+            <p className={subtitleClassName || "mt-3 text-sm sm:text-base text-muted-foreground"}>
+              {subtitle || t('modeSubtitle')}
+            </p>
+          )}
         </div>
       )}
       
@@ -227,11 +241,11 @@ export function AgentStartInput({
         )}
       </div>
       
-      {/* Relu Modes Panel */}
-      {showModesPanel && isReluAgent && (
+      {/* Suna Modes Panel - Always show for hero variant (LP), otherwise check isSunaAgent */}
+      {showModesPanel && (variant === 'hero' || isSunaAgent) && (
         <div className={modesPanelWrapperClassName || "w-full animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-200 fill-mode-both"}>
           <Suspense fallback={<div className="h-24 bg-muted/10 rounded-lg animate-pulse" />}>
-            <ReluModesPanel
+            <SunaModesPanel
               selectedMode={selectedMode}
               onModeSelect={setSelectedMode}
               onSelectPrompt={setInputValue}

@@ -16,7 +16,7 @@ import {
   FileText,
   Download,
 } from 'lucide-react';
-import { ReluLoader } from '@/components/ui/relu-loader';
+import { KortixLoader } from '@/components/ui/kortix-loader';
 import {
   EditableFileRenderer,
   getEditableFileType,
@@ -32,11 +32,11 @@ import {
 } from '@/hooks/files';
 import { useDownloadRestriction } from '@/hooks/billing';
 import { cn } from '@/lib/utils';
-import { useReluComputerStore } from '@/stores/relu-computer-store';
+import { useKortixComputerStore } from '@/stores/kortix-computer-store';
 import { PresentationViewer } from '../tool-views/presentation-tools/PresentationViewer';
 import { FullScreenPresentationViewer } from '../tool-views/presentation-tools/FullScreenPresentationViewer';
 import { usePresentationViewerStore } from '@/stores/presentation-viewer-store';
-import { ReluComputerHeader } from './ReluComputerHeader';
+import { KortixComputerHeader } from './KortixComputerHeader';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -64,6 +64,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { fileQueryKeys } from '@/hooks/files/use-file-queries';
 import { VersionBanner } from './VersionBanner';
 import { FileDownloadButton } from '../tool-views/shared/FileDownloadButton';
+import { useSandboxStatusWithAutoStart, isSandboxUsable } from '@/hooks/files/use-sandbox-details';
 
 
 
@@ -143,10 +144,16 @@ export function FileViewerView({
   sandboxId,
   filePath,
   project,
+  projectId,
 }: FileViewerViewProps) {
   const { session } = useAuth();
 
-  // Relu Computer Store
+  // Get unified sandbox status with auto-start
+  const { data: sandboxStatusData, isAutoStarting } = useSandboxStatusWithAutoStart(projectId);
+  const sandboxStatus = sandboxStatusData?.status;
+  const isSandboxReady = sandboxStatus ? isSandboxUsable(sandboxStatus) : false;
+
+  // Kortix Computer Store
   const {
     filePathList,
     currentFileIndex,
@@ -162,7 +169,7 @@ export function FileViewerView({
     selectedVersionDate: globalSelectedVersionDate,
     setSelectedVersion: setGlobalSelectedVersion,
     clearSelectedVersion: clearGlobalSelectedVersion,
-  } = useReluComputerStore();
+  } = useKortixComputerStore();
 
   // React Query client for cache invalidation
   const queryClient = useQueryClient();
@@ -221,7 +228,7 @@ export function FileViewerView({
   const [revertMode, setRevertMode] = useState<'commit' | 'single'>('single');
   const [revertSelectedPaths, setRevertSelectedPaths] = useState<string[]>([]);
 
-  // Use the React Query hook for the selected file
+  // Use the React Query hook for the selected file - only fetch when sandbox is ready
   const {
     data: cachedFileContent,
     isLoading: isCachedFileLoading,
@@ -232,7 +239,7 @@ export function FileViewerView({
     sandboxId,
     filePath,
     {
-      enabled: !!filePath && !!sandboxId && !selectedVersion, // Disable when viewing a specific version
+      enabled: !!filePath && !!sandboxId && !selectedVersion && isSandboxReady, // Disable when viewing a specific version or sandbox not ready
       staleTime: 5 * 60 * 1000,
     }
   );
@@ -857,7 +864,7 @@ export function FileViewerView({
   if (presentationFolderInfo.isFolder && isFolderValidated === null) {
     return (
       <div className="h-full flex flex-col items-center justify-center bg-background">
-        <ReluLoader customSize={32} />
+        <KortixLoader customSize={32} />
         <p className="text-sm text-muted-foreground mt-4">Checking folder...</p>
       </div>
     );
@@ -873,7 +880,7 @@ export function FileViewerView({
     return (
       <div className="h-full flex flex-col overflow-hidden bg-background">
         {/* Header */}
-        <ReluComputerHeader
+        <KortixComputerHeader
           icon={Home}
           onIconClick={goBackToBrowser}
           iconTitle="Back to files"
@@ -971,7 +978,7 @@ export function FileViewerView({
   return (
     <div className="h-full flex flex-col overflow-hidden bg-background">
       {/* Header */}
-      <ReluComputerHeader
+      <KortixComputerHeader
         icon={Home}
         onIconClick={goBackToBrowser}
         iconTitle="Back to files"
@@ -1016,7 +1023,7 @@ export function FileViewerView({
                     className="h-8 w-8 p-0 bg-transparent border border-border rounded-xl text-muted-foreground"
                     title="Saving..."
                   >
-                    <ReluLoader size="small" />
+                    <KortixLoader size="small" />
                   </Button>
                 ) : mdEditorControls.saveState === 'saved' ? (
                   <Button
@@ -1067,6 +1074,7 @@ export function FileViewerView({
                   content={typeof rawContent === 'string' ? rawContent : ''}
                   fileName={fileName}
                   getHtmlContent={mdEditorControls?.getHtml ? () => mdEditorControls.getHtml() : undefined}
+                  sandboxUrl={project?.sandbox?.sandbox_url}
                 />
               </>
             </TooltipProvider>
@@ -1084,7 +1092,7 @@ export function FileViewerView({
                 className="h-8 px-3 gap-1.5 text-xs bg-transparent border border-border rounded-xl text-muted-foreground hover:text-foreground hover:bg-accent/50"
               >
                 {isLoadingVersions ? (
-                  <ReluLoader size="small" />
+                  <KortixLoader size="small" />
                 ) : (
                   <svg className="h-3.5 w-3.5 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1106,7 +1114,7 @@ export function FileViewerView({
             <DropdownMenuContent align="end" className="max-h-[400px] overflow-y-auto w-[320px]">
               {isLoadingVersions ? (
                 <div className="flex items-center justify-center py-8">
-                  <ReluLoader size="small" />
+                  <KortixLoader size="small" />
                   <span className="ml-2 text-sm text-muted-foreground">Loading history...</span>
                 </div>
               ) : fileVersions.length === 0 ? (
@@ -1217,7 +1225,7 @@ export function FileViewerView({
               title="Download file"
             >
               {isDownloading ? (
-                <ReluLoader size="small" />
+                <KortixLoader size="small" />
               ) : (
                 <Download className="h-4 w-4" />
               )}
@@ -1256,18 +1264,39 @@ export function FileViewerView({
           // Check if we're still retrying - show loading state instead of error
           const isStillRetrying = fileRetryAttempt < 15;
           const hasError = !!(contentError || cachedFileError);
-          
+
+          // Show sandbox status when not ready
+          if (!isSandboxReady && sandboxStatus) {
+            return (
+              <div className="h-full w-full max-w-full flex flex-col items-center justify-center min-w-0">
+                <KortixLoader size="medium" className="mb-3" />
+                <p className="text-sm text-muted-foreground">
+                  {sandboxStatus === 'STARTING' && (isAutoStarting ? 'Waking up computer...' : 'Computer starting...')}
+                  {sandboxStatus === 'OFFLINE' && 'Computer offline'}
+                  {sandboxStatus === 'FAILED' && 'Computer unavailable'}
+                  {sandboxStatus === 'UNKNOWN' && 'Initializing...'}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {sandboxStatus === 'STARTING' && 'File will load once the computer is ready.'}
+                  {sandboxStatus === 'OFFLINE' && 'Attempting to start the computer...'}
+                  {sandboxStatus === 'FAILED' && 'There was an issue starting the computer.'}
+                  {sandboxStatus === 'UNKNOWN' && 'Setting up your workspace...'}
+                </p>
+              </div>
+            );
+          }
+
           return (isCachedFileLoading || isLoadingVersionContent || (hasError && isStillRetrying)) ? (
           <div className="h-full w-full max-w-full flex flex-col items-center justify-center min-w-0">
-            <ReluLoader size="medium" className="mb-3" />
+            <KortixLoader size="medium" className="mb-3" />
             <p className="text-sm text-muted-foreground">
               {isLoadingVersionContent ? 'Loading version...' : `Loading ${fileName}`}
             </p>
             {(fileRetryAttempt > 0 || (hasError && isStillRetrying)) && !isLoadingVersionContent && (
               <p className="text-xs text-muted-foreground mt-1">
-                {hasError && isStillRetrying 
+                {hasError && isStillRetrying
                   ? `Retrying... (attempt ${fileRetryAttempt + 1})`
-                  : fileRetryAttempt > 0 
+                  : fileRetryAttempt > 0
                     ? `Retrying... (attempt ${fileRetryAttempt + 1})`
                     : 'Loading...'}
               </p>
@@ -1386,7 +1415,7 @@ export function FileViewerView({
 
           {revertLoadingInfo ? (
             <div className="py-6 flex items-center justify-center">
-              <ReluLoader size="medium" />
+              <KortixLoader size="medium" />
             </div>
           ) : revertCommitInfo ? (
             <div className="mt-2">
@@ -1477,7 +1506,7 @@ export function FileViewerView({
           <DialogFooter>
             <Button variant="ghost" onClick={() => setRevertModalOpen(false)} disabled={revertInProgress}>Cancel</Button>
             <Button onClick={performRevert} disabled={revertInProgress || (revertMode === 'single' && !revertCurrentRelativePath)}>
-              {revertInProgress ? (<><ReluLoader size="small" className="mr-2" />Restoring...</>) : 'Restore'}
+              {revertInProgress ? (<><KortixLoader size="small" className="mr-2" />Restoring...</>) : 'Restore'}
             </Button>
           </DialogFooter>
 

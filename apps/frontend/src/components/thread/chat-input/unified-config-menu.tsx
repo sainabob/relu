@@ -19,9 +19,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Search, Check, ChevronDown, Plus, Plug, Brain, LibraryBig, Zap, Sparkles, ChevronLeft } from 'lucide-react';
-import { ReluLoader } from '@/components/ui/relu-loader';
+import { KortixLoader } from '@/components/ui/kortix-loader';
 import { useAgents } from '@/hooks/agents/use-agents';
-import { ReluLogo } from '@/components/sidebar/relu-logo';
+import { KortixLogo } from '@/components/sidebar/kortix-logo';
 import { SpotlightCard } from '@/components/ui/spotlight-card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -111,14 +111,14 @@ const LoggedInMenu: React.FC<UnifiedConfigMenuProps> = memo(function LoggedInMen
 
     const agents: any[] = allAgents;
 
-    const reluAgent = useMemo(() => {
-        return agents.find(a => a.metadata?.is_relu_default === true);
+    const sunaAgent = useMemo(() => {
+        return agents.find(a => a.metadata?.is_suna_default === true);
     }, [agents]);
 
-    const placeholderReluAgent = useMemo(() => ({
+    const placeholderSunaAgent = useMemo(() => ({
         agent_id: undefined,
-        name: 'Relu',
-        metadata: { is_relu_default: true }
+        name: 'Kortix',
+        metadata: { is_suna_default: true }
     }), []);
 
     useEffect(() => {
@@ -171,9 +171,9 @@ const LoggedInMenu: React.FC<UnifiedConfigMenuProps> = memo(function LoggedInMen
             const found = agents.find(a => a.agent_id === selectedAgentId);
             if (found) return found;
         }
-        if (reluAgent) return reluAgent;
+        if (sunaAgent) return sunaAgent;
         return agents[0];
-    }, [agents, selectedAgentId, reluAgent]);
+    }, [agents, selectedAgentId, sunaAgent]);
 
     const handleQuickAction = useCallback((action: 'instructions' | 'knowledge' | 'triggers' | 'tools') => {
         if (!selectedAgentId && !displayAgent?.agent_id) {
@@ -184,11 +184,11 @@ const LoggedInMenu: React.FC<UnifiedConfigMenuProps> = memo(function LoggedInMen
     }, [selectedAgentId, displayAgent?.agent_id]);
 
     const renderAgentIcon = useCallback((agent: any, size: number = 32) => {
-        if (!agent && (isLoading || reluAgent)) {
-            return <AgentAvatar isReluDefault={true} agentName="Relu" size={size} className="flex-shrink-0 !border-0" />;
+        if (!agent && (isLoading || sunaAgent)) {
+            return <AgentAvatar isSunaDefault={true} agentName="Kortix" size={size} className="flex-shrink-0 !border-0" />;
         }
         return <AgentAvatar agent={agent} agentId={agent?.agent_id} size={size} className="flex-shrink-0 !border-0" />;
-    }, [isLoading, reluAgent]);
+    }, [isLoading, sunaAgent]);
 
     // Shared content components
     const AgentsList = useCallback(({ compact = false }: { compact?: boolean }) => (
@@ -259,7 +259,7 @@ const LoggedInMenu: React.FC<UnifiedConfigMenuProps> = memo(function LoggedInMen
                             >
                                 {isFetching ? (
                                     <>
-                                        <ReluLoader size="small" className="mr-2" />
+                                        <KortixLoader size="small" className="mr-2" />
                                         Loading...
                                     </>
                                 ) : (
@@ -379,8 +379,8 @@ const LoggedInMenu: React.FC<UnifiedConfigMenuProps> = memo(function LoggedInMen
         ) : null
     ), [onAgentSelect, selectedAgentId, displayAgent?.agent_id, handleQuickAction]);
 
-    // Check if current agent is Relu (used in multiple places)
-    const isReluAgent = !displayAgent?.name || displayAgent?.name === 'Relu';
+    // Check if current agent is Kortix (used in multiple places)
+    const isKortixAgent = !displayAgent?.name || displayAgent?.name === 'Kortix';
 
     // Mobile Sheet Content
     const MobileSheetContent = useCallback(() => {
@@ -444,17 +444,17 @@ const LoggedInMenu: React.FC<UnifiedConfigMenuProps> = memo(function LoggedInMen
                                 onClick={() => setMobileSection('agents')}
                                 className="w-full flex items-center gap-3 p-3 rounded-2xl border border-border bg-card hover:bg-muted/50 active:bg-muted/70 transition-colors"
                             >
-                                {isReluAgent ? (
+                                {isKortixAgent ? (
                                     <div className="flex items-center justify-center w-10 h-10 bg-card border-[1.5px] border-border flex-shrink-0" style={{ borderRadius: '10.4px' }}>
                                         {renderAgentIcon(null, 40)}
                                     </div>
                                 ) : (
                                     <div className="flex items-center justify-center w-10 h-10 bg-card border-[1.5px] border-border flex-shrink-0" style={{ borderRadius: '10.4px' }}>
-                                        {renderAgentIcon(isLoading && !displayAgent ? placeholderReluAgent : displayAgent, 40)}
+                                        {renderAgentIcon(isLoading && !displayAgent ? placeholderSunaAgent : displayAgent, 40)}
                                     </div>
                                 )}
                                 <span className="flex-1 truncate text-base font-medium text-left min-w-0">
-                                    {isReluAgent ? 'Relu' : displayAgent?.name}
+                                    {isKortixAgent ? 'Kortix' : displayAgent?.name}
                                 </span>
                                 <ChevronDown className="h-5 w-5 text-muted-foreground rotate-[-90deg] flex-shrink-0" />
                             </button>
@@ -470,7 +470,7 @@ const LoggedInMenu: React.FC<UnifiedConfigMenuProps> = memo(function LoggedInMen
                 )}
             </div>
         );
-    }, [mobileSection, searchQuery, onAgentSelect, displayAgent, isLoading, placeholderReluAgent, renderAgentIcon, selectedAgentId, AgentsList, CreateWorkerButton, WorkerSettingsButtons, isReluAgent]);
+    }, [mobileSection, searchQuery, onAgentSelect, displayAgent, isLoading, placeholderSunaAgent, renderAgentIcon, selectedAgentId, AgentsList, CreateWorkerButton, WorkerSettingsButtons, isKortixAgent]);
 
     // Trigger button
     const TriggerButton = (
@@ -483,21 +483,15 @@ const LoggedInMenu: React.FC<UnifiedConfigMenuProps> = memo(function LoggedInMen
         >
             {onAgentSelect ? (
                 <div className="flex items-center gap-2 min-w-0 max-w-[180px]">
-                    {isReluAgent ? (
-                        <ReluLogo variant="logomark" size={14} />
-                    ) : (
-                        <>
-                            {renderAgentIcon(isLoading && !displayAgent ? placeholderReluAgent : displayAgent, 24)}
-                            <span className="truncate text-sm font-medium">
-                                {displayAgent?.name}
-                            </span>
-                        </>
-                    )}
+                    {renderAgentIcon(isLoading && !displayAgent ? placeholderSunaAgent : displayAgent, 24)}
+                    <span className="truncate text-sm font-medium">
+                        {isKortixAgent ? 'Kortix' : displayAgent?.name}
+                    </span>
                     <ChevronDown size={12} className="opacity-60 flex-shrink-0" />
                 </div>
             ) : (
                 <div className="flex items-center gap-1.5">
-                    <ReluLogo size={20} />
+                    <KortixLogo size={20} />
                     <ChevronDown size={12} className="opacity-60" />
                 </div>
             )}
@@ -557,17 +551,15 @@ const LoggedInMenu: React.FC<UnifiedConfigMenuProps> = memo(function LoggedInMen
                                         <span className="text-xs font-medium text-muted-foreground">Worker</span>
                                     </div>
                                     <div className="px-2 pb-2">
-                                        <SpotlightCard className={cn("transition-colors cursor-pointer bg-transparent", isReluAgent ? "p-2" : "")}>
+                                        <SpotlightCard className={cn("transition-colors cursor-pointer bg-transparent", isKortixAgent ? "p-2" : "")}>
                                             <DropdownMenuSub>
                                                 <DropdownMenuSubTrigger className="flex items-center gap-3 text-sm cursor-pointer px-1 hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent w-full">
-                                                    {isReluAgent ? (
-                                                        <ReluLogo variant="logomark" size={14} />
-                                                    ) : (
-                                                        <div className="flex items-center">
-                                                            {renderAgentIcon(isLoading && !displayAgent ? placeholderReluAgent : displayAgent)}
-                                                            <span className="flex-1 truncate font-medium text-left">{displayAgent?.name}</span>
-                                                        </div>
-                                                    )}
+                                                    <div className="flex items-center gap-3">
+                                                        {renderAgentIcon(isLoading && !displayAgent ? placeholderSunaAgent : displayAgent)}
+                                                        <span className="flex-1 truncate font-medium text-left">
+                                                            {isKortixAgent ? 'Kortix' : displayAgent?.name}
+                                                        </span>
+                                                    </div>
                                                 </DropdownMenuSubTrigger>
                                                 <DropdownMenuPortal>
                                                     <DropdownMenuSubContent className="w-[320px] px-0 py-3 border-[1.5px] border-border rounded-2xl max-h-[500px] overflow-hidden" sideOffset={8}>
@@ -654,9 +646,9 @@ const GuestMenu: React.FC<UnifiedConfigMenuProps> = memo(function GuestMenu() {
                     >
                         <div className="flex items-center gap-2 min-w-0 max-w-[180px]">
                             <div className="flex-shrink-0">
-                                <ReluLogo size={20} />
+                                <KortixLogo size={20} />
                             </div>
-                            <span className="truncate text-sm font-medium">Relu</span>
+                            <span className="truncate text-sm font-medium">Kortix</span>
                             <ChevronDown size={12} className="opacity-60 flex-shrink-0" />
                         </div>
                     </Button>

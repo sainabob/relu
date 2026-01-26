@@ -5,7 +5,7 @@ import { Icon } from '@/components/ui/icon';
 import { X } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
-import { useReluComputerStore } from '@/stores/relu-computer-store';
+import { useKortixComputerStore } from '@/stores/kortix-computer-store';
 import { ViewToggle } from './ViewToggle';
 import { NavigationControls } from './NavigationControls';
 import { ToolsView } from './ToolsView';
@@ -17,7 +17,7 @@ import type { UnifiedMessage } from '@/api/types';
 import type { ToolMessagePair } from '@/components/chat';
 import { log } from '@/lib/logger';
 
-interface ReluComputerProps {
+interface KortixComputerProps {
   toolMessages: ToolMessagePair[];
   currentIndex: number;
   onNavigate: (newIndex: number) => void;
@@ -41,7 +41,7 @@ interface ReluComputerProps {
   sandboxId?: string;
 }
 
-export function ReluComputer({
+export function KortixComputer({
   toolMessages,
   currentIndex,
   onNavigate,
@@ -54,8 +54,10 @@ export function ReluComputer({
   onPromptFill,
   streamingText,
   sandboxId,
-}: ReluComputerProps) {
-  log.log('[ReluComputer] Render - toolMessages:', toolMessages.length, 'currentIndex:', currentIndex);
+}: KortixComputerProps) {
+  log.log('[KortixComputer] Render - toolMessages:', toolMessages.length, 'currentIndex:', currentIndex);
+  log.log('[KortixComputer] project:', project ? { id: project.id, name: project.name, hasSandbox: !!project.sandbox } : 'undefined');
+  log.log('[KortixComputer] sandboxId prop:', sandboxId);
   
   const insets = useSafeAreaInsets();
 
@@ -68,7 +70,7 @@ export function ReluComputer({
     closePanel,
     setActiveView,
     clearPendingToolNav,
-  } = useReluComputerStore();
+  } = useKortixComputerStore();
 
   const [internalIndex, setInternalIndex] = useState(currentIndex);
   const [navigationMode, setNavigationMode] = useState<'live' | 'manual'>('live');
@@ -95,16 +97,16 @@ export function ReluComputer({
     ? toolMessages[safeIndex]
     : undefined;
   
-  log.log('[ReluComputer] currentPair:', currentPair ? 'has pair' : 'undefined');
-  log.log('[ReluComputer] currentPair.toolMessage:', currentPair?.toolMessage?.message_id || 'null');
-  log.log('[ReluComputer] currentPair.assistantMessage:', currentPair?.assistantMessage?.message_id || 'null');
+  log.log('[KortixComputer] currentPair:', currentPair ? 'has pair' : 'undefined');
+  log.log('[KortixComputer] currentPair.toolMessage:', currentPair?.toolMessage?.message_id || 'null');
+  log.log('[KortixComputer] currentPair.assistantMessage:', currentPair?.assistantMessage?.message_id || 'null');
   
   const { toolCall, toolResult, isSuccess, assistantTimestamp, toolTimestamp } = useMemo(() => {
     if (!currentPair?.toolMessage) {
-      log.log('[ReluComputer] No toolMessage in currentPair, returning null');
+      log.log('[KortixComputer] No toolMessage in currentPair, returning null');
       return { toolCall: null, toolResult: null, isSuccess: false, assistantTimestamp: undefined, toolTimestamp: undefined };
     }
-    log.log('[ReluComputer] Calling extractToolCallAndResult');
+    log.log('[KortixComputer] Calling extractToolCallAndResult');
     return extractToolCallAndResult(currentPair.assistantMessage, currentPair.toolMessage);
   }, [currentPair]);
 
@@ -179,7 +181,7 @@ export function ReluComputer({
         >
           <View className="flex-row items-center gap-3">
             <Text className="text-lg font-roobert-semibold text-primary">
-              Relu Computer
+              Kortix Computer
             </Text>
           </View>
 
@@ -229,11 +231,13 @@ export function ReluComputer({
                 <FileViewerView
                   sandboxId={effectiveSandboxId}
                   filePath={selectedFilePath}
+                  projectId={project?.id}
                   project={project}
                 />
               ) : (
                 <FileBrowserView
                   sandboxId={effectiveSandboxId}
+                  projectId={project?.id}
                   project={project}
                 />
               )}

@@ -83,7 +83,7 @@ class StreamHub:
             if stream_key not in self._pumps:
                 self._pumps[stream_key] = asyncio.create_task(self._pump(stream_key, last_id))
                 self.streams_active += 1
-                logger.debug(f"Hub: Started pump for {stream_key}")
+                logger.info(f"[HUB] Started pump for {stream_key}, last_id={last_id}")
         return queue
 
     async def unsubscribe(self, stream_key: str, queue: asyncio.Queue):
@@ -121,6 +121,7 @@ class StreamHub:
                                 try:
                                     queue.put_nowait((msg_id, fields))
                                     self.messages_delivered += 1
+                                    # logger.info(f"[HUB] Delivered msg {msg_id} to queue for {stream_key}")
                                 except asyncio.QueueFull:
                                     self.messages_dropped += 1
                 except (ConnectionError, RedisConnectionError, OSError) as e:
@@ -679,6 +680,39 @@ class RedisClient:
         )
         return result or 0
     
+    async def lpush(self, key: str, *values, timeout: float = None) -> int:
+        timeout = timeout or DEFAULT_OP_TIMEOUT
+        client = await self.get_client()
+        result = await self._with_timeout(
+            client.lpush(key, *values),
+            timeout_seconds=timeout,
+            operation_name=f"lpush({key})",
+            default=0
+        )
+        return result or 0
+    
+    async def ltrim(self, key: str, start: int, end: int, timeout: float = None) -> bool:
+        timeout = timeout or DEFAULT_OP_TIMEOUT
+        client = await self.get_client()
+        result = await self._with_timeout(
+            client.ltrim(key, start, end),
+            timeout_seconds=timeout,
+            operation_name=f"ltrim({key})",
+            default=False
+        )
+        return result
+    
+    async def lrange(self, key: str, start: int, end: int, timeout: float = None) -> list:
+        timeout = timeout or DEFAULT_OP_TIMEOUT
+        client = await self.get_client()
+        result = await self._with_timeout(
+            client.lrange(key, start, end),
+            timeout_seconds=timeout,
+            operation_name=f"lrange({key})",
+            default=[]
+        )
+        return result or []
+    
     # ========== Stream Operations with Timeout ==========
     
     async def stream_add(self, stream_key: str, fields: Dict[str, str], maxlen: int = None, 
@@ -1035,6 +1069,15 @@ async def zscore(key: str, member: str, timeout: float = None):
 
 async def llen(key: str, timeout: float = None) -> int:
     return await redis.llen(key, timeout=timeout)
+
+async def lpush(key: str, *values, timeout: float = None) -> int:
+    return await redis.lpush(key, *values, timeout=timeout)
+
+async def ltrim(key: str, start: int, end: int, timeout: float = None) -> bool:
+    return await redis.ltrim(key, start, end, timeout=timeout)
+
+async def lrange(key: str, start: int, end: int, timeout: float = None) -> list:
+    return await redis.lrange(key, start, end, timeout=timeout)
 
 async def stream_add(stream_key: str, fields: dict, maxlen: int = None, approximate: bool = True, 
                     timeout: Optional[float] = None, fail_silently: bool = True) -> Optional[str]:
