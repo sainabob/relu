@@ -921,7 +921,7 @@
   display: inline;
 }
 
-/* Pulse heartbeat animation for reasoning section Kortix icon */
+/* Pulse heartbeat animation for reasoning section Relu icon */
 @keyframes pulse-heartbeat {
   0%, 100% {
     transform: scale(1);

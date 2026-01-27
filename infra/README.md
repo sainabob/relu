@@ -8,14 +8,14 @@ Unified Pulumi Infrastructure-as-Code
                     ┌─────────────────────────────────────────────────────────┐
                     │                    CLOUDFLARE                            │
                     │                                                          │
-                    │   api.kortix.com ──► Worker (api-kortix-router)          │
+                    │   api.relu.work ──► Worker (api-relu-router)          │
                     │                          │                               │
                     │         ┌────────────────┴────────────────┐              │
                     │         ▼                                 ▼              │
                     │   ACTIVE_BACKEND=lightsail          (future: ecs)        │
                     │         │                                 │              │
                     │         ▼                                 ▼              │
-                    │   api-lightsail.kortix.com         api-ecs.kortix.com    │
+                    │   api-lightsail.relu.work         api-ecs.relu.work    │
                     │   (Tunnel f4125d84)                (Direct to ALB)       │
                     └─────────┬─────────────────────────────────┬──────────────┘
                               │                                 │
@@ -31,6 +31,6 @@ Unified Pulumi Infrastructure-as-Code
 │         LIGHTSAIL (Dev)                 │    │         LIGHTSAIL (Staging)       │
 │   suna-dev: 35.87.190.182               │    │   suna-staging: 54.184.54.33      │
 │   8GB RAM, 2 vCPU                       │    │   8GB RAM, 2 vCPU                 │
-│   Tunnel → dev-api.kortix.com           │    │   Tunnel → staging-api.kortix.com │
+│   Tunnel → dev-api.relu.work           │    │   Tunnel → staging-api.relu.work │
 └─────────────────────────────────────────┘    └───────────────────────────────────┘
 ```

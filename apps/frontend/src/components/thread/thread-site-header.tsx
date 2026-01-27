@@ -134,7 +134,7 @@ export function SiteHeader({
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="bottom" sideOffset={4}>
-                <p>{isSidePanelOpen ? 'Close' : 'Open'} Kortix Computer</p>
+                <p>{isSidePanelOpen ? 'Close' : 'Open'} Relu Computer</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

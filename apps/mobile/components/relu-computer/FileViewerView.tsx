@@ -728,7 +728,7 @@ export function FileViewerView({
         {/* Show loading while fetching sandbox status */}
         {isLoadingStatus && !sandboxStatus ? (
           <View className="flex-1 items-center justify-center p-8">
-            <KortixLoader size="large" />
+            <ReluLoader size="large" />
             <Text className="text-sm text-primary opacity-50 mt-4">
               Checking computer status...
             </Text>
@@ -752,7 +752,7 @@ export function FileViewerView({
         ) : !isSandboxReady && (sandboxStatus || isAutoStarting) ? (
           /* Show sandbox status when not ready */
           <View className="flex-1 items-center justify-center p-8">
-            <KortixLoader size="large" />
+            <ReluLoader size="large" />
             <Text className="text-sm text-primary opacity-50 mt-4">
               {(sandboxStatus === 'STARTING' || isAutoStarting) && (isAutoStarting ? 'Waking up computer...' : 'Computer starting...')}
               {sandboxStatus === 'OFFLINE' && !isAutoStarting && 'Computer offline'}

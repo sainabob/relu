@@ -165,14 +165,14 @@ export default function TutorialsPage() {
                 <BookOpen className="w-6 h-6 text-primary" />
               </div>
               <span className="text-sm font-medium text-muted-foreground">
-                Learn Kortix
+                Learn Relu
               </span>
             </div>
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground mb-4">
               Tutorials
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              Step-by-step interactive tutorials to help you get the most out of Kortix. 
+              Step-by-step interactive tutorials to help you get the most out of Relu. 
               From getting started to advanced workflows, master every feature.
             </p>
           </motion.div>
@@ -203,7 +203,7 @@ export default function TutorialsPage() {
                   More tutorials coming soon
                 </h3>
                 <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                  We're working on more tutorials to help you master Kortix. 
+                  We're working on more tutorials to help you master Relu. 
                   Check back soon for new content.
                 </p>
               </motion.div>
@@ -229,7 +229,7 @@ export default function TutorialsPage() {
                     Support
                   </a>
                   <a
-                    href="mailto:support@kortix.com"
+                    href="mailto:support@relu.work"
                     className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors py-1"
                   >
                     <ChevronRight className="w-4 h-4" />

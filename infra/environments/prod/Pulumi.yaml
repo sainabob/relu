@@ -1,5 +1,5 @@
-name: kortix-infra-prod
-description: Kortix PRODUCTION environment - ECS + Lightsail + Cloudflare Router
+name: relu-infra-prod
+description: Relu PRODUCTION environment - ECS + Lightsail + Cloudflare Router
 runtime:
   name: nodejs
   options:

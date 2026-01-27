@@ -71,9 +71,9 @@ export const albDnsName = ALB_DNS_NAME;
 export const secretsManagerEnvArn = SECRETS_MANAGER_ENV_ARN;
 
 export const apiEndpoints = {
-  primary: "api.kortix.com",
-  lightsail: "api-lightsail.kortix.com",
-  ecs: "api-ecs.kortix.com",
+  primary: "api.relu.work",
+  lightsail: "api-lightsail.relu.work",
+  ecs: "api-ecs.relu.work",
 };
 
 // Setup instructions
@@ -87,9 +87,9 @@ export const setupInstructions = pulumi.interpolate`
    sudo systemctl status cloudflared
 
 3. API endpoints:
-   - Primary (routed via Cloudflare Worker): https://api.kortix.com
-   - Lightsail direct: https://api-lightsail.kortix.com
-   - ECS direct: https://api-ecs.kortix.com
+   - Primary (routed via Cloudflare Worker): https://api.relu.work
+   - Lightsail direct: https://api-lightsail.relu.work
+   - ECS direct: https://api-ecs.relu.work
 
 4. ECS cluster: ${ECS_CLUSTER_NAME}
    ALB: ${ALB_DNS_NAME}

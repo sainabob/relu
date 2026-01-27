@@ -751,13 +751,13 @@ async def unified_agent_start(
     elif model_name != "mock-ai":
         model_name = model_manager.resolve_model_id(model_name)
 
-    if model_name in ("kortix/basic", "kortix-basic") and config.ENV_MODE != EnvMode.LOCAL:
+    if model_name in ("relu/basic", "relu-basic") and config.ENV_MODE != EnvMode.LOCAL:
         from core.billing.subscriptions import subscription_service
         from core.cache.runtime_cache import get_cached_tier_info
         tier_info = await get_cached_tier_info(account_id) or await subscription_service.get_user_subscription_tier(account_id)
         if tier_info.get('name') in ('free', 'none'):
             logger.info(f"⚡ [MODEL_OVERRIDE] Free tier user {account_id} - using minimax instead of basic")
-            model_name = "kortix/minimax"
+            model_name = "relu/minimax"
 
     memory_enabled_bool = memory_enabled.lower() == 'true' if memory_enabled else None
     
@@ -787,7 +787,7 @@ async def unified_agent_start(
             from core.files.upload_handler import fast_parse_files
             final_prompt, files_data = await fast_parse_files(files, final_prompt)
             logger.info(f"[AGENT_START] Received {len(files)} files, parsed {len(files_data)} for upload")
-        if files_data and model_name == "kortix/minimax":
+        if files_data and model_name == "relu/minimax":
             has_images = any(mime.startswith("image/") for _, _, mime, _ in files_data)
             if has_images:
                 logger.info(f"⚡ [IMAGE_UPGRADE] Free tier user uploaded image - injecting upgrade prompt")

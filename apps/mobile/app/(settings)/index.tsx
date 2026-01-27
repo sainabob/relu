@@ -26,7 +26,7 @@ import {
   Wallet,
   BarChart3,
 } from 'lucide-react-native';
-import { KortixLoader } from '@/components/ui/kortix-loader';
+import { ReluLoader } from '@/components/ui/relu-loader';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { useAccountDeletionStatus } from '@/hooks/useAccountDeletion';
@@ -268,7 +268,7 @@ const SettingsItem = React.memo(
       >
         <View className="flex-row items-center gap-3">
           {isLoading ? (
-            <KortixLoader size="small" customSize={20} />
+            <ReluLoader size="small" customSize={20} />
           ) : (
             <Icon as={icon} size={20} className={iconColor} strokeWidth={2} />
           )}

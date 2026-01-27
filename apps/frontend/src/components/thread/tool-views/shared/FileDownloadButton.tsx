@@ -257,7 +257,7 @@ export function FileDownloadButton({
             title="Export file"
           >
             {isExporting ? (
-              <KortixLoader customSize={16} />
+              <ReluLoader customSize={16} />
             ) : (
               <Download className="h-4 w-4" />
             )}

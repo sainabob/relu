@@ -12,7 +12,7 @@ const instance = new aws.lightsail.Instance("suna-dev-instance", {
   availabilityZone: "us-west-2a",
   blueprintId: "ubuntu_24_04",
   bundleId: "large_3_0",
-  keyPairName: "kortix-lightsail",
+  keyPairName: "relu-lightsail",
   tags: {
     ...COMMON_TAGS,
     Environment: "dev",
@@ -49,7 +49,7 @@ export const privateIpAddress = instance.privateIpAddress;
 export const tunnelId = EXISTING_TUNNEL_ID;
 export const tunnelCname = `${EXISTING_TUNNEL_ID}.cfargotunnel.com`;
 
-export const apiEndpoint = "dev-api.kortix.com";
+export const apiEndpoint = "dev-api.relu.work";
 
 // Setup instructions
 export const setupInstructions = pulumi.interpolate`
@@ -61,5 +61,5 @@ export const setupInstructions = pulumi.interpolate`
 2. Check tunnel status:
    sudo systemctl status cloudflared
 
-3. API endpoint: https://dev-api.kortix.com
+3. API endpoint: https://dev-api.relu.work
 `;

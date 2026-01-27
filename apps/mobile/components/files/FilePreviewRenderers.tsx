@@ -1073,7 +1073,7 @@ function DocxPreview({ blobUrl, fileName }: { blobUrl?: string; fileName: string
   if (!blobUrl) {
     return (
       <View className="flex-1 items-center justify-center p-8">
-        <KortixLoader size="large" />
+        <ReluLoader size="large" />
         <Text className="text-sm text-muted-foreground mt-4">
           Loading document...
         </Text>
@@ -1084,7 +1084,7 @@ function DocxPreview({ blobUrl, fileName }: { blobUrl?: string; fileName: string
   if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center" style={{ backgroundColor: isDark ? '#121215' : '#ffffff' }}>
-        <KortixLoader size="large" />
+        <ReluLoader size="large" />
         <Text className="text-sm text-muted-foreground mt-4">
           Preparing document...
         </Text>
@@ -1123,7 +1123,7 @@ function DocxPreview({ blobUrl, fileName }: { blobUrl?: string; fileName: string
         startInLoadingState={true}
         renderLoading={() => (
           <View className="absolute inset-0 items-center justify-center" style={{ backgroundColor: isDark ? '#121215' : '#ffffff' }}>
-            <KortixLoader size="large" />
+            <ReluLoader size="large" />
             <Text className="text-sm text-muted-foreground mt-4">
               Rendering document...
             </Text>

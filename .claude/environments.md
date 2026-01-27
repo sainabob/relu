@@ -4,9 +4,9 @@
 
 | Environment | Git Branch | Frontend | Backend API |
 |-------------|------------|----------|-------------|
-| **DEV** | `main` | dev.kortix.com | dev-api.kortix.com |
-| **STAGING** | `staging` | staging.kortix.com | staging-api.kortix.com |
-| **PRODUCTION** | `PRODUCTION` | kortix.com | api.kortix.com |
+| **DEV** | `main` | dev.relu.work | dev-api.relu.work |
+| **STAGING** | `staging` | staging.relu.work | staging-api.relu.work |
+| **PRODUCTION** | `PRODUCTION` | relu.work | api.relu.work |
 
 ## Databases (Supabase)
 

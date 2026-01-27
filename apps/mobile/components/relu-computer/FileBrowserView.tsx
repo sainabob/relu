@@ -537,7 +537,7 @@ export function FileBrowserView({
         {/* Show loading while fetching sandbox status */}
         {hasSandbox && isLoadingStatus && !sandboxStatus ? (
           <View className="flex-1 items-center justify-center gap-2 p-8">
-            <KortixLoader size="large" />
+            <ReluLoader size="large" />
             <Text className="text-sm font-roobert-medium text-center">
               Checking computer status...
             </Text>
@@ -561,7 +561,7 @@ export function FileBrowserView({
         ) : hasSandbox && !isSandboxReady && (sandboxStatus || isAutoStarting) ? (
           /* Show sandbox status when not ready */
           <View className="flex-1 items-center justify-center gap-2 p-8">
-            <KortixLoader size="large" />
+            <ReluLoader size="large" />
             <Text className="text-sm font-roobert-medium text-center">
               {(sandboxStatus === 'STARTING' || isAutoStarting) && (isAutoStarting ? 'Waking up computer...' : 'Computer starting...')}
               {sandboxStatus === 'OFFLINE' && !isAutoStarting && 'Computer offline'}

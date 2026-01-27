@@ -88,7 +88,7 @@ export function UpgradeCTA() {
             'text-xs font-mono font-semibold text-primary',
             'tracking-wide'
           )}>
-            KORTIX2026
+            RELU2026
           </span>
           <span className="text-xs text-muted-foreground">
             for

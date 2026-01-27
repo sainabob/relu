@@ -32,10 +32,10 @@ class SearchAPIsStep(BaseStep):
             )
         else:
             self.info(
-                "Search APIs are OPTIONAL tools that enhance Kortix Suna's capabilities."
+                "Search APIs are OPTIONAL tools that enhance Relu Suna's capabilities."
             )
             self.info(
-                "Without these, Kortix Suna will work but won't have web search or scraping functionality."
+                "Without these, Relu Suna will work but won't have web search or scraping functionality."
             )
             self.console.print("\nAvailable Search Tools:")
             self.console.print("  🔍 Tavily - Web search")
@@ -153,7 +153,7 @@ class SearchAPIsStep(BaseStep):
             self.success(f"Search tools configured: {', '.join(configured)}")
         else:
             self.info(
-                "No search tools configured - Kortix Suna will work without web search capabilities."
+                "No search tools configured - Relu Suna will work without web search capabilities."
             )
 
         self.success("Search and scraping keys saved.")

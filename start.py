@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Kortix Suna Service Manager
+Relu Suna Service Manager
 
 Starts and stops Suna services based on the setup method configured
 during setup (Docker or Manual).
@@ -42,10 +42,10 @@ class Colors:
 
 
 def print_banner():
-    """Print the Kortix Suna banner."""
+    """Print the Relu Suna banner."""
     print(f"\n{Colors.BLUE}{Colors.BOLD}")
     print("  ╔═══════════════════════════════════════╗")
-    print("  ║         Kortix Suna Manager           ║")
+    print("  ║         Relu Suna Manager           ║")
     print("  ╚═══════════════════════════════════════╝")
     print(f"{Colors.ENDC}")
 

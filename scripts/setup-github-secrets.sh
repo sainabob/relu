@@ -4,7 +4,7 @@
 
 set -e
 
-REPO="kortix-ai/suna"
+REPO="sainabob/relu"
 
 echo "=========================================="
 echo "GitHub Secrets Setup for CI/CD"
@@ -38,11 +38,11 @@ declare -a REQUIRED_SECRETS=(
     "AWS_DEV_HOST"
     "AWS_DEV_USERNAME"
     "AWS_DEV_KEY"
-    "DEV_KORTIX_ADMIN_API_KEY"
+    "DEV_RELU_ADMIN_API_KEY"
     "AWS_STAGING_HOST"
     "AWS_STAGING_USERNAME"
     "AWS_STAGING_KEY"
-    "STAGING_KORTIX_ADMIN_API_KEY"
+    "STAGING_RELU_ADMIN_API_KEY"
 )
 
 echo "=========================================="

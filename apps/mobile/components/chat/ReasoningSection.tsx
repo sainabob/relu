@@ -19,7 +19,7 @@ import Animated, {
 import { ChevronDown } from 'lucide-react-native';
 import { Text } from '@/components/ui/text';
 import { Icon } from '@/components/ui/icon';
-import { KortixLogo } from '@/components/ui/KortixLogo';
+import { ReluLogo } from '@/components/ui/ReluLogo';
 import { useColorScheme } from 'nativewind';
 import { SelectableMarkdownText } from '@/components/ui/selectable-markdown';
 
@@ -161,11 +161,11 @@ export function ReasoningSection({
       exiting={FadeOut.duration(150)}
       className="w-full"
     >
-      {/* Header row: Kortix logo + Toggle button */}
+      {/* Header row: Relu logo + Toggle button */}
       <View className="flex-row items-center gap-3">
-        {/* Kortix logo - pulses when reasoning is active */}
+        {/* Relu logo - pulses when reasoning is active */}
         <Animated.View style={logoAnimatedStyle}>
-          <KortixLogo
+          <ReluLogo
             size={14}
             variant="logomark"
             color={isDark ? 'dark' : 'light'}
