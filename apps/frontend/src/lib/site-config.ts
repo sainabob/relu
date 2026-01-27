@@ -30,17 +30,18 @@ export const siteConfig = {
     {
       title: 'Resources',
       links: [
-        { id: 5, title: 'Documentation', url: 'https://github.com/sainabob/relu' },
-        { id: 6, title: 'Discord', url: 'https://discord.com/invite/relu' },
-        { id: 7, title: 'GitHub', url: 'https://github.com/sainabob/relu' },
+        { id: 5, title: 'Tutorials', url: '/tutorials' },
+        { id: 6, title: 'Documentation', url: 'https://github.com/sainabob/relu' },
+        { id: 7, title: 'Discord', url: 'https://discord.com/invite/relu' },
+        { id: 8, title: 'GitHub', url: 'https://github.com/sainabob/relu' },
       ],
     },
     {
       title: 'Legal',
       links: [
-        { id: 8, title: 'Privacy Policy', url: '/legal?tab=privacy' },
-        { id: 9, title: 'Terms of Service', url: '/legal?tab=terms' },
-        { id: 10, title: 'License', url: 'https://github.com/sainabob/relu/blob/main/LICENSE' },
+        { id: 9, title: 'Privacy Policy', url: '/legal?tab=privacy' },
+        { id: 10, title: 'Terms of Service', url: '/legal?tab=terms' },
+        { id: 11, title: 'License', url: 'https://github.com/sainabob/relu/blob/main/LICENSE' },
       ],
     },
   ],
