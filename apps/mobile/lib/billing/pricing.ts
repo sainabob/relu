@@ -53,7 +53,7 @@ export const PRICING_TIERS: PricingTier[] = [
       '300 weekly credits - Refreshes every 7 days',
       '2 concurrent runs',
       '10 Chats',
-      'Basic Mode - Core Kortix experience with basic autonomy',
+      'Basic Mode - Core Relu experience with basic autonomy',
     ],
     disabledFeatures: [
       // 'No custom AI Workers',

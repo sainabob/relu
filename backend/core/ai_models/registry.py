@@ -89,9 +89,9 @@ class PricingPresets:
     )
 
 
-FREE_MODEL_ID = "kortix/minimax"
-PREMIUM_MODEL_ID = "kortix/power"
-IMAGE_MODEL_ID = "kortix/haiku"
+FREE_MODEL_ID = "relu/minimax"
+PREMIUM_MODEL_ID = "relu/power"
+IMAGE_MODEL_ID = "relu/haiku"
 
 
 def _create_anthropic_model_config() -> ModelConfig:
