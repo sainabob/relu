@@ -51,9 +51,9 @@ export const PRICING_TIERS: PricingTier[] = [
     description: 'Perfect for getting started',
     features: [
       '300 weekly credits - Refreshes every 7 days',
-      '1 concurrent run',
-      '1 Chat',
-      'Basic Mode - Core Relu experience with basic autonomy',
+      '2 concurrent runs',
+      '10 Chats',
+      'Basic Mode - Core Kortix experience with basic autonomy',
     ],
     disabledFeatures: [
       // 'No custom AI Workers',

@@ -49,6 +49,10 @@ const ReluAppBanners = lazy(() =>
   import('@/components/announcements/relu-app-banners').then(mod => ({ default: mod.ReluAppBanners }))
 );
 
+const TutorialsBanner = lazy(() => 
+  import('@/components/announcements/tutorials-banner').then(mod => ({ default: mod.TutorialsBanner }))
+);
+
 const MobileAppInterstitial = lazy(() => 
   import('@/components/announcements/mobile-app-interstitial').then(mod => ({ default: mod.MobileAppInterstitial }))
 );
@@ -254,6 +258,10 @@ export default function DashboardLayoutContent({
         {/* Relu App announcement banners */}
         <Suspense fallback={null}>
           <ReluAppBanners disableMobileAdvertising={featureFlags.disableMobileAdvertising} />
+        </Suspense>
+        {/* Tutorials banner for new users */}
+        <Suspense fallback={null}>
+          <TutorialsBanner />
         </Suspense>
         {/* Mobile app install interstitial - shown on actual mobile devices */}
         {!featureFlags.disableMobileAdvertising ? (
