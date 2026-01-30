@@ -23,7 +23,7 @@ class SupabaseStep(BaseStep):
 
     def run(self) -> StepResult:
         self.info(
-            "Relu Suna REQUIRES a Supabase project to function. "
+            "Relu REQUIRES a Supabase project to function. "
             "Without these keys, the application will crash on startup."
         )
 

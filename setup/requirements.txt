@@ -1,4 +1,4 @@
-# Requirements for Relu Suna Setup Package
+# Requirements for Relu Setup Package
 # Install with: uv pip install -r setup/requirements.txt
 
 # Required - Core dependencies

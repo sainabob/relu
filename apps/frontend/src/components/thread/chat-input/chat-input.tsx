@@ -32,7 +32,7 @@ import { ToolCallInput } from './floating-tool-preview';
 import { ChatSnack } from './chat-snack';
 import { Brain, Zap, Database, ArrowDown, ArrowUp, Wrench, Clock, Send } from 'lucide-react';
 import { useMessageQueueStore } from '@/stores/message-queue-store';
-import { useSunaModesStore } from '@/stores/suna-modes-store';
+import { useReluModesStore } from '@/stores/relu-modes-store';
 import { useComposioToolkitIcon } from '@/hooks/composio/use-composio';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ContextUsageIndicator } from '../ContextUsageIndicator';
@@ -413,18 +413,18 @@ function ModeButton({
   isModeDismissing,
   onDeselect,
 }: ModeButtonProps) {
-  const t = useTranslations('suna');
+  const t = useTranslations('relu');
   
   // Read ALL mode state directly from Zustand store with individual selectors
   // Each selector returns a primitive/stable reference, so no infinite loop
-  const selectedMode = useSunaModesStore((state) => state.selectedMode);
-  const selectedCharts = useSunaModesStore((state) => state.selectedCharts);
-  const selectedOutputFormat = useSunaModesStore((state) => state.selectedOutputFormat);
-  const selectedTemplate = useSunaModesStore((state) => state.selectedTemplate);
-  const selectedDocsType = useSunaModesStore((state) => state.selectedDocsType);
-  const selectedImageStyle = useSunaModesStore((state) => state.selectedImageStyle);
-  const selectedCanvasAction = useSunaModesStore((state) => state.selectedCanvasAction);
-  const selectedVideoStyle = useSunaModesStore((state) => state.selectedVideoStyle);
+  const selectedMode = useReluModesStore((state) => state.selectedMode);
+  const selectedCharts = useReluModesStore((state) => state.selectedCharts);
+  const selectedOutputFormat = useReluModesStore((state) => state.selectedOutputFormat);
+  const selectedTemplate = useReluModesStore((state) => state.selectedTemplate);
+  const selectedDocsType = useReluModesStore((state) => state.selectedDocsType);
+  const selectedImageStyle = useReluModesStore((state) => state.selectedImageStyle);
+  const selectedCanvasAction = useReluModesStore((state) => state.selectedCanvasAction);
+  const selectedVideoStyle = useReluModesStore((state) => state.selectedVideoStyle);
   
   // Generate mode-specific display text - computed directly (no useMemo to ensure fresh values)
   const getDisplayText = () => {
@@ -868,9 +868,9 @@ export const ChatInput = memo(forwardRef<ChatInputHandles, ChatInputProps>(
     const [reluAgentModes, setReluAgentModes] = useState<'adaptive' | 'autonomous' | 'chat'>('adaptive');
 
     // Read mode-specific state directly from Zustand for markdown generation
-    const selectedCharts = useSunaModesStore((state) => state.selectedCharts);
-    const selectedOutputFormat = useSunaModesStore((state) => state.selectedOutputFormat);
-    const selectedTemplate = useSunaModesStore((state) => state.selectedTemplate);
+    const selectedCharts = useReluModesStore((state) => state.selectedCharts);
+    const selectedOutputFormat = useReluModesStore((state) => state.selectedOutputFormat);
+    const selectedTemplate = useReluModesStore((state) => state.selectedTemplate);
 
     // Voice player state for snack visibility
     const voiceState = useVoicePlayerStore((s) => s.state);
@@ -1407,7 +1407,7 @@ export const ChatInput = memo(forwardRef<ChatInputHandles, ChatInputProps>(
           </div>
         )}
       </div>
-    ), [hideAttachments, loading, disabled, isAgentRunning, isUploading, sandboxId, projectId, messages, isLoggedIn, isFreeTier, quickIntegrations, integrationIcons, handleOpenRegistry, handleOpenPlanModal, threadId, isSunaAgent, sunaAgentModes, onModeDeselect, isModeDismissing, handleModeDeselect]);
+    ), [hideAttachments, loading, disabled, isAgentRunning, isUploading, sandboxId, projectId, messages, isLoggedIn, isFreeTier, quickIntegrations, integrationIcons, handleOpenRegistry, handleOpenPlanModal, threadId, isReluAgent, reluAgentModes, onModeDeselect, isModeDismissing, handleModeDeselect]);
 
     const rightControls = useMemo(() => (
       <div className='flex items-center gap-1.5 sm:gap-2 flex-shrink-0'>

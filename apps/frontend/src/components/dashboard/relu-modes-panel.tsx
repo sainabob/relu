@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { useSunaModesStore } from '@/stores/suna-modes-store';
+import { useReluModesStore } from '@/stores/relu-modes-store';
 import {
   Image as ImageIcon,
   Presentation,
@@ -81,7 +81,7 @@ import { getPdfUrl } from '@/components/thread/tool-views/utils/presentation-uti
 import { useTranslations } from 'next-intl';
 import { PromptExamples } from '@/components/shared/prompt-examples';
 
-interface SunaModesPanelProps {
+interface ReluModesPanelProps {
   selectedMode: string | null;
   onModeSelect: (mode: string | null) => void;
   onSelectPrompt: (prompt: string) => void;
@@ -921,7 +921,7 @@ const ChartIcon = ({ type, className }: { type: string; className?: string }) =>
   }
 };
 
-export function SunaModesPanel({ 
+export function ReluModesPanel({ 
   selectedMode, 
   onModeSelect, 
   onSelectPrompt, 
@@ -942,8 +942,8 @@ export function SunaModesPanel({
   onVideoStyleChange,
   isFreeTier = false,
   onUpgradeClick,
-}: SunaModesPanelProps) {
-  const t = useTranslations('suna');
+}: ReluModesPanelProps) {
+  const t = useTranslations('relu');
   const currentMode = selectedMode ? modes.find((m) => m.id === selectedMode) : null;
   const promptCount = isMobile ? 2 : 4;
   
@@ -962,7 +962,7 @@ export function SunaModesPanel({
         const key = `prompts.${modeId}.${index}` as any;
         const translatedText = t(key);
         // Check if translation exists (next-intl returns the key if missing)
-        if (!translatedText || translatedText === `suna.${key}` || translatedText.startsWith('suna.prompts.') || translatedText.includes(modeId)) {
+        if (!translatedText || translatedText === `relu.${key}` || translatedText.startsWith('relu.prompts.') || translatedText.includes(modeId)) {
           // If translation is missing, use the hardcoded prompt
           prompts.push(originalPrompt);
         } else {
@@ -1059,14 +1059,14 @@ export function SunaModesPanel({
   };
   
   // Get atomic combined setters from Zustand store - these set mode AND selection in one call
-  const selectTemplate = useSunaModesStore((state) => state.selectTemplate);
-  const selectOutputFormat = useSunaModesStore((state) => state.selectOutputFormat);
-  const selectCharts = useSunaModesStore((state) => state.selectCharts);
-  const selectDocsType = useSunaModesStore((state) => state.selectDocsType);
-  const selectImageStyle = useSunaModesStore((state) => state.selectImageStyle);
-  const selectCanvasAction = useSunaModesStore((state) => state.selectCanvasAction);
-  const selectVideoStyle = useSunaModesStore((state) => state.selectVideoStyle);
-  const storeSetSelectedMode = useSunaModesStore((state) => state.setSelectedMode);
+  const selectTemplate = useReluModesStore((state) => state.selectTemplate);
+  const selectOutputFormat = useReluModesStore((state) => state.selectOutputFormat);
+  const selectCharts = useReluModesStore((state) => state.selectCharts);
+  const selectDocsType = useReluModesStore((state) => state.selectDocsType);
+  const selectImageStyle = useReluModesStore((state) => state.selectImageStyle);
+  const selectCanvasAction = useReluModesStore((state) => state.selectCanvasAction);
+  const selectVideoStyle = useReluModesStore((state) => state.selectVideoStyle);
+  const storeSetSelectedMode = useReluModesStore((state) => state.setSelectedMode);
 
   // Handler for chart selection toggle - uses atomic setter
   const handleChartToggle = (chartId: string) => {

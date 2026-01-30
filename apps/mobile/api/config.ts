@@ -44,7 +44,7 @@ export function getFrontendUrl(): string {
   }
 
   // Infer from backend URL - if backend is production, frontend should be too
-  if (BACKEND_URL.includes('api.relu.work') || BACKEND_URL.includes('api.suna.so')) {
+  if (BACKEND_URL.includes('api.relu.work') || BACKEND_URL.includes('api.relu.so')) {
     return 'https://relu.work';
   }
   if (BACKEND_URL.includes('staging.api') || BACKEND_URL.includes('staging-api')) {

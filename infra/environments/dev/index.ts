@@ -7,8 +7,8 @@ import { COMMON_TAGS } from "../../components";
 // LIGHTSAIL INSTANCE (Imported from existing)
 // ============================================================================
 
-const instance = new aws.lightsail.Instance("suna-dev-instance", {
-  name: "suna-dev",
+const instance = new aws.lightsail.Instance("relu-dev-instance", {
+  name: "relu-dev",
   availabilityZone: "us-west-2a",
   blueprintId: "ubuntu_24_04",
   bundleId: "large_3_0",
@@ -16,11 +16,11 @@ const instance = new aws.lightsail.Instance("suna-dev-instance", {
   tags: {
     ...COMMON_TAGS,
     Environment: "dev",
-    Name: "suna-dev",
+    Name: "relu-dev",
   },
 });
 
-const ports = new aws.lightsail.InstancePublicPorts("suna-dev-ports", {
+const ports = new aws.lightsail.InstancePublicPorts("relu-dev-ports", {
   instanceName: instance.name,
   portInfos: [{
     protocol: "tcp",

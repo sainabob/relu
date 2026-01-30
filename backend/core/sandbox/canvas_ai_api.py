@@ -191,7 +191,7 @@ async def process_with_gemini(
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
-        "HTTP-Referer": "https://relu.ai",
+        "HTTP-Referer": "https://relu.work",
         "X-Title": "Relu Canvas AI"
     }
     

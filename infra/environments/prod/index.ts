@@ -7,20 +7,20 @@ import { COMMON_TAGS } from "../../components";
 // LIGHTSAIL INSTANCE (Imported from existing)
 // ============================================================================
 
-const instance = new aws.lightsail.Instance("suna-prod-instance", {
-  name: "suna-prod",
+const instance = new aws.lightsail.Instance("relu-prod-instance", {
+  name: "relu-prod",
   availabilityZone: "us-west-2a",
   blueprintId: "ubuntu_24_04",
   bundleId: "8xlarge_3_0",
-  keyPairName: "suna-prod-key",
+  keyPairName: "relu-prod-key",
   tags: {
     ...COMMON_TAGS,
     Environment: "prod",
-    Name: "suna-prod",
+    Name: "relu-prod",
   },
 });
 
-const ports = new aws.lightsail.InstancePublicPorts("suna-prod-ports", {
+const ports = new aws.lightsail.InstancePublicPorts("relu-prod-ports", {
   instanceName: instance.name,
   portInfos: [{
     protocol: "tcp",
@@ -42,17 +42,17 @@ const EXISTING_TUNNEL_ID = "f4125d84-33d5-424d-ae6b-2b84b790392b";
 // ============================================================================
 
 // ECS cluster and related resources are already configured in AWS
-const ECS_CLUSTER_NAME = "suna-ecs";
-const ALB_DNS_NAME = "suna-alb-3975a7d-1271164322.us-west-2.elb.amazonaws.com";
+const ECS_CLUSTER_NAME = "relu-ecs";
+const ALB_DNS_NAME = "relu-alb-3975a7d-1271164322.us-west-2.elb.amazonaws.com";
 
 // ============================================================================
 // SECRETS MANAGER (Reference to existing secret)
 // ============================================================================
 
 // IMPORTANT: If this secret is recreated, update the ARN here AND in:
-// 1. IAM policy: suna-ecs-task-exec-role -> suna-ecs-task-exec-secrets
-// 2. ECS task definition: suna-api (secrets.SUNA_ENV_JSON.valueFrom)
-const SECRETS_MANAGER_ENV_ARN = "arn:aws:secretsmanager:us-west-2:935064898258:secret:suna-env-prod-2ikWXj";
+// 1. IAM policy: relu-ecs-task-exec-role -> relu-ecs-task-exec-secrets
+// 2. ECS task definition: relu-api (secrets.RELU_ENV_JSON.valueFrom)
+const SECRETS_MANAGER_ENV_ARN = "arn:aws:secretsmanager:us-west-2:935064898258:secret:relu-env-prod-2ikWXj";
 
 // ============================================================================
 // EXPORTS

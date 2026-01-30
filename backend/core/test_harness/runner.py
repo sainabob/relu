@@ -59,7 +59,7 @@ class TestHarnessRunner:
         """
         Ensure test user exists and return their ID.
         
-        Looks for user with email 'testuser@relu.ai' and creates if not exists.
+        Looks for user with email 'testuser@relu.work' and creates if not exists.
         
         Returns:
             user_id: UUID of the test user
@@ -67,7 +67,7 @@ class TestHarnessRunner:
         if self._test_user_initialized and self.test_account_id:
             return self.test_account_id
         
-        TEST_USER_EMAIL = "testuser@relu.ai"
+        TEST_USER_EMAIL = "testuser@relu.work"
         
         from core.services.supabase import DBConnection
         db = DBConnection()

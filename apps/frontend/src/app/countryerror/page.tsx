@@ -57,7 +57,7 @@ export default function CountryError() {
               className="w-full h-12 rounded-lg font-medium"
             >
               <Link
-                href="mailto:support@relu.ai"
+                href="mailto:support@relu.work"
                 className="flex items-center justify-center gap-2"
               >
                 <Mail className="h-4 w-4" />

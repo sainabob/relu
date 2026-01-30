@@ -8,7 +8,7 @@ node_modules/
 .env
 *.env
 !*.env.example
-suna.env
+relu.env
 
 # SSH keys
 *.pem

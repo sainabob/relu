@@ -7,20 +7,20 @@ import { COMMON_TAGS } from "../../components";
 // LIGHTSAIL INSTANCE (Imported from existing)
 // ============================================================================
 
-const instance = new aws.lightsail.Instance("suna-staging-instance", {
-  name: "suna-staging",
+const instance = new aws.lightsail.Instance("relu-staging-instance", {
+  name: "relu-staging",
   availabilityZone: "us-west-2a",
   blueprintId: "ubuntu_24_04",
   bundleId: "large_3_0",
-  keyPairName: "suna-staging-key",
+  keyPairName: "relu-staging-key",
   tags: {
     ...COMMON_TAGS,
     Environment: "staging",
-    Name: "suna-staging",
+    Name: "relu-staging",
   },
 });
 
-const ports = new aws.lightsail.InstancePublicPorts("suna-staging-ports", {
+const ports = new aws.lightsail.InstancePublicPorts("relu-staging-ports", {
   instanceName: instance.name,
   portInfos: [{
     protocol: "tcp",
@@ -58,7 +58,7 @@ export const setupInstructions = pulumi.interpolate`
 === STAGING ENVIRONMENT SETUP ===
 
 1. SSH into the instance:
-   ssh -i suna-staging-key.pem ubuntu@${instance.publicIpAddress}
+   ssh -i relu-staging-key.pem ubuntu@${instance.publicIpAddress}
 
 2. Check tunnel status:
    sudo systemctl status cloudflared

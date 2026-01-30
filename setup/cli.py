@@ -13,7 +13,7 @@ def create_parser() -> argparse.ArgumentParser:
     """Create and configure the argument parser."""
     parser = argparse.ArgumentParser(
         prog="setup",
-        description="Relu Suna Setup Wizard - Configure and install Relu Suna",
+        description="Relu Setup Wizard - Configure and install Relu",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:

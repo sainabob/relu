@@ -150,7 +150,7 @@ Get your Relu platform running in minutes with our automated setup wizard:
 ### 1️⃣ Clone the Repository
 ```bash
 git clone https://github.com/sainabob/relu.git
-cd suna
+cd relu
 ```
 
 ### 2️⃣ Run the Setup Wizard

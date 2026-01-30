@@ -1,7 +1,7 @@
 """
-Relu Suna Setup Package
+Relu Setup Package
 
-A modular, testable, and extensible setup system for Relu Suna.
+A modular, testable, and extensible setup system for Relu.
 Supports interactive wizard mode, non-interactive config file mode,
 dry-run preview, and individual step execution.
 """

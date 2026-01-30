@@ -1,7 +1,7 @@
 {
-  "name": "suna-infrastructure",
+  "name": "relu-infrastructure",
   "version": "1.0.0",
-  "description": "Suna unified infrastructure - Pulumi IaC",
+  "description": "Relu unified infrastructure - Pulumi IaC",
   "private": true,
   "main": "index.ts",
   "scripts": {

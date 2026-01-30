@@ -16,7 +16,7 @@ permissions:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}/suna-backend
+  IMAGE_NAME: ${{ github.repository }}/relu-backend
 
 jobs:
   # ===========================================================================
@@ -116,7 +116,7 @@ jobs:
             set -e
             echo "🚀 Deploying to DEV environment..."
 
-            cd /home/ubuntu/suna/backend
+            cd /home/ubuntu/relu/backend
             git fetch origin main
             git reset --hard origin/main
 
@@ -152,7 +152,7 @@ jobs:
             set -e
             echo "🚀 Deploying to STAGING environment..."
 
-            cd /home/ubuntu/suna/backend
+            cd /home/ubuntu/relu/backend
             git fetch origin staging
             git reset --hard origin/staging
 
@@ -188,7 +188,7 @@ jobs:
             set -e
             echo "🚀 Deploying to PRODUCTION Lightsail..."
 
-            cd /home/ubuntu/suna/backend
+            cd /home/ubuntu/relu/backend
             git fetch origin PRODUCTION
             git reset --hard origin/PRODUCTION
 
@@ -220,29 +220,29 @@ jobs:
           echo "🚀 Deploying to ECS cluster..."
 
           aws ecs update-service \
-            --cluster suna-ecs \
-            --service suna-ecs-api-svc \
+            --cluster relu-ecs \
+            --service relu-ecs-api-svc \
             --force-new-deployment \
             --region us-west-2
 
           echo "⏳ Waiting for deployment to stabilize..."
 
           aws ecs wait services-stable \
-            --cluster suna-ecs \
-            --services suna-ecs-api-svc \
+            --cluster relu-ecs \
+            --services relu-ecs-api-svc \
             --region us-west-2 || {
               echo "⚠️ Timeout - checking status..."
               aws ecs describe-services \
-                --cluster suna-ecs \
-                --services suna-ecs-api-svc \
+                --cluster relu-ecs \
+                --services relu-ecs-api-svc \
                 --region us-west-2 \
                 --query 'services[0].{Status:status,Desired:desiredCount,Running:runningCount}'
             }
 
           echo "✅ ECS deployment complete!"
           aws ecs describe-services \
-            --cluster suna-ecs \
-            --services suna-ecs-api-svc \
+            --cluster relu-ecs \
+            --services relu-ecs-api-svc \
             --region us-west-2 \
             --query 'services[0].{Status:status,Desired:desiredCount,Running:runningCount}' \
             --output table

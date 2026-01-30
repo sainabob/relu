@@ -111,14 +111,14 @@ const LoggedInMenu: React.FC<UnifiedConfigMenuProps> = memo(function LoggedInMen
 
     const agents: any[] = allAgents;
 
-    const sunaAgent = useMemo(() => {
-        return agents.find(a => a.metadata?.is_suna_default === true);
+    const reluAgent = useMemo(() => {
+        return agents.find(a => a.metadata?.is_relu_default === true);
     }, [agents]);
 
-    const placeholderSunaAgent = useMemo(() => ({
+    const placeholderReluAgent = useMemo(() => ({
         agent_id: undefined,
         name: 'Relu',
-        metadata: { is_suna_default: true }
+        metadata: { is_relu_default: true }
     }), []);
 
     useEffect(() => {
@@ -171,9 +171,9 @@ const LoggedInMenu: React.FC<UnifiedConfigMenuProps> = memo(function LoggedInMen
             const found = agents.find(a => a.agent_id === selectedAgentId);
             if (found) return found;
         }
-        if (sunaAgent) return sunaAgent;
+        if (reluAgent) return reluAgent;
         return agents[0];
-    }, [agents, selectedAgentId, sunaAgent]);
+    }, [agents, selectedAgentId, reluAgent]);
 
     const handleQuickAction = useCallback((action: 'instructions' | 'knowledge' | 'triggers' | 'tools') => {
         if (!selectedAgentId && !displayAgent?.agent_id) {
@@ -184,11 +184,11 @@ const LoggedInMenu: React.FC<UnifiedConfigMenuProps> = memo(function LoggedInMen
     }, [selectedAgentId, displayAgent?.agent_id]);
 
     const renderAgentIcon = useCallback((agent: any, size: number = 32) => {
-        if (!agent && (isLoading || sunaAgent)) {
-            return <AgentAvatar isSunaDefault={true} agentName="Relu" size={size} className="flex-shrink-0 !border-0" />;
+        if (!agent && (isLoading || reluAgent)) {
+            return <AgentAvatar isReluDefault={true} agentName="Relu" size={size} className="flex-shrink-0 !border-0" />;
         }
         return <AgentAvatar agent={agent} agentId={agent?.agent_id} size={size} className="flex-shrink-0 !border-0" />;
-    }, [isLoading, sunaAgent]);
+    }, [isLoading, reluAgent]);
 
     // Shared content components
     const AgentsList = useCallback(({ compact = false }: { compact?: boolean }) => (
@@ -450,7 +450,7 @@ const LoggedInMenu: React.FC<UnifiedConfigMenuProps> = memo(function LoggedInMen
                                     </div>
                                 ) : (
                                     <div className="flex items-center justify-center w-10 h-10 bg-card border-[1.5px] border-border flex-shrink-0" style={{ borderRadius: '10.4px' }}>
-                                        {renderAgentIcon(isLoading && !displayAgent ? placeholderSunaAgent : displayAgent, 40)}
+                                        {renderAgentIcon(isLoading && !displayAgent ? placeholderReluAgent : displayAgent, 40)}
                                     </div>
                                 )}
                                 <span className="flex-1 truncate text-base font-medium text-left min-w-0">
@@ -470,7 +470,7 @@ const LoggedInMenu: React.FC<UnifiedConfigMenuProps> = memo(function LoggedInMen
                 )}
             </div>
         );
-    }, [mobileSection, searchQuery, onAgentSelect, displayAgent, isLoading, placeholderSunaAgent, renderAgentIcon, selectedAgentId, AgentsList, CreateWorkerButton, WorkerSettingsButtons, isReluAgent]);
+    }, [mobileSection, searchQuery, onAgentSelect, displayAgent, isLoading, placeholderReluAgent, renderAgentIcon, selectedAgentId, AgentsList, CreateWorkerButton, WorkerSettingsButtons, isReluAgent]);
 
     // Trigger button
     const TriggerButton = (
@@ -483,7 +483,7 @@ const LoggedInMenu: React.FC<UnifiedConfigMenuProps> = memo(function LoggedInMen
         >
             {onAgentSelect ? (
                 <div className="flex items-center gap-2 min-w-0 max-w-[180px]">
-                    {renderAgentIcon(isLoading && !displayAgent ? placeholderSunaAgent : displayAgent, 24)}
+                    {renderAgentIcon(isLoading && !displayAgent ? placeholderReluAgent : displayAgent, 24)}
                     <span className="truncate text-sm font-medium">
                         {isReluAgent ? 'Relu' : displayAgent?.name}
                     </span>
@@ -555,7 +555,7 @@ const LoggedInMenu: React.FC<UnifiedConfigMenuProps> = memo(function LoggedInMen
                                             <DropdownMenuSub>
                                                 <DropdownMenuSubTrigger className="flex items-center gap-3 text-sm cursor-pointer px-1 hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent w-full">
                                                     <div className="flex items-center gap-3">
-                                                        {renderAgentIcon(isLoading && !displayAgent ? placeholderSunaAgent : displayAgent)}
+                                                        {renderAgentIcon(isLoading && !displayAgent ? placeholderReluAgent : displayAgent)}
                                                         <span className="flex-1 truncate font-medium text-left">
                                                             {isReluAgent ? 'Relu' : displayAgent?.name}
                                                         </span>

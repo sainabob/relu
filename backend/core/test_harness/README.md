@@ -26,7 +26,7 @@ supabase db push
 python api.py
 ```
 
-**Note**: The test harness automatically creates a test user (`testuser@relu.ai`) if it doesn't exist. No manual user setup required!
+**Note**: The test harness automatically creates a test user (`testuser@relu.work`) if it doesn't exist. No manual user setup required!
 
 ### 3. Run a Test
 
@@ -214,7 +214,7 @@ The `mock_llm.py` module provides deterministic responses. Customize `_determine
 - All endpoints require `X-Admin-Api-Key` header
 - Uses existing admin authentication system
 - No public access to test harness
-- Test user (`testuser@relu.ai`) is automatically created with minimal permissions
+- Test user (`testuser@relu.work`) is automatically created with minimal permissions
 
 ## Performance
 
